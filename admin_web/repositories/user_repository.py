@@ -1,12 +1,12 @@
 """
-User DAO (Data Access Object)
+User Repository
 유저 데이터베이스 접근을 담당
 """
 import sqlite3
 from typing import Optional, List, Dict, Any
 
 
-class UserDAO:
+class UserRepository:
     """유저 데이터 접근 객체"""
 
     def __init__(self, db_path: str):

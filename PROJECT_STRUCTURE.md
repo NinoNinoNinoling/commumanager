@@ -7,9 +7,10 @@ commumanager/
 │   ├── config.py          # 설정 파일
 │   ├── __init__.py        # 패키지 초기화
 │   ├── models/            # 데이터 모델 (Model)
-│   ├── dao/               # 데이터 접근 객체 (DAO)
+│   ├── repositories/      # 데이터베이스 접근 (Repository)
 │   ├── services/          # 비즈니스 로직 (Service)
-│   ├── controllers/       # HTTP 요청/응답 처리 (Controller)
+│   ├── controllers/       # 비즈니스 로직 처리 (Controller)
+│   ├── routes/            # Flask Blueprint (Route)
 │   ├── static/            # 정적 파일 (CSS, JS, 이미지)
 │   │   ├── css/
 │   │   ├── js/
@@ -41,70 +42,86 @@ commumanager/
 
 ## 백엔드 아키텍처
 
-### Model - DAO - Service - Controller 패턴
+### Model - Repository - Service - Controller - Route 패턴
 
-Flask 관리자 웹은 4계층 아키텍처를 사용합니다:
+Flask 관리자 웹은 5계층 아키텍처를 사용합니다:
 
 #### 1. Model (모델)
 - 데이터 구조 정의
 - DB 테이블과 매핑되는 객체
 - 위치: `admin_web/models/`
 
-#### 2. DAO (Data Access Object)
+#### 2. Repository (저장소)
 - 데이터베이스 접근 담당
 - SQL 쿼리 실행 및 결과 반환
 - Model에 의존
-- 위치: `admin_web/dao/`
-- 예시: `user_dao.py` - 유저 데이터 CRUD 작업
+- 위치: `admin_web/repositories/`
+- 예시: `user_repository.py` - 유저 데이터 CRUD 작업
 
 #### 3. Service (서비스)
-- 비즈니스 로직 처리
-- DAO를 사용하여 데이터 조작
+- 복잡한 비즈니스 로직 처리
+- Repository를 사용하여 데이터 조작
 - 트랜잭션 관리, 유효성 검사
 - 위치: `admin_web/services/`
 - 예시: `user_service.py` - 유저 관리 로직, 권한 검사
 
 #### 4. Controller (컨트롤러)
-- HTTP 요청/응답 처리
+- 비즈니스 로직 처리
 - Service를 호출하여 로직 수행
-- 템플릿 렌더링 또는 JSON 반환
-- Flask Blueprint 사용
+- 데이터 변환 및 가공
 - 위치: `admin_web/controllers/`
-- 예시: `user_controller.py` - 유저 관련 엔드포인트
+- 예시: `auth_controller.py` - OAuth 처리 로직
+
+#### 5. Route (라우트)
+- Flask Blueprint 정의
+- HTTP 요청/응답 라우팅
+- Controller를 호출
+- 위치: `admin_web/routes/`
+- 예시: `auth.py` - 인증 관련 엔드포인트
 
 ### 데이터 흐름
 
 ```
 HTTP Request
     ↓
-Controller (요청 검증, 파라미터 추출)
+Route (Blueprint 라우팅)
     ↓
-Service (비즈니스 로직 수행)
+Controller (비즈니스 로직)
     ↓
-DAO (데이터베이스 쿼리)
+Service (복잡한 비즈니스 로직)
+    ↓
+Repository (데이터베이스 쿼리)
     ↓
 Model (데이터 구조)
     ↓
 Database
 ```
 
-### 예시: 유저 조회
+### 예시: OAuth 로그인
 
 ```python
-# Controller (user_controller.py)
-@user_bp.route('/<int:user_id>')
-def get_user(user_id):
-    user = user_service.get_user_info(user_id)
-    return render_template('users/detail.html', user=user)
+# Route (auth.py)
+@auth_bp.route('/login')
+def login():
+    return auth_controller.login()
+
+# Controller (auth_controller.py)
+def login(self):
+    mastodon = self.get_mastodon_client()
+    auth_url = mastodon.auth_request_url(...)
+    return redirect(auth_url)
 
 # Service (user_service.py)
-def get_user_info(self, user_id):
-    return self.user_dao.get_user_by_id(user_id)
+def get_or_create_user(self, mastodon_id, ...):
+    user = self.user_repository.get_user_by_mastodon_id(mastodon_id)
+    if not user:
+        user_id = self.user_repository.create_user(...)
+    return user
 
-# DAO (user_dao.py)
-def get_user_by_id(self, user_id):
-    cursor = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,))
-    return dict(cursor.fetchone())
+# Repository (user_repository.py)
+def get_user_by_mastodon_id(self, mastodon_id):
+    cursor = conn.execute("SELECT * FROM users WHERE mastodon_id = ?", (mastodon_id,))
+    return dict(cursor.fetchone()) if cursor.fetchone() else None
 ```
 
 ## 설치 및 실행

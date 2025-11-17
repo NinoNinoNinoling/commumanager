@@ -3,7 +3,7 @@ User Service
 유저 관련 비즈니스 로직을 담당
 """
 from typing import Optional, List, Dict, Any
-from admin_web.dao.user_dao import UserDAO
+from admin_web.repositories.user_repository import UserRepository
 
 
 class UserService:
@@ -14,7 +14,7 @@ class UserService:
         Args:
             db_path: 데이터베이스 경로
         """
-        self.user_dao = UserDAO(db_path)
+        self.user_repository = UserRepository(db_path)
 
     def get_or_create_user(self, mastodon_id: str, username: str,
                           display_name: str, is_admin: bool = False) -> Dict[str, Any]:
@@ -31,14 +31,14 @@ class UserService:
             유저 정보
         """
         # 기존 유저 조회
-        user = self.user_dao.get_user_by_mastodon_id(mastodon_id)
+        user = self.user_repository.get_user_by_mastodon_id(mastodon_id)
 
         if user:
             return user
 
         # 신규 유저 생성
-        user_id = self.user_dao.create_user(mastodon_id, username, display_name, is_admin)
-        return self.user_dao.get_user_by_id(user_id)
+        user_id = self.user_repository.create_user(mastodon_id, username, display_name, is_admin)
+        return self.user_repository.get_user_by_id(user_id)
 
     def get_user_info(self, user_id: int) -> Optional[Dict[str, Any]]:
         """
@@ -50,7 +50,7 @@ class UserService:
         Returns:
             유저 정보 또는 None
         """
-        return self.user_dao.get_user_by_id(user_id)
+        return self.user_repository.get_user_by_id(user_id)
 
     def adjust_user_currency(self, user_id: int, amount: int, reason: str = "") -> bool:
         """
@@ -66,7 +66,7 @@ class UserService:
         """
         # 재화 감소시 잔액 확인
         if amount < 0:
-            user = self.user_dao.get_user_by_id(user_id)
+            user = self.user_repository.get_user_by_id(user_id)
             if not user:
                 return False
 
@@ -76,7 +76,7 @@ class UserService:
                 return False
 
         # 재화 업데이트
-        success = self.user_dao.update_user_currency(user_id, amount)
+        success = self.user_repository.update_user_currency(user_id, amount)
 
         # TODO: 트랜잭션 로그 기록
         # if success and reason:
@@ -102,8 +102,8 @@ class UserService:
             }
         """
         offset = (page - 1) * per_page
-        users = self.user_dao.get_all_users(limit=per_page, offset=offset)
-        total = self.user_dao.get_user_count()
+        users = self.user_repository.get_all_users(limit=per_page, offset=offset)
+        total = self.user_repository.get_user_count()
         total_pages = (total + per_page - 1) // per_page
 
         return {
@@ -124,7 +124,7 @@ class UserService:
         Returns:
             관리자 여부
         """
-        user = self.user_dao.get_user_by_id(user_id)
+        user = self.user_repository.get_user_by_id(user_id)
         return user.get('is_admin', False) if user else False
 
     def get_user_statistics(self) -> Dict[str, Any]:
@@ -134,7 +134,7 @@ class UserService:
         Returns:
             통계 정보
         """
-        total_users = self.user_dao.get_user_count()
+        total_users = self.user_repository.get_user_count()
 
         # TODO: 추가 통계 정보
         # - 활성 유저 수
