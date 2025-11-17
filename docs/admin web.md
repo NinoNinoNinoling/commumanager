@@ -127,6 +127,8 @@
 /logs               # 관리 로그
 
 # 디버깅 (개발/테스트용)
+/debug              # 디버깅 메뉴
+/debug/routes       # 등록된 모든 엔드포인트 목록
 /debug/db           # DB 상태 확인 (테이블별 레코드 수, 최근 데이터)
 /debug/bot          # 봇 상태 확인 (실행 여부, 마지막 활동)
 /debug/trigger      # 수동 활동량 체크 실행 [POST]
