@@ -305,8 +305,8 @@ GROUP BY u.id, u.username;
 # 매일 3시 SQLite 백업
 0 3 * * * sqlite3 /path/to/economy.db ".backup '/backups/economy_$(date +\%Y\%m\%d).db'"
 
-# 30일 지난 백업 삭제
-0 6 * * 0 find /backups -name "*.db" -mtime +30 -delete
+# 60일 지난 백업 삭제
+0 6 * * 0 find /backups -name "*.db" -mtime +60 -delete
 ```
 
 ## 초기화
