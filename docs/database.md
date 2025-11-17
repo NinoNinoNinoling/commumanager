@@ -280,21 +280,9 @@ INSERT INTO settings (key, value, description) VALUES
 ('admin_bot_account', 'admin_bot_name', '관리자 봇 계정명 (운영진 공지용)');
 ```
 
-### game_sessions (추후)
-```sql
-CREATE TABLE game_sessions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    game_type TEXT NOT NULL,
-    player_id TEXT NOT NULL,
-    opponent_id TEXT,
-    bet_amount INTEGER NOT NULL,
-    game_state TEXT,
-    winner_id TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    finished_at TIMESTAMP,
-    FOREIGN KEY(player_id) REFERENCES users(mastodon_id)
-);
-```
+### 추후 구현
+- 게임 시스템 관련 테이블 (게임 종류 및 세부 사항 결정 후 추가)
+- 아이템 양도 관련 테이블 (필요 시 추가)
 
 ## PostgreSQL 참조 (읽기 전용)
 
