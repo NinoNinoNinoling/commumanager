@@ -79,7 +79,7 @@ CREATE TABLE settings (
 
 -- 기본값
 INSERT INTO settings (key, value, description) VALUES
-('check_times', '05:00,12:00', '활동량 체크 시간'),
+('check_times', '04:00,16:00', '활동량 체크 시간 (12시간 간격)'),
 ('check_period_hours', '48', '체크 기간'),
 ('min_replies_48h', '20', '최소 답글 수'),
 ('replies_per_reward', '1', '답글당 재화'),

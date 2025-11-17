@@ -30,7 +30,7 @@ sequenceDiagram
 ### 활동량 체크 (벌크)
 ```mermaid
 sequenceDiagram
-    participant C as Cron (5시, 12시)
+    participant C as Cron (4시, 16시)
     participant B as Activity Checker
     participant P as PostgreSQL
     participant S as SQLite
@@ -53,7 +53,7 @@ sequenceDiagram
 - systemd 24시간 구동
 
 ### activity_checker.py
-- cron: 오전 5시, 오후 12시
+- cron: 오전 4시, 오후 4시 (12시간 간격)
 - PostgreSQL 벌크 쿼리 (48시간)
 - role 필터링: user만 체크
 - 휴식계 제외
