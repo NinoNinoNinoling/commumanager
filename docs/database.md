@@ -104,7 +104,7 @@ erDiagram
 
     scheduled_posts {
         int id PK
-        text account_username
+        text post_type
         text content
         timestamp scheduled_at
         text visibility
@@ -248,14 +248,14 @@ CREATE TABLE admin_logs (
 CREATE INDEX idx_admin_logs_timestamp ON admin_logs(timestamp DESC);
 ```
 
-### scheduled_posts (스토리/공지 예약)
+### scheduled_posts (스토리/공지/운영진 공지 예약)
 ```sql
 CREATE TABLE scheduled_posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    account_username TEXT NOT NULL,     -- 스토리/공지 계정명
+    post_type TEXT NOT NULL,            -- story/announcement/admin_notice
     content TEXT NOT NULL,
     scheduled_at TIMESTAMP NOT NULL,
-    visibility TEXT DEFAULT 'public',   -- public/unlisted/private
+    visibility TEXT DEFAULT 'public',   -- public/unlisted/private (admin_notice는 항상 private)
     status TEXT DEFAULT 'pending',      -- pending/published/cancelled
     mastodon_scheduled_id TEXT,         -- 마스토돈 예약 ID
     created_by TEXT NOT NULL,           -- 작성한 관리자
@@ -264,6 +264,20 @@ CREATE TABLE scheduled_posts (
 );
 CREATE INDEX idx_scheduled_posts_scheduled ON scheduled_posts(scheduled_at);
 CREATE INDEX idx_scheduled_posts_status ON scheduled_posts(status);
+CREATE INDEX idx_scheduled_posts_type ON scheduled_posts(post_type);
+```
+
+**post_type 설명**:
+- `story`: 스토리 계정으로 발행
+- `announcement`: 공지 계정으로 발행
+- `admin_notice`: 관리자 봇으로 비공개 툿 발행 (운영진 전용)
+
+**계정 설정** (settings 테이블에 추가):
+```sql
+INSERT INTO settings (key, value, description) VALUES
+('story_account', 'story_account_name', '스토리 계정명'),
+('announcement_account', 'notice_account_name', '공지 계정명'),
+('admin_bot_account', 'admin_bot_name', '관리자 봇 계정명 (운영진 공지용)');
 ```
 
 ### game_sessions (추후)

@@ -13,7 +13,7 @@ graph TD
     A[홈<br/>대시보드] --> B[활동량 관리]
     A --> C[재화 관리]
     A --> D[상점 관리]
-    A --> E[스토리/공지 관리]
+    A --> E[콘텐츠 관리]
     A --> F[시스템 설정]
     A --> G[관리 로그]
 
@@ -27,9 +27,9 @@ graph TD
     D --> D1[아이템 목록]
     D --> D2[아이템 추가/수정]
 
-    E --> E1[예약 툿 작성]
-    E --> E2[예약 목록]
-    E --> E3[발행 내역]
+    E --> E1[스토리]
+    E --> E2[공지]
+    E --> E3[운영진 공지]
 
     F --> F1[활동량 기준]
     F --> F2[재화 지급 설정]
@@ -59,19 +59,30 @@ graph TD
 - 아이템 목록 (카테고리/상태 필터)
 - 아이템 추가/편집: 이름, 설명, 가격, 카테고리, 이미지, 판매 상태
 
-### 스토리/공지 관리
-- 예약 툿 작성
-  - 계정 선택 (스토리/공지 계정 목록)
+### 콘텐츠 관리 (스토리/공지)
+**3개 탭으로 구분**:
+
+#### 스토리
+- 예약 작성
   - 내용 작성 (마크다운 지원)
   - 예약 날짜/시간
-  - 공개 범위 (public/unlisted/private)
-- 예약 목록
-  - 예약된 툿 목록 (날짜순)
-  - 수정/삭제/즉시 발행
+  - 공개 범위 (public/unlisted)
+- 예약 목록 (날짜순)
 - 발행 내역
-  - 과거 발행 목록
-  - 필터 (날짜, 계정)
-  - 검색
+
+#### 공지
+- 예약 작성 (동일)
+- 예약 목록
+- 발행 내역
+
+#### 운영진 공지
+- 예약 작성
+  - 내용 작성
+  - 예약 날짜/시간
+  - **관리자 봇으로 비공개 툿 자동 발행**
+- 예약 목록
+- 발행 내역
+- **특징**: 관리자들만 팔로우한 봇이 발행 → 실시간 알림
 
 ### 시스템 설정
 - 활동량 체크 기준: 기간(48h), 최소 답글(20개)
@@ -106,14 +117,15 @@ graph TD
 /shop/add           # 아이템 추가 [POST]
 /shop/edit/<id>     # 아이템 수정 [POST]
 
-# 스토리/공지
-/story              # 예약 목록
-/story/new          # 예약 툿 작성
-/story/schedule     # 예약 등록 [POST]
-/story/edit/<id>    # 예약 수정 [POST]
-/story/delete/<id>  # 예약 삭제 [POST]
-/story/publish/<id> # 즉시 발행 [POST]
-/story/history      # 발행 내역
+# 콘텐츠 관리
+/content                      # 콘텐츠 관리 (스토리/공지/운영진 공지 탭)
+/content/new/<type>           # 예약 작성 (type: story/announcement/admin_notice)
+/content/schedule             # 예약 등록 [POST]
+/content/list/<type>          # 예약 목록
+/content/history/<type>       # 발행 내역
+/content/edit/<id>            # 예약 수정 [POST]
+/content/delete/<id>          # 예약 삭제 [POST]
+/content/publish/<id>         # 즉시 발행 [POST]
 
 # 설정
 /settings           # 시스템 설정 [GET/POST]
