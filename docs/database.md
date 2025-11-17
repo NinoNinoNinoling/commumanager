@@ -142,6 +142,24 @@ CREATE TABLE admin_logs (
 CREATE INDEX idx_admin_logs_timestamp ON admin_logs(timestamp DESC);
 ```
 
+### scheduled_posts (스토리/공지 예약)
+```sql
+CREATE TABLE scheduled_posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    account_username TEXT NOT NULL,     -- 스토리/공지 계정명
+    content TEXT NOT NULL,
+    scheduled_at TIMESTAMP NOT NULL,
+    visibility TEXT DEFAULT 'public',   -- public/unlisted/private
+    status TEXT DEFAULT 'pending',      -- pending/published/cancelled
+    mastodon_scheduled_id TEXT,         -- 마스토돈 예약 ID
+    created_by TEXT NOT NULL,           -- 작성한 관리자
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    published_at TIMESTAMP
+);
+CREATE INDEX idx_scheduled_posts_scheduled ON scheduled_posts(scheduled_at);
+CREATE INDEX idx_scheduled_posts_status ON scheduled_posts(status);
+```
+
 ### game_sessions (추후)
 ```sql
 CREATE TABLE game_sessions (
