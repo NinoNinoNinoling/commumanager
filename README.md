@@ -3,10 +3,8 @@
 휘핑 에디션 마스토돈용 활동량 기반 자동 운영 관리 시스템
 
 ## 개요
-- 30~50명 규모 폐쇄형 커뮤니티
-- 답글 기반 재화 지급
-- 활동량 자동 체크 및 경고
-- 상점 시스템
+
+마스토돈 커뮤니티를 위한 활동량 기반 자동 관리 봇. 답글 감지로 재화를 지급하고, 활동량을 체크하여 경고를 발송합니다.
 
 ## 핵심 기능
 1. 활동량 체크 (하루 2회, 오전 4시/오후 4시)
@@ -60,47 +58,10 @@ commumanager/
 
 ## 백엔드 아키텍처
 
-### Model - Repository - Service - Controller - Route 패턴
-
-Flask 관리자 웹은 5계층 아키텍처를 사용합니다:
-
-1. **Model** - 데이터 구조 정의
-2. **Repository** - 데이터베이스 접근 (SQL 쿼리)
-3. **Service** - 복잡한 비즈니스 로직, 트랜잭션 관리
-4. **Controller** - 비즈니스 로직 처리
-5. **Route** - Flask Blueprint 라우팅
-
-### 데이터 흐름
+Flask 관리자 웹은 **Model - Repository - Service - Controller - Route** 5계층 아키텍처를 사용합니다.
 
 ```
 HTTP Request → Route → Controller → Service → Repository → Database
-```
-
-### 예시: OAuth 로그인
-
-```python
-# Route (auth.py)
-@auth_bp.route('/login')
-def login():
-    return auth_controller.login()
-
-# Controller (auth_controller.py)
-def login(self):
-    mastodon = self.get_mastodon_client()
-    auth_url = mastodon.auth_request_url(...)
-    return redirect(auth_url)
-
-# Service (user_service.py)
-def get_or_create_user(self, mastodon_id, ...):
-    user = self.user_repository.get_user_by_mastodon_id(mastodon_id)
-    if not user:
-        user_id = self.user_repository.create_user(...)
-    return user
-
-# Repository (user_repository.py)
-def get_user_by_mastodon_id(self, mastodon_id):
-    cursor = conn.execute("SELECT * FROM users WHERE mastodon_id = ?", ...)
-    return dict(cursor.fetchone())
 ```
 
 ## 설치 및 실행
@@ -142,10 +103,8 @@ python app.py
 - [서버 구축](docs/server_setup.md)
 - [개발 로드맵](docs/로드맵.md)
 
-## 개발 시작하기
+## 디렉토리 구조
 
-- **관리자 웹**: `admin_web/` 디렉토리
-- **봇 시스템**: `bot/` 디렉토리
-- **문서**: `docs/` 디렉토리
-
-각 디렉토리는 모듈화되어 있으며 독립적으로 개발할 수 있습니다.
+- `admin_web/` - Flask 관리자 웹
+- `bot/` - 마스토돈 봇 시스템
+- `docs/` - 프로젝트 문서
