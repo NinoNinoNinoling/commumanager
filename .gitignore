@@ -205,3 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project specific
+*.db
+*.db-journal
+/backups/
+config_local.py
+.DS_Store
