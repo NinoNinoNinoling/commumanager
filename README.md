@@ -10,6 +10,7 @@
 
 ## 문서
 - [프로젝트 개요](docs/project_overview.md)
+- [기능 목록](docs/features.md)
 - [기술 스택](docs/tech_stack.md)
 - [시스템 아키텍처](docs/architecture.md)
 - [데이터베이스](docs/database.md)
