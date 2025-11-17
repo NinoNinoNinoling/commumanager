@@ -9,6 +9,112 @@ graph LR
     C -->|읽기| D[Admin Web]
 ```
 
+## ERD
+
+```mermaid
+erDiagram
+    users ||--o{ transactions : has
+    users ||--o{ warnings : receives
+    users ||--o{ vacation : takes
+    users ||--o{ inventory : owns
+    items ||--o{ inventory : in
+    items ||--o{ transactions : relates
+
+    users {
+        text mastodon_id PK
+        text username
+        text display_name
+        text role
+        text dormitory
+        int balance
+        int total_earned
+        int total_spent
+        int reply_count
+        timestamp last_active
+        timestamp last_check
+    }
+
+    transactions {
+        int id PK
+        text user_id FK
+        text transaction_type
+        int amount
+        text status_id
+        int item_id FK
+        text description
+        text admin_name
+        timestamp timestamp
+    }
+
+    warnings {
+        int id PK
+        text user_id FK
+        text warning_type
+        int check_period_hours
+        int required_replies
+        int actual_replies
+        text message
+        bool dm_sent
+        text admin_name
+        timestamp timestamp
+    }
+
+    vacation {
+        int id PK
+        text user_id FK
+        date start_date
+        date end_date
+        text reason
+        text registered_by
+    }
+
+    items {
+        int id PK
+        text name
+        text description
+        int price
+        text category
+        text image_url
+        bool is_active
+    }
+
+    inventory {
+        int id PK
+        text user_id FK
+        int item_id FK
+        int quantity
+        timestamp acquired_at
+    }
+
+    settings {
+        text key PK
+        text value
+        text description
+        text updated_by
+    }
+
+    admin_logs {
+        int id PK
+        text admin_name
+        text action_type
+        text target_user
+        text details
+        timestamp timestamp
+    }
+
+    scheduled_posts {
+        int id PK
+        text account_username
+        text content
+        timestamp scheduled_at
+        text visibility
+        text status
+        text mastodon_scheduled_id
+        text created_by
+        timestamp published_at
+    }
+```
+
 ## SQLite 테이블 (economy.db)
 
 ### users
