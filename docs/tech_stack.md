@@ -11,7 +11,7 @@
 - Ruby 3.2.2, Node.js 16.20.2
 - PostgreSQL 12.16+, Redis 5.0.7+
 
-## 경제 봇
+## 관리 봇
 - Python 3.9+
 - Mastodon.py, psycopg2, sqlite3
 - systemd + cron
@@ -32,7 +32,7 @@ economy_bot/
 
 ## 데이터베이스
 - PostgreSQL: 읽기 전용 (마스토돈 유저/답글 데이터)
-- SQLite: 경제 시스템 전용 (재화, 거래, 경고, 상점)
+- SQLite: 관리 시스템 전용 (재화, 거래, 경고, 상점)
 
 ## 네트워크
 ```
