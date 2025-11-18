@@ -474,39 +474,139 @@ WHERE mastodon_id = ?;
 
 ---
 
-## UC-06: 휴식 신청
+## UC-06: 휴식 관리 (봇 명령어)
 
 ### 액터
 - 일반 유저
-- 관리자
+- 봇
 
 ### 전제조건
-- 유저가 관리자에게 휴식 신청 (마스토돈 DM 또는 웹)
+- 유저가 봇에게 멘션
 
-### 기본 흐름 (관리자 웹)
-1. 관리자가 관리자 웹 로그인
-2. "활동량 관리" → "휴식 신청 목록" 메뉴
-3. "새 휴식 등록" 버튼 클릭
-4. 폼 입력
-   - 유저: 드롭다운에서 선택
-   - 시작일: 2025-11-20
-   - 종료일: 2025-11-25
-   - 사유: 여행
-5. "등록" 버튼 클릭
-6. DB 저장
-   ```sql
-   INSERT INTO vacation (user_id, start_date, end_date, reason, registered_by)
-   VALUES ('115565546282398331', '2025-11-20', '2025-11-25', '여행', 'admin_user');
+### 기본 흐름 1: 휴식 등록
+
+1. 유저가 마스토돈에서 `@봇 휴식 2` 멘션
+2. 봇이 멘션 이벤트 수신
+3. **명령어 파싱**
+   ```python
+   pattern = r'@봇\s+휴식\s+(\d+)'
+   match = re.match(pattern, mention_text)
+   if match:
+       days = int(match.group(1))  # 2
    ```
-7. 관리 로그 기록
-   ```sql
-   INSERT INTO admin_logs (admin_name, action_type, target_user, details)
-   VALUES ('admin_user', 'register_vacation', '115565546282398331', '2025-11-20 ~ 2025-11-25: 여행');
+
+4. **날짜 계산**
+   ```python
+   from datetime import date, timedelta
+
+   start_date = date.today()  # 2025-11-18
+   end_date = start_date + timedelta(days=days-1)  # 2025-11-19 (2일: 18일, 19일)
    ```
+
+5. **기존 활성 휴식 체크**
+   ```sql
+   SELECT COUNT(*) FROM vacation
+   WHERE user_id = '115565546282398331'
+   AND end_date >= DATE('now', 'localtime');
+   ```
+   - 결과 > 0 → 이미 휴식 중 → 에러 메시지
+
+6. **휴식 등록**
+   ```sql
+   BEGIN TRANSACTION;
+
+   INSERT INTO vacation (user_id, start_date, end_date, reason, approved, registered_by)
+   VALUES ('115565546282398331', '2025-11-18', '2025-11-19', '봇 자동 등록', 1, 'bot');
+
+   COMMIT;
+   ```
+
+7. **확인 DM 발송**
+   ```python
+   mastodon.status_post(
+       f"@{username} 휴식이 등록되었습니다.\n기간: {start_date} ~ {end_date} ({days}일간)\n이 기간 동안 활동량 체크가 제외됩니다.",
+       visibility='direct'
+   )
+   ```
+
+### 기본 흐름 2: 휴식 해제
+
+1. 유저가 `@봇 휴식 해제` 멘션
+2. 봇이 멘션 이벤트 수신
+3. **현재 활성 휴식 조회**
+   ```sql
+   SELECT id, start_date, end_date FROM vacation
+   WHERE user_id = '115565546282398331'
+   AND end_date >= DATE('now', 'localtime')
+   ORDER BY end_date DESC LIMIT 1;
+   ```
+   - 결과 없음 → "현재 휴식 중이 아닙니다" 메시지
+
+4. **휴식 종료 처리**
+   ```sql
+   UPDATE vacation
+   SET end_date = DATE('now', 'localtime', '-1 day')
+   WHERE id = ?;
+   ```
+
+5. **확인 DM 발송**
+   ```python
+   mastodon.status_post(
+       f"@{username} 휴식이 해제되었습니다.\n다음 활동량 체크부터 정상 체크가 재개됩니다.",
+       visibility='direct'
+   )
+   ```
+
+### 기본 흐름 3: 휴식 조회
+
+1. 유저가 `@봇 휴식 조회` 멘션
+2. 봇이 멘션 이벤트 수신
+3. **현재 활성 휴식 조회**
+   ```sql
+   SELECT start_date, end_date FROM vacation
+   WHERE user_id = '115565546282398331'
+   AND end_date >= DATE('now', 'localtime')
+   ORDER BY end_date DESC LIMIT 1;
+   ```
+
+4. **응답 메시지 생성**
+   - 휴식 있음:
+     ```
+     현재 휴식 중입니다.
+     기간: 2025-11-18 ~ 2025-11-19
+     종료까지 1일 남음
+     ```
+   - 휴식 없음:
+     ```
+     현재 휴식 중이 아닙니다.
+     ```
+
+5. **DM 발송**
+
+### 대안 흐름
+
+**5-1. 이미 휴식 중 (흐름 1)**
+- 기존 휴식이 활성화되어 있음
+- DM: "이미 휴식 중입니다 (~ 2025-11-20). 먼저 해제해주세요."
+- 등록 안 함
+
+**3-1. 잘못된 일수 (흐름 1)**
+- 일수가 0 이하 또는 너무 큼 (> 90)
+- DM: "휴식 기간은 1~90일 사이여야 합니다."
+- 등록 안 함
+
+**3-1. 휴식 중 아님 (흐름 2)**
+- 현재 활성 휴식 없음
+- DM: "현재 휴식 중이 아닙니다."
+
+**관리자 웹 수동 등록 (선택)**
+- 관리자가 웹에서 직접 등록 가능
+- features.md 참조
 
 ### 후행조건
-- vacation 테이블에 휴식 기간 등록됨
-- 해당 기간 동안 활동량 체크 제외됨 (UC-05의 3-1)
+- vacation 테이블에 휴식 기간 등록/수정됨
+- 휴식 기간 동안 활동량 체크 제외됨 (UC-05의 3-1)
+- 유저에게 확인 DM 발송됨
 
 ---
 

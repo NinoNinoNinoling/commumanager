@@ -274,7 +274,8 @@ CREATE TABLE vacation (
     start_date DATE NOT NULL,
     end_date DATE NOT NULL,
     reason TEXT,
-    registered_by TEXT,
+    approved BOOLEAN DEFAULT 1,                  -- 자동 승인 (봇 명령어 기본값 1)
+    registered_by TEXT,                          -- 'bot' 또는 관리자 username
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(user_id) REFERENCES users(mastodon_id)
 );

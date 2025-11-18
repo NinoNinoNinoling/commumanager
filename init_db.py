@@ -79,13 +79,14 @@ def init_database(db_path='economy.db'):
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS vacation (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
+            user_id TEXT NOT NULL,
             start_date DATE NOT NULL,
             end_date DATE NOT NULL,
             reason TEXT,
-            approved BOOLEAN DEFAULT 0,
+            approved BOOLEAN DEFAULT 1,
+            registered_by TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            FOREIGN KEY (user_id) REFERENCES users(mastodon_id) ON DELETE CASCADE
         )
     """)
     print("✓ vacation 테이블 생성")
