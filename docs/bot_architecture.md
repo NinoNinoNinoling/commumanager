@@ -26,7 +26,7 @@ graph TB
 
 **기능**:
 - 유저 팔로우 시 DB 등록 (follow 이벤트 트리거)
-- 관리자 웹 OAuth 인증
+- 관리자 웹 OAuth 인증 (총괄계정 + role='admin' 유저)
 - 공지 발행 (announcement type)
 
 **특징**:
