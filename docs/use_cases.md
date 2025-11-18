@@ -291,11 +291,7 @@ WHERE mastodon_id = ?;
 ### 전제조건
 - 출석 트윗이 발행되어 있음 (UC-03 완료)
 - 유저가 DB에 등록되어 있음
-- settings에 출석 보상 설정되어 있음
-  - `attendance_base_reward=50`
-  - `attendance_streak_7=20`
-  - `attendance_streak_14=50`
-  - `attendance_streak_30=100`
+- settings에 출석 보상 설정되어 있음: `attendance_base_reward=50`
 
 ### 기본 흐름
 1. 유저가 출석 트윗에 답글 작성
@@ -307,52 +303,22 @@ WHERE mastodon_id = ?;
    AND expires_at > CURRENT_TIMESTAMP;
    ```
    - 결과 없으면 → 만료된 출석 트윗 → 종료
-4. **중복 체크**
-   ```sql
-   SELECT COUNT(*) FROM attendances
-   WHERE user_id = '115565546282398331'
-   AND attendance_post_id = '115568000000000001';
-   ```
-   - 결과 > 0이면 → 이미 출석함 → 종료 (UNIQUE 제약으로도 방지)
-5. **연속 출석 계산**
-   ```sql
-   -- 어제 출석 기록 확인
-   SELECT streak_days FROM attendances
-   WHERE user_id = '115565546282398331'
-   AND DATE(attended_at) = DATE('now', '-1 day', 'localtime')
-   ORDER BY attended_at DESC LIMIT 1;
-   ```
-   - 어제 출석 있으면: `streak_days = 어제_streak + 1`
-   - 어제 출석 없으면: `streak_days = 1`
-6. **보상 계산**
-   - 기본: 50원
-   - 연속 7일: +20원
-   - 연속 14일: +50원
-   - 연속 30일: +100원
-   ```python
-   reward = 50
-   if streak_days >= 30:
-       reward += 100
-   elif streak_days >= 14:
-       reward += 50
-   elif streak_days >= 7:
-       reward += 20
-   ```
-7. **트랜잭션 처리**
+
+4. **트랜잭션 처리**
    ```sql
    BEGIN TRANSACTION;
 
    -- 재화 지급
    UPDATE users
-   SET balance = balance + 70,
-       total_earned = total_earned + 70
+   SET currency = currency + 50,
+       updated_at = CURRENT_TIMESTAMP
    WHERE mastodon_id = '115565546282398331';
 
-   -- 출석 기록
+   -- 출석 기록 (UNIQUE 제약으로 중복 방지)
    INSERT INTO attendances
-   (user_id, attendance_post_id, attended_at, reward_amount, streak_days)
+   (user_id, attendance_post_id, attended_at, reward_amount)
    VALUES
-   ('115565546282398331', '115568000000000001', CURRENT_TIMESTAMP, 70, 7);
+   ('115565546282398331', '115568000000000001', CURRENT_TIMESTAMP, 50);
 
    -- 출석 인원 증가
    UPDATE attendance_posts
@@ -368,13 +334,9 @@ WHERE mastodon_id = ?;
 - 조용히 무시 (처리 안 함, 응답 안 함)
 
 **4-1. 중복 출석 시도**
-- UNIQUE 제약 위반 → SQLite 에러
-- 또는 SELECT COUNT 체크에서 걸림
+- UNIQUE(user_id, attendance_post_id) 제약 위반 → SQLite 에러
+- 트랜잭션 ROLLBACK
 - 유저에게 DM: "이미 출석하셨습니다"
-
-**5-1. 연속 출석 끊김**
-- 어제 출석 기록 없음
-- streak_days = 1 (초기화)
 
 ### 후행조건
 - attendances 테이블에 출석 기록 추가

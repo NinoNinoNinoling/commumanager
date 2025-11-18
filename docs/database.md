@@ -270,9 +270,6 @@ INSERT INTO settings (key, value, description) VALUES
 -- 출석 체크
 ('attendance_time', '10:00', '출석 트윗 발행 시간'),
 ('attendance_base_reward', '50', '기본 출석 보상'),
-('attendance_streak_7', '20', '7일 연속 보너스'),
-('attendance_streak_14', '50', '14일 연속 보너스'),
-('attendance_streak_30', '100', '30일 연속 보너스'),
 ('attendance_check_enabled', '1', '출석 체크 시스템 활성화'),
 
 -- 휴식 관리
@@ -385,8 +382,7 @@ CREATE TABLE attendances (
     user_id TEXT NOT NULL,
     attendance_post_id TEXT NOT NULL,     -- 출석 트윗 post_id (FK)
     attended_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    reward_amount INTEGER NOT NULL,       -- 지급된 재화 (기본 + 연속 보너스)
-    streak_days INTEGER DEFAULT 1,        -- 연속 출석 일수
+    reward_amount INTEGER NOT NULL,       -- 지급된 재화 (기본 50원 고정)
     FOREIGN KEY(user_id) REFERENCES users(mastodon_id),
     FOREIGN KEY(attendance_post_id) REFERENCES attendance_posts(post_id),
     UNIQUE(user_id, attendance_post_id)   -- 중복 출석 방지 (DB 레벨)

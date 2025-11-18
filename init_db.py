@@ -283,9 +283,6 @@ def init_database(db_path='economy.db'):
         # 출석 체크
         ('attendance_time', '10:00', '출석 트윗 발행 시간'),
         ('attendance_base_reward', '50', '기본 출석 보상'),
-        ('attendance_streak_7', '20', '7일 연속 보너스'),
-        ('attendance_streak_14', '50', '14일 연속 보너스'),
-        ('attendance_streak_30', '100', '30일 연속 보너스'),
         ('attendance_check_enabled', '1', '출석 체크 시스템 활성화'),
 
         # 휴식 관리
