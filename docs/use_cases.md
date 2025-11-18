@@ -5,108 +5,7 @@
 
 ---
 
-## UC-01: 주기적 유저 동기화
-
-### 액터
-- Celery beat (스케줄러)
-
-### 전제조건
-- PostgreSQL (마스토돈 DB) 접근 가능
-- SQLite (economy.db) 접근 가능
-- settings에 `user_sync_interval` 설정됨
-
-### 기본 흐름
-1. **실행 시점**
-   - 새벽 4시 활동량 벌크 체크와 함께 자동 실행
-   - 관리자 웹에서 "수동 동기화" 버튼 클릭 시 실행
-
-2. **PostgreSQL에서 신규/업데이트 계정 조회**
-   ```sql
-   -- 마지막 동기화 이후 생성/수정된 계정
-   SELECT id, username, display_name, created_at, updated_at
-   FROM accounts
-   WHERE updated_at > :last_sync_time
-   ORDER BY updated_at;
-   ```
-
-3. **SQLite와 비교 및 동기화**
-   ```python
-   for account in pg_accounts:
-       # SQLite에 존재하는지 확인
-       existing = sqlite.execute(
-           "SELECT mastodon_id FROM users WHERE mastodon_id = ?",
-           (account.id,)
-       ).fetchone()
-
-       if not existing:
-           # 신규 유저 생성
-           sqlite.execute("""
-               INSERT INTO users (mastodon_id, username, display_name, currency)
-               VALUES (?, ?, ?, 0)
-           """, (account.id, account.username, account.display_name))
-           logger.info(f"New user synced: {account.username}")
-       else:
-           # 기존 유저 정보 업데이트 (username, display_name 변경 대응)
-           sqlite.execute("""
-               UPDATE users
-               SET username = ?, display_name = ?, updated_at = CURRENT_TIMESTAMP
-               WHERE mastodon_id = ?
-           """, (account.username, account.display_name, account.id))
-   ```
-
-4. **마지막 동기화 시각 업데이트**
-   ```sql
-   UPDATE system_config
-   SET value = CURRENT_TIMESTAMP
-   WHERE key = 'last_user_sync_time';
-   ```
-
-5. **동기화 로그 기록**
-   ```python
-   logger.info(f"User sync completed: {new_count} new, {update_count} updated")
-   ```
-
-### 대안 흐름
-
-**2-1. PostgreSQL 연결 실패**
-- 재시도 (최대 3회)
-- 실패 시 에러 로그 + 관리자 알림
-- 다음 주기에 재시도
-
-**3-1. 유저 정보 업데이트**
-- username, display_name 변경 감지
-- SQLite에 반영하여 일관성 유지
-
-**백업: Lazy Creation**
-- 동기화 누락 대비
-- 답글 재화 지급 시 유저 없으면 즉시 생성
-- Redis 캐시로 중복 체크 최소화
-```python
-def ensure_user_exists(mastodon_id):
-    """백업: 동기화 누락 시 즉시 생성"""
-    if redis.exists(f"user:{mastodon_id}"):
-        return True
-
-    if not db_user_exists(mastodon_id):
-        # PostgreSQL에서 정보 조회 → SQLite 생성
-        create_user_from_pg(mastodon_id)
-        logger.warning(f"Lazy user creation: {mastodon_id}")
-
-    redis.set(f"user:{mastodon_id}", "1", ex=3600)
-    return True
-```
-
-### 후행조건
-- 신규 유저가 economy.db에 등록됨
-- 기존 유저 정보가 최신 상태로 유지됨
-- last_user_sync_time 업데이트됨
-- 동기화 실패 시 로그 기록됨
-
-**참고**: UC-01B 팔로우 이벤트가 1순위 등록 방법이며, 이 주기적 동기화는 백업 용도
-
----
-
-## UC-01B: 팔로우 이벤트 기반 유저 등록 (실시간, 1순위)
+## UC-01: 팔로우 이벤트 기반 유저 등록
 
 ### 액터
 - Streaming API 리스너 (봇)
@@ -194,7 +93,7 @@ WHERE mastodon_id = ?;
 **4-1. DB 저장 실패**
 - 에러 로그 기록
 - 재시도 큐에 등록
-- UC-01 주기적 동기화가 백업으로 처리
+- 실패 시 Lazy Creation이 백업으로 처리
 
 **언팔로우 처리**
 - 유저가 언팔로우해도 DB에서 삭제 안 함
@@ -211,7 +110,7 @@ WHERE mastodon_id = ?;
 - ⚡ **실시간 등록**: 팔로우 즉시 DB 생성
 - 🎯 **정확성**: 가입 의사가 명확 (팔로우 = 참여)
 - 💪 **성능**: 이벤트 기반, 오버헤드 제로
-- 🔄 **UC-01 백업**: 주기적 동기화가 누락 방지
+- 🔄 **Lazy Creation 백업**: 답글 재화 지급 시 자동 생성
 
 ---
 

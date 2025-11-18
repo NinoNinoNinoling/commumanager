@@ -262,8 +262,7 @@ INSERT INTO settings (key, value, description) VALUES
 ('replies_per_reward', '1', '답글당 재화'),
 ('reward_amount', '10', '지급량'),
 ('archive_warning_threshold', '3', '툿 아카이빙 경고 임계값 (N회 이상)'),
-('admin_account_id', '', '어드민 마스토돈 계정 ID (팔로우 감지용)'),
-('last_user_sync_time', '2025-01-01 00:00:00', '마지막 유저 동기화 시각 (새벽 4시 + 수동)');
+('admin_account_id', '', '어드민 마스토돈 계정 ID (팔로우 감지용)');
 ```
 
 ### vacation
