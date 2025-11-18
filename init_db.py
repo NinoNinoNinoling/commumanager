@@ -1,172 +1,232 @@
 #!/usr/bin/env python3
 """
 SQLite 데이터베이스 초기화 스크립트
-관리 시스템 전용 DB (economy.db) 생성
+economy.db 생성 및 초기 데이터 삽입
 """
 import sqlite3
-import os
+import sys
 from datetime import datetime
 
 
 def init_database(db_path='economy.db'):
-    """
-    데이터베이스 초기화 및 테이블 생성
+    """데이터베이스 초기화 및 테이블 생성"""
 
-    Args:
-        db_path: 데이터베이스 파일 경로
-    """
-    # 기존 DB 백업
-    if os.path.exists(db_path):
-        backup_path = f"{db_path}.backup.{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        os.rename(db_path, backup_path)
-        print(f"기존 DB 백업: {backup_path}")
-
-    # 연결 생성
     conn = sqlite3.connect(db_path)
-    conn.execute("PRAGMA foreign_keys = ON")  # 외래키 제약 활성화
-    conn.execute("PRAGMA journal_mode = WAL")  # WAL 모드 (동시 읽기/쓰기)
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA journal_mode = WAL")
     cursor = conn.cursor()
 
-    print("데이터베이스 테이블 생성 중...")
+    print(f"📦 데이터베이스 초기화: {db_path}")
+    print("=" * 60)
 
-    # 1. users 테이블
+    # 1. users
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            mastodon_id TEXT UNIQUE NOT NULL,
+            mastodon_id TEXT PRIMARY KEY,
             username TEXT NOT NULL,
             display_name TEXT,
-            is_admin BOOLEAN DEFAULT 0,
-            currency INTEGER DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            role TEXT DEFAULT 'user',
+            dormitory TEXT,
+            balance INTEGER DEFAULT 0,
+            total_earned INTEGER DEFAULT 0,
+            total_spent INTEGER DEFAULT 0,
+            reply_count INTEGER DEFAULT 0,
+            last_active TIMESTAMP,
+            last_check TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    print("✓ users 테이블 생성")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_balance ON users(balance DESC)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)")
+    print("✓ users")
 
-    # 2. transactions 테이블
+    # 2. transactions
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
+            user_id TEXT NOT NULL,
+            transaction_type TEXT NOT NULL,
             amount INTEGER NOT NULL,
-            balance_after INTEGER NOT NULL,
-            type TEXT NOT NULL,
+            status_id TEXT,
+            item_id INTEGER,
             description TEXT,
-            related_id TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            admin_name TEXT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(mastodon_id)
         )
     """)
-    print("✓ transactions 테이블 생성")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_transactions_user ON transactions(user_id, timestamp DESC)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status_id)")
+    print("✓ transactions")
 
-    # 3. warnings 테이블
+    # 3. warnings
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS warnings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            reason TEXT NOT NULL,
-            reply_count INTEGER,
-            threshold INTEGER,
-            period_hours INTEGER,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            user_id TEXT NOT NULL,
+            warning_type TEXT DEFAULT 'auto',
+            check_period_hours INTEGER,
+            required_replies INTEGER,
+            actual_replies INTEGER,
+            message TEXT,
+            dm_sent BOOLEAN DEFAULT 0,
+            admin_name TEXT,
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(user_id) REFERENCES users(mastodon_id)
         )
     """)
-    print("✓ warnings 테이블 생성")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_warnings_user ON warnings(user_id, timestamp DESC)")
+    print("✓ warnings")
 
-    # 4. vacation 테이블
+    # 4. settings
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS settings (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL,
+            description TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_by TEXT
+        )
+    """)
+    print("✓ settings")
+
+    # 5. vacation
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS vacation (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id TEXT NOT NULL,
             start_date DATE NOT NULL,
+            start_time TIME,
             end_date DATE NOT NULL,
+            end_time TIME,
             reason TEXT,
             approved BOOLEAN DEFAULT 1,
             registered_by TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(mastodon_id) ON DELETE CASCADE
+            FOREIGN KEY(user_id) REFERENCES users(mastodon_id)
         )
     """)
-    print("✓ vacation 테이블 생성")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_vacation_dates ON vacation(start_date, end_date)")
+    print("✓ vacation")
 
-    # 5. items 테이블
+    # 6. items
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS items (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT UNIQUE NOT NULL,
+            name TEXT NOT NULL,
             description TEXT,
             price INTEGER NOT NULL,
             category TEXT,
             image_url TEXT,
             is_active BOOLEAN DEFAULT 1,
-            stock INTEGER DEFAULT -1,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    print("✓ items 테이블 생성")
+    print("✓ items")
 
-    # 6. inventory 테이블
+    # 7. inventory
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS inventory (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
+            user_id TEXT NOT NULL,
             item_id INTEGER NOT NULL,
             quantity INTEGER DEFAULT 1,
             acquired_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-            FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
+            FOREIGN KEY(user_id) REFERENCES users(mastodon_id),
+            FOREIGN KEY(item_id) REFERENCES items(id),
             UNIQUE(user_id, item_id)
         )
     """)
-    print("✓ inventory 테이블 생성")
+    print("✓ inventory")
 
-    # 7. system_config 테이블
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS system_config (
-            key TEXT PRIMARY KEY,
-            value TEXT NOT NULL,
-            description TEXT,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-    print("✓ system_config 테이블 생성")
-
-    # 8. scheduled_posts 테이블
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS scheduled_posts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            content_type TEXT NOT NULL,
-            title TEXT,
-            content TEXT NOT NULL,
-            scheduled_at TIMESTAMP NOT NULL,
-            posted BOOLEAN DEFAULT 0,
-            posted_at TIMESTAMP,
-            created_by INTEGER,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
-        )
-    """)
-    print("✓ scheduled_posts 테이블 생성")
-
-    # 9. admin_logs 테이블
+    # 8. admin_logs
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS admin_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            admin_id INTEGER NOT NULL,
-            action TEXT NOT NULL,
-            target_type TEXT,
-            target_id INTEGER,
+            admin_name TEXT NOT NULL,
+            action_type TEXT NOT NULL,
+            target_user TEXT,
             details TEXT,
-            ip_address TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (admin_id) REFERENCES users(id) ON DELETE CASCADE
+            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
-    print("✓ admin_logs 테이블 생성")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_admin_logs_timestamp ON admin_logs(timestamp DESC)")
+    print("✓ admin_logs")
 
-    # 10. user_stats 테이블 (소셜 분석)
+    # 9. scheduled_posts
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS scheduled_posts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_type TEXT NOT NULL,
+            content TEXT NOT NULL,
+            scheduled_at TIMESTAMP NOT NULL,
+            visibility TEXT DEFAULT 'public',
+            is_public BOOLEAN DEFAULT 1,
+            status TEXT DEFAULT 'pending',
+            mastodon_scheduled_id TEXT,
+            created_by TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            published_at TIMESTAMP
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_scheduled_posts_scheduled ON scheduled_posts(scheduled_at)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_scheduled_posts_status ON scheduled_posts(status)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_scheduled_posts_type ON scheduled_posts(post_type)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_scheduled_posts_public ON scheduled_posts(is_public)")
+    print("✓ scheduled_posts")
+
+    # 10. attendances
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS attendances (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL,
+            attendance_post_id TEXT NOT NULL,
+            attended_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            reward_amount INTEGER NOT NULL,
+            FOREIGN KEY(user_id) REFERENCES users(mastodon_id),
+            FOREIGN KEY(attendance_post_id) REFERENCES attendance_posts(post_id),
+            UNIQUE(user_id, attendance_post_id)
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_attendances_user ON attendances(user_id, attended_at DESC)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_attendances_post ON attendances(attendance_post_id)")
+    print("✓ attendances")
+
+    # 11. attendance_posts
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS attendance_posts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id TEXT UNIQUE NOT NULL,
+            posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            expires_at TIMESTAMP,
+            total_attendees INTEGER DEFAULT 0
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_attendance_posts_posted ON attendance_posts(posted_at DESC)")
+    print("✓ attendance_posts")
+
+    # 12. calendar_events
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS calendar_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            event_date DATE NOT NULL,
+            start_time TIME,
+            end_date DATE,
+            end_time TIME,
+            event_type TEXT DEFAULT 'event',
+            is_global_vacation BOOLEAN DEFAULT 0,
+            created_by TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_calendar_events_date ON calendar_events(event_date DESC)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_calendar_events_vacation ON calendar_events(is_global_vacation)")
+    print("✓ calendar_events")
+
+    # 13. user_stats
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS user_stats (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -186,9 +246,12 @@ def init_database(db_path='economy.db'):
             FOREIGN KEY(user_id) REFERENCES users(mastodon_id)
         )
     """)
-    print("✓ user_stats 테이블 생성")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_stats_user ON user_stats(user_id, analyzed_at DESC)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_stats_isolated ON user_stats(is_isolated)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_stats_biased ON user_stats(is_biased)")
+    print("✓ user_stats")
 
-    # 11. warning_templates 테이블
+    # 14. warning_templates
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS warning_templates (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -200,9 +263,9 @@ def init_database(db_path='economy.db'):
             FOREIGN KEY(created_by) REFERENCES users(mastodon_id)
         )
     """)
-    print("✓ warning_templates 테이블 생성")
+    print("✓ warning_templates")
 
-    # 12. ban_records 테이블
+    # 15. ban_records
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS ban_records (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -219,9 +282,11 @@ def init_database(db_path='economy.db'):
             FOREIGN KEY(user_id) REFERENCES users(mastodon_id)
         )
     """)
-    print("✓ ban_records 테이블 생성")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_ban_records_user ON ban_records(user_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_ban_records_active ON ban_records(is_active)")
+    print("✓ ban_records")
 
-    # 13. archived_toots 테이블
+    # 16. archived_toots
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS archived_toots (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -239,118 +304,74 @@ def init_database(db_path='economy.db'):
             FOREIGN KEY(user_id) REFERENCES users(mastodon_id)
         )
     """)
-    print("✓ archived_toots 테이블 생성")
-
-    # 인덱스 생성
-    print("\n인덱스 생성 중...")
-
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_mastodon_id ON users(mastodon_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_transactions_created_at ON transactions(created_at)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_warnings_user_id ON warnings(user_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_vacation_user_id ON vacation(user_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_vacation_dates ON vacation(start_date, end_date)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_inventory_user_id ON inventory(user_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_scheduled_posts_scheduled_at ON scheduled_posts(scheduled_at)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_admin_logs_admin_id ON admin_logs(admin_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_admin_logs_created_at ON admin_logs(created_at)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_stats_user ON user_stats(user_id, analyzed_at DESC)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_stats_isolated ON user_stats(is_isolated)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_stats_biased ON user_stats(is_biased)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_ban_records_user ON ban_records(user_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_ban_records_active ON ban_records(is_active)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_archived_toots_user ON archived_toots(user_id, archived_at DESC)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_archived_toots_toot ON archived_toots(toot_id)")
     cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_archived_toots_unique ON archived_toots(user_id, toot_id)")
-    print("✓ 인덱스 생성 완료")
+    print("✓ archived_toots")
 
-    # 기본 시스템 설정 삽입
-    print("\n기본 설정 삽입 중...")
+    print("=" * 60)
+    print("📝 초기 데이터 삽입 중...")
 
-    default_configs = [
-        # 타임존
+    # settings 초기 데이터
+    settings_data = [
         ('timezone', 'Asia/Seoul', '타임존'),
-
-        # 활동량 조회 (관리자 웹 전용)
         ('check_period_hours', '48', '조회 기간 (시간)'),
         ('min_replies_48h', '20', '최소 답글 수 기준'),
-
-        # 재화 지급
-        ('reward_reply_count', '100', '재화 지급 기준 답글 수 (N개)'),
-        ('reward_per_replies', '10', 'N개당 지급할 재화량 (M원)'),
-        ('last_reward_settlement_time', '2025-01-01 00:00:00', '마지막 재화 정산 시각'),
-
-        # 출석 체크
+        ('reward_reply_count', '100', '재화 지급 기준 답글 수'),
+        ('reward_per_replies', '10', 'N개당 지급 재화'),
+        ('last_reward_settlement_time', '2025-01-01 00:00:00', '마지막 정산 시각'),
         ('attendance_time', '10:00', '출석 트윗 발행 시간'),
         ('attendance_base_reward', '50', '기본 출석 보상'),
-        ('attendance_check_enabled', '1', '출석 체크 시스템 활성화'),
-
-        # 휴식 관리
+        ('attendance_check_enabled', '1', '출석 체크 활성화'),
+        ('attendance_tweet_template', '🌟 오늘의 출석 체크!\n이 트윗에 답글 달아주세요!', '출석 트윗 템플릿'),
         ('max_vacation_days', '90', '최대 휴식 기간 (일)'),
-        ('vacation_self_service_enabled', '1', '봇 명령어 셀프 등록 허용'),
-
-        # 소셜 분석
+        ('vacation_self_service_enabled', '1', '봇 셀프 등록 허용'),
         ('isolation_threshold', '7', '고립 판정 기준 (N명 미만)'),
         ('bias_threshold', '0.3', '편중 판정 기준 (비율)'),
         ('inactive_threshold', '0.5', '비활동 판정 기준 (접속률)'),
-
-        # 경고 및 아카이빙
         ('archive_warning_threshold', '3', '툿 아카이빙 경고 임계값'),
-        ('admin_account_id', '', '어드민 마스토돈 계정 ID')
+        ('admin_account', '', '총괄계정명'),
+        ('story_account', '', '스토리 계정명'),
+        ('system_bot_account', '', '시스템계정명 (@봇)'),
+        ('supervisor_bot_account', '', '감독봇 계정명'),
+        ('admin_account_id', '', '어드민 마스토돈 계정 ID'),
     ]
 
     cursor.executemany(
-        "INSERT OR IGNORE INTO system_config (key, value, description) VALUES (?, ?, ?)",
-        default_configs
+        "INSERT OR IGNORE INTO settings (key, value, description) VALUES (?, ?, ?)",
+        settings_data
     )
-    print("✓ 기본 설정 삽입 완료")
+    print(f"✓ settings: {len(settings_data)}개 항목")
 
-    # 기본 경고 템플릿 삽입
-    print("\n기본 경고 템플릿 삽입 중...")
-
-    default_templates = [
-        ('활동량 미달 기본', 'activity', '@{username}님, 최근 48시간 답글이 {actual_replies}개로 기준({required_replies}개)에 미달했습니다. 커뮤니티 활동에 관심 부탁드립니다.'),
-        ('고립 위험 기본', 'isolation', '@{username}님, 최근 대화 상대가 {unique_partners}명으로 적습니다. 다양한 멤버와 소통해보세요!'),
-        ('비활동 기본', 'inactive', '@{username}님, 최근 7일 접속률이 {login_rate}%입니다. 커뮤니티에 관심 가져주세요!'),
-        ('편중 경고 기본', 'bias', '@{username}님, @{top_partner}와의 대화가 {ratio}%입니다. 다양한 멤버와 소통해보세요!'),
+    # warning_templates 초기 데이터
+    templates_data = [
+        ('활동량 미달', 'activity',
+         '@{username}님, 최근 48시간 답글이 {actual_replies}개로 기준({required_replies}개)에 미달했습니다.'),
+        ('고립 위험', 'isolation',
+         '@{username}님, 최근 대화 상대가 {unique_partners}명으로 적습니다.'),
+        ('비활동', 'inactive',
+         '@{username}님, 최근 7일 접속률이 {login_rate}%입니다.'),
+        ('편중 경고', 'bias',
+         '@{username}님, @{top_partner}와의 대화가 {ratio}%입니다.'),
     ]
 
     cursor.executemany(
         "INSERT OR IGNORE INTO warning_templates (name, warning_type, template) VALUES (?, ?, ?)",
-        default_templates
+        templates_data
     )
-    print("✓ 기본 경고 템플릿 삽입 완료")
+    print(f"✓ warning_templates: {len(templates_data)}개 템플릿")
 
-    # 변경사항 저장
     conn.commit()
-
-    # 테이블 목록 확인
-    print("\n생성된 테이블:")
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
-    tables = cursor.fetchall()
-    for table in tables:
-        cursor.execute(f"SELECT COUNT(*) FROM {table[0]}")
-        count = cursor.fetchone()[0]
-        print(f"  - {table[0]}: {count}개 레코드")
-
     conn.close()
-    print(f"\n✅ 데이터베이스 초기화 완료: {db_path}")
-    print(f"   WAL 모드: 활성화")
-    print(f"   외래키: 활성화")
+
+    print("=" * 60)
+    print("✅ 데이터베이스 초기화 완료!")
+    print(f"📍 경로: {db_path}")
+    print(f"📊 테이블: 16개")
+    print(f"⚙️  설정: {len(settings_data)}개")
+    print(f"📋 템플릿: {len(templates_data)}개")
 
 
 if __name__ == '__main__':
-    import sys
-
     db_path = sys.argv[1] if len(sys.argv) > 1 else 'economy.db'
-
-    print("=" * 60)
-    print("마녀봇 관리 시스템 - 데이터베이스 초기화")
-    print("=" * 60)
-    print(f"DB 경로: {db_path}\n")
-
-    try:
-        init_database(db_path)
-    except Exception as e:
-        print(f"\n❌ 오류 발생: {e}")
-        sys.exit(1)
+    init_database(db_path)
