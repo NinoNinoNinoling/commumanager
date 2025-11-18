@@ -18,32 +18,34 @@ erDiagram
     users ||--o{ vacation : takes
     users ||--o{ inventory : owns
     users ||--o{ attendances : attends
+    users ||--o{ calendar_events : creates
     items ||--o{ inventory : in
     items ||--o{ transactions : relates
     attendance_posts ||--o{ attendances : receives
-    calendar_events {
-        int id PK
-        text title
-        text description
-        date event_date
-        text event_type
-        bool is_global_vacation
-        text created_by
-        timestamp created_at
-    }
 
     users {
-        text mastodon_id PK
-        text username
-        text display_name
-        text role
-        text dormitory
-        int balance
-        int total_earned
-        int total_spent
-        int reply_count
-        timestamp last_active
-        timestamp last_check
+        text mastodon_id PK "마스토돈 ID (TEXT PK)"
+        text username "유저명"
+        text display_name "표시명"
+        text role "역할(user/admin/system/story)"
+        text dormitory "기숙사"
+        int balance "현재 재화"
+        int total_earned "누적 획득"
+        int total_spent "누적 사용"
+        int reply_count "답글 수"
+        timestamp last_active "마지막 활동"
+        timestamp last_check "마지막 체크"
+    }
+
+    calendar_events {
+        int id PK
+        text title "제목"
+        text description "설명"
+        date event_date "날짜"
+        text event_type "타입(event/holiday/notice)"
+        bool is_global_vacation "전역 휴식기간"
+        text created_by FK "작성자(users.mastodon_id)"
+        timestamp created_at "생성 시각"
     }
 
     transactions {
@@ -128,31 +130,56 @@ erDiagram
 
     attendances {
         int id PK
-        text user_id FK
-        text attendance_post_id FK
-        timestamp attended_at
-        int reward_amount
-        int streak_days
+        text user_id FK "users.mastodon_id"
+        text attendance_post_id FK "attendance_posts.post_id"
+        timestamp attended_at "출석 시각"
+        int reward_amount "지급 재화"
+        int streak_days "연속 일수"
+        unique user_attendance "UNIQUE(user_id, attendance_post_id)"
     }
 
     attendance_posts {
         int id PK
-        text post_id
-        timestamp posted_at
-        timestamp expires_at
-        int total_attendees
+        text post_id UK "마스토돈 status ID (UNIQUE)"
+        timestamp posted_at "발행 시각"
+        timestamp expires_at "만료 시각"
+        int total_attendees "출석 인원"
     }
 ```
 
 ## SQLite 테이블 (economy.db)
 
+## 논리 설계 결정 사항
+
+### PK 전략
+- **users.mastodon_id를 TEXT PK로 사용**
+- 이유: 마스토돈 API와 직접 매핑, 코드 단순화, 소규모 프로젝트에 적합
+- 장점: JOIN 감소, 코드 직관성
+- 단점: TEXT PK 성능 (미미한 차이), 마이그레이션 어려움
+- 트레이드오프: 단순성 > 성능 최적화
+
+### 중복 방지 전략
+- **attendances**: UNIQUE(user_id, attendance_post_id) - DB 레벨 제약
+- **transactions**: status_id로 애플리케이션 레벨 체크
+- **attendance_posts**: post_id UNIQUE
+
+### 타임존
+- **Asia/Seoul** 기준
+- 출석/활동량 체크 모두 서울 시간 기준
+
+### 전역 휴식기간
+- **출석 트윗 발행 자체를 막음** (cron/celery에서 체크)
+- 활동량 체크도 비활성화
+
+---
+
 ### users
 ```sql
 CREATE TABLE users (
-    mastodon_id TEXT PRIMARY KEY,
+    mastodon_id TEXT PRIMARY KEY,     -- 마스토돈 ID (TEXT PK)
     username TEXT NOT NULL,
     display_name TEXT,
-    role TEXT DEFAULT 'user',        -- user/admin/system/story
+    role TEXT DEFAULT 'user',         -- user/admin/system/story
     dormitory TEXT,
     balance INTEGER DEFAULT 0,
     total_earned INTEGER DEFAULT 0,
@@ -214,6 +241,7 @@ CREATE TABLE settings (
 
 -- 기본값
 INSERT INTO settings (key, value, description) VALUES
+('timezone', 'Asia/Seoul', '타임존 (서울 시간 기준)'),
 ('check_times', '04:00,16:00', '활동량 체크 시간 (12시간 간격)'),
 ('check_period_hours', '48', '체크 기간'),
 ('min_replies_48h', '20', '최소 답글 수'),
@@ -314,15 +342,23 @@ INSERT INTO settings (key, value, description) VALUES
 CREATE TABLE attendances (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL,
-    attendance_post_id TEXT NOT NULL,     -- 출석 트윗 ID
+    attendance_post_id TEXT NOT NULL,     -- 출석 트윗 post_id (FK)
     attended_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     reward_amount INTEGER NOT NULL,       -- 지급된 재화 (기본 + 연속 보너스)
     streak_days INTEGER DEFAULT 1,        -- 연속 출석 일수
-    FOREIGN KEY(user_id) REFERENCES users(mastodon_id)
+    FOREIGN KEY(user_id) REFERENCES users(mastodon_id),
+    FOREIGN KEY(attendance_post_id) REFERENCES attendance_posts(post_id),
+    UNIQUE(user_id, attendance_post_id)   -- 중복 출석 방지 (DB 레벨)
 );
 CREATE INDEX idx_attendances_user ON attendances(user_id, attended_at DESC);
 CREATE INDEX idx_attendances_post ON attendances(attendance_post_id);
 ```
+
+**비즈니스 규칙:**
+- 한 유저는 같은 출석 트윗에 1회만 출석 가능 (UNIQUE 제약)
+- 하루 기준: Asia/Seoul 타임존
+- reward_amount: 저장 이유 = 과거 보상 규칙 변경돼도 히스토리 유지
+- streak_days: 저장 이유 = 특정 시점의 연속일 확인 가능
 
 ### attendance_posts (출석 트윗 기록)
 ```sql
