@@ -532,7 +532,7 @@ WHERE mastodon_id = ?;
 
 ---
 
-## UC-07: 전역 휴식기간 설정
+## UC-07: 일정/이벤트 관리
 
 ### 액터
 - 관리자
@@ -540,7 +540,30 @@ WHERE mastodon_id = ?;
 ### 전제조건
 - 관리자 웹에 로그인됨
 
-### 기본 흐름
+### 기본 흐름 1: 일반 이벤트 등록
+1. 관리자가 "일정/이벤트 관리" 메뉴 클릭
+2. "새 일정 등록" 버튼 클릭
+3. 폼 입력
+   - 제목: 커뮤니티 모임
+   - 설명: 월말 정기 모임
+   - 날짜: 2025-11-30
+   - 타입: event
+   - 전역 휴식기간: ☐ (체크 안 함)
+4. "저장" 버튼 클릭
+5. DB 저장
+   ```sql
+   INSERT INTO calendar_events
+   (title, description, event_date, event_type, is_global_vacation, created_by)
+   VALUES
+   ('커뮤니티 모임', '월말 정기 모임', '2025-11-30', 'event', 0, 'admin_user');
+   ```
+6. 관리 로그 기록
+   ```sql
+   INSERT INTO admin_logs (admin_name, action_type, details)
+   VALUES ('admin_user', 'add_event', '일정 등록: 2025-11-30 커뮤니티 모임');
+   ```
+
+### 기본 흐름 2: 전역 휴식기간 설정
 1. 관리자가 "일정/이벤트 관리" 메뉴 클릭
 2. "새 일정 등록" 버튼 클릭
 3. 폼 입력
@@ -548,7 +571,7 @@ WHERE mastodon_id = ?;
    - 설명: 연말 커뮤니티 휴식
    - 날짜: 2025-12-25
    - 타입: holiday
-   - **전역 휴식기간 체크박스: ✅**
+   - **전역 휴식기간: ✅ (체크)**
 4. "저장" 버튼 클릭
 5. DB 저장
    ```sql
@@ -563,10 +586,34 @@ WHERE mastodon_id = ?;
    VALUES ('admin_user', 'add_event', '전역 휴식기간 설정: 2025-12-25');
    ```
 
+### 기본 흐름 3: 일정 수정
+1. 관리자가 일정 목록에서 특정 일정 클릭
+2. 편집 폼에서 내용 수정
+3. "저장" 버튼 클릭
+4. DB 업데이트
+   ```sql
+   UPDATE calendar_events
+   SET title = '수정된 제목',
+       description = '수정된 설명',
+       event_type = 'notice',
+       updated_at = CURRENT_TIMESTAMP
+   WHERE id = ?;
+   ```
+
+### 기본 흐름 4: 일정 삭제
+1. 관리자가 일정 목록에서 "삭제" 버튼 클릭
+2. 확인 팝업: "정말 삭제하시겠습니까?"
+3. "확인" 클릭
+4. DB 삭제
+   ```sql
+   DELETE FROM calendar_events WHERE id = ?;
+   ```
+
 ### 후행조건
-- calendar_events 테이블에 휴식기간 등록됨
-- 2025-12-25에는:
-  - 출석 트윗 발행 안 됨 (UC-03의 2-1)
+- calendar_events 테이블에 일정 등록/수정/삭제됨
+- 전역 휴식기간(is_global_vacation=1)인 경우:
+  - 해당 날짜에는 출석 트윗 발행 안 됨 (UC-03의 2-1)
+- 모든 일정은 `@봇 일정` 명령어로 조회 가능 (UC-08)
 
 ---
 
