@@ -65,16 +65,6 @@
    logger.info(f"New user registered via follow: {new_user.username} ({new_user.id})")
    ```
 
-7. **환영 메시지 발송 (선택)**
-   ```python
-   # 어드민 봇으로 환영 DM 발송
-   mastodon.status_post(
-       f"@{new_user.username} 환영합니다! 커뮤니티 가입을 환영해요 🎉",
-       visibility='direct',
-       in_reply_to_id=None
-   )
-   ```
-
 ### 대안 흐름
 
 **2-1. 어드민 외 다른 계정 팔로우**
@@ -90,8 +80,11 @@ SET username = ?, display_name = ?, updated_at = CURRENT_TIMESTAMP
 WHERE mastodon_id = ?;
 ```
 
-**4-1. DB 저장 실패**
+**4-1. DB 저장 실패 (크리티컬)**
 - 에러 로그 기록
+- **관리자에게 즉시 알림 필요**
+  - 검토사항: 카카오톡 봇 연동 가능 여부 확인 필요
+  - 대안: 이메일, Discord webhook, Slack 등
 - 재시도 큐에 등록
 - 실패 시 Lazy Creation이 백업으로 처리
 
@@ -103,7 +96,6 @@ WHERE mastodon_id = ?;
 ### 후행조건
 - 신규 유저가 economy.db에 즉시 등록됨
 - Redis 캐시에 유저 정보 저장됨
-- 환영 메시지 발송됨 (선택)
 - 답글 작성 시 재화 지급 가능한 상태
 
 **장점**:
@@ -249,14 +241,27 @@ WHERE mastodon_id = ?;
    AND is_global_vacation = 1;
    ```
    - 결과 > 0이면 **출석 트윗 발행 안 함** → 종료
-3. 출석 트윗 작성
+3. **최근 정산 정보 조회 (선택)**
+   ```sql
+   SELECT value FROM system_config WHERE key = 'last_reward_settlement_time';
+   -- 결과: '2025-11-18 16:00:00'
+   ```
+
+4. **출석 트윗 작성**
    ```python
+   # 정산 시각 포맷팅 (예: "오후 4시")
+   settlement_time = format_time(last_settlement_time)  # "오후 4시"
+
    status = mastodon.status_post(
-       "🌟 오늘의 출석 체크!\n이 트윗에 답글 달아주세요!",
+       f"""🌟 오늘의 출석 체크!
+이 트윗에 답글 달아주세요!
+
+💰 최근 정산 완료: {settlement_time}
+재화 지급이 완료되었습니다.""",
        visibility="public"
    )
    ```
-4. attendance_posts 테이블에 기록
+5. **attendance_posts 테이블에 기록**
    ```sql
    INSERT INTO attendance_posts (post_id, posted_at, expires_at)
    VALUES (
@@ -336,7 +341,7 @@ WHERE mastodon_id = ?;
 **4-1. 중복 출석 시도**
 - UNIQUE(user_id, attendance_post_id) 제약 위반 → SQLite 에러
 - 트랜잭션 ROLLBACK
-- 유저에게 DM: "이미 출석하셨습니다"
+- 조용히 무시 (DM 발송 안 함)
 
 ### 후행조건
 - attendances 테이블에 출석 기록 추가
@@ -499,7 +504,7 @@ WHERE mastodon_id = ?;
 
 **5-1. 이미 휴식 중 (흐름 1)**
 - 기존 휴식이 활성화되어 있음
-- DM: "이미 휴식 중입니다 (~ 2025-11-20). 먼저 해제해주세요."
+- 조용히 무시 (DM 발송 안 함)
 - 등록 안 함
 
 **3-1. 잘못된 일수 (흐름 1)**
@@ -540,22 +545,42 @@ WHERE mastodon_id = ?;
 ### 전제조건
 - 관리자 웹에 로그인됨
 
-### 기본 흐름 1: 일반 이벤트 등록
+### 기본 흐름 1: 일반 이벤트 등록 (단일 날짜)
 1. 관리자가 "일정/이벤트 관리" 메뉴 클릭
 2. "새 일정 등록" 버튼 클릭
 3. 폼 입력
    - 제목: 커뮤니티 모임
    - 설명: 월말 정기 모임
-   - 날짜: 2025-11-30
+   - 시작일: 2025-11-30
+   - 종료일: (비워둠 - 단일 날짜 이벤트)
    - 타입: event
    - 전역 휴식기간: ☐ (체크 안 함)
 4. "저장" 버튼 클릭
 5. DB 저장
    ```sql
    INSERT INTO calendar_events
-   (title, description, event_date, event_type, is_global_vacation, created_by)
+   (title, description, event_date, end_date, event_type, is_global_vacation, created_by)
    VALUES
-   ('커뮤니티 모임', '월말 정기 모임', '2025-11-30', 'event', 0, 'admin_user');
+   ('커뮤니티 모임', '월말 정기 모임', '2025-11-30', NULL, 'event', 0, 'admin_user');
+   ```
+
+### 기본 흐름 1-2: 기간제 이벤트 등록
+1. 관리자가 "일정/이벤트 관리" 메뉴 클릭
+2. "새 일정 등록" 버튼 클릭
+3. 폼 입력
+   - 제목: 연말 이벤트 기간
+   - 설명: 12월 연말 특별 이벤트
+   - 시작일: 2025-12-20
+   - 종료일: 2025-12-31
+   - 타입: event
+   - 전역 휴식기간: ☐ (체크 안 함)
+4. "저장" 버튼 클릭
+5. DB 저장
+   ```sql
+   INSERT INTO calendar_events
+   (title, description, event_date, end_date, event_type, is_global_vacation, created_by)
+   VALUES
+   ('연말 이벤트 기간', '12월 연말 특별 이벤트', '2025-12-20', '2025-12-31', 'event', 0, 'admin_user');
    ```
 6. 관리 로그 기록
    ```sql
@@ -569,16 +594,17 @@ WHERE mastodon_id = ?;
 3. 폼 입력
    - 제목: 크리스마스 휴식기간
    - 설명: 연말 커뮤니티 휴식
-   - 날짜: 2025-12-25
+   - 시작일: 2025-12-25
+   - 종료일: (비워둠 - 하루만)
    - 타입: holiday
    - **전역 휴식기간: ✅ (체크)**
 4. "저장" 버튼 클릭
 5. DB 저장
    ```sql
    INSERT INTO calendar_events
-   (title, description, event_date, event_type, is_global_vacation, created_by)
+   (title, description, event_date, end_date, event_type, is_global_vacation, created_by)
    VALUES
-   ('크리스마스 휴식기간', '연말 커뮤니티 휴식', '2025-12-25', 'holiday', 1, 'admin_user');
+   ('크리스마스 휴식기간', '연말 커뮤니티 휴식', '2025-12-25', NULL, 'holiday', 1, 'admin_user');
    ```
 6. 관리 로그 기록
    ```sql
@@ -628,28 +654,46 @@ WHERE mastodon_id = ?;
 ### 기본 흐름
 1. 유저가 마스토돈에서 `@봇 일정` 멘션
 2. 봇이 멘션 이벤트 수신
-3. **이번 주 일정 조회** (오늘 ~ 7일 이내)
+3. **다음 전역 휴일 조회**
    ```sql
-   SELECT title, event_date, event_type, is_global_vacation
+   SELECT event_date FROM calendar_events
+   WHERE is_global_vacation = 1
+     AND event_date >= DATE('now', 'localtime')
+   ORDER BY event_date ASC
+   LIMIT 1;
+   ```
+   - 결과: `2025-12-25` (다음 전역 휴일)
+   - 결과 없으면: 오늘부터 +30일까지로 제한
+
+4. **일정 조회** (오늘 ~ 다음 전역 휴일 전까지)
+   ```sql
+   SELECT title, event_date, end_date, event_type, is_global_vacation
    FROM calendar_events
-   WHERE event_date BETWEEN DATE('now', 'localtime')
-                        AND DATE('now', '+7 days', 'localtime')
+   WHERE event_date >= DATE('now', 'localtime')
+     AND event_date < '2025-12-25'  -- 다음 전역 휴일 전까지
    ORDER BY event_date ASC;
    ```
-4. 응답 메시지 생성
+
+5. **응답 메시지 생성**
    ```
-   📅 이번 주 일정
+   📅 일정 (~ 12/25 전역 휴식 전까지)
 
    11/20 (수) 🎉 커뮤니티 모임
-   11/25 (월) 🏖️ 전역 휴식기간
+   11/25 (월) 📢 중요 공지
+   12/20-12/24 🎄 연말 이벤트 기간
 
-   * 전역 휴식기간에는 출석/활동량 체크가 없습니다.
+   다음 전역 휴식: 12/25 크리스마스
    ```
-5. 유저에게 DM 또는 멘션 답글로 응답
+
+6. 유저에게 DM 또는 멘션 답글로 응답
 
 ### 대안 흐름
-**3-1. 일정 없음**
-- 응답: "이번 주 등록된 일정이 없습니다."
+**3-1. 다음 전역 휴일 없음**
+- 오늘부터 +30일까지로 조회 범위 제한
+- 응답에 "다음 30일 일정" 표시
+
+**4-1. 일정 없음**
+- 응답: "다음 전역 휴식 전까지 등록된 일정이 없습니다."
 
 **1-1. 다른 명령어**
 - `@봇 일정 이번달`: 이번 달 전체 조회
@@ -1664,31 +1708,23 @@ INSERT INTO warning_templates (name, warning_type, template) VALUES
 
 ## 추가 검토 필요 사항
 
-### 1. 연속 출석 계산 (UC-04)
-- 자정 기준? 출석 트윗 발행 시각 기준?
-- 예: 12/1 23:59 출석 → 12/2 00:01 출석 = 연속?
-- **현재 설계**: DATE 기준 (자정 기준)
+### 1. PostgreSQL 답글 수 조회 성능 (UC-02)
+- **현재 설계**: 벌크 쿼리 사용 (GROUP BY account_id)
+- **예상 규모**: 유저 최대 30명
+- **쿼리 빈도**: 매일 2회 (4시, 16시)
+- **결론**: 현재 설계로 충분, 성능 문제 없음
 
-### 2. 만료된 출석 트윗 처리
-- 23시간 59분 후 자동 만료
-- 만료된 트윗에 답글 달면?
-- **현재 설계**: 조용히 무시 (처리 안 함, 응답 안 함)
-
-### 3. PostgreSQL 답글 수 조회 성능
-- 유저 100명 × 매일 2회 = 200 쿼리
-- 벌크 조회 필요?
-- **현재 설계**: 개별 쿼리 (추후 최적화)
-
-### 4. 휴식 중 출석 가능?
-- **현재 설계**: 가능 (활동량 체크와 별개)
-- 변경 필요 여부?
-
-### 5. CASCADE 동작
-- attendance_posts 삭제 시 attendances도 삭제?
+### 2. CASCADE 동작 (attendance_posts → attendances)
+- **설명**: `attendance_posts` 테이블이 삭제될 때 관련 `attendances` 레코드 처리
 - **현재 설계**: FK 제약만, CASCADE 없음
-- 추가 필요?
+  - 출석 트윗 삭제 시 먼저 수동으로 출석 기록 삭제 필요
+  - `DELETE FROM attendances WHERE attendance_post_id = ?;`
+  - `DELETE FROM attendance_posts WHERE id = ?;`
+- **CASCADE 추가 시**: 출석 트윗 삭제하면 출석 기록 자동 삭제
+  - `FOREIGN KEY(attendance_post_id) REFERENCES attendance_posts(post_id) ON DELETE CASCADE`
+- **결정 보류**: 추후 운영 중 필요성 판단
 
-### 6. 봇 응답 방식 검토
+### 3. 봇 응답 방식 검토
 - **현재 설계**: DM (Direct Message) 기반 응답
 - **검토사항**: 멘션에 대한 답글(reply) 방식 고려
   - 장점: 공개적 피드백, 다른 유저도 참고 가능

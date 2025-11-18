@@ -427,7 +427,8 @@ CREATE TABLE calendar_events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     description TEXT,
-    event_date DATE NOT NULL,
+    event_date DATE NOT NULL,           -- 시작일 (단일 이벤트인 경우 이 날짜만 사용)
+    end_date DATE,                      -- 종료일 (기간제 이벤트인 경우, NULL이면 단일 날짜)
     event_type TEXT DEFAULT 'event',    -- event/holiday/notice
     is_global_vacation BOOLEAN DEFAULT 0,  -- 전역 휴식기간 여부
     created_by TEXT NOT NULL,
@@ -443,10 +444,16 @@ CREATE INDEX idx_calendar_events_vacation ON calendar_events(is_global_vacation)
 - `holiday`: 공휴일/기념일
 - `notice`: 중요 공지 날짜
 
+**기간제 이벤트**:
+- `end_date = NULL`: 단일 날짜 이벤트 (event_date 하루만)
+- `end_date != NULL`: 기간제 이벤트 (event_date ~ end_date)
+- 예: 12/20 ~ 12/31 연말 이벤트
+
 **전역 휴식기간 (is_global_vacation=true)**:
-- 해당 날짜에는 출석 체크 및 활동량 체크 비활성화
+- 해당 날짜에는 출석 트윗 발행 비활성화
 - 커뮤니티 전체 휴식 기간 지정 가능
 - 관리자 웹에서 설정
+- 기간제도 가능 (event_date ~ end_date 모두 휴식)
 
 ### 추후 구현
 - 게임 시스템 관련 테이블 (게임 종류 및 세부 사항 결정 후 추가)
