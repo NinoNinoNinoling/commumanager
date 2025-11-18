@@ -1225,6 +1225,256 @@ INSERT INTO warning_templates (name, warning_type, template) VALUES
 
 ---
 
+## UC-16: 자동 툿 아카이빙 (경고 임계값 도달)
+
+### 액터
+- 봇 시스템 (자동)
+
+### 전제조건
+- 유저에게 경고가 발송됨
+- settings에 `archive_warning_threshold=3` 설정되어 있음
+
+### 기본 흐름
+1. 경고 발송 완료 후 (UC-05, UC-12 등)
+2. **유저의 누적 경고 횟수 조회**
+   ```sql
+   SELECT COUNT(*) as warning_count
+   FROM warnings
+   WHERE user_id = '115565546282398331';
+   ```
+3. **임계값 확인**
+   ```sql
+   SELECT value FROM settings WHERE key = 'archive_warning_threshold';
+   -- 결과: 3
+   ```
+4. **조건 확인**: warning_count >= 3
+   - 조건 미충족 시 → 종료
+   - 조건 충족 시 → 아카이빙 시작
+5. **아카이빙 이미 실행됐는지 확인**
+   ```sql
+   SELECT COUNT(*) FROM archived_toots
+   WHERE user_id = '115565546282398331';
+   ```
+   - 이미 아카이빙 있으면 → 새 툿만 추가
+   - 없으면 → 전체 아카이빙
+6. **PostgreSQL에서 유저의 모든 statuses 조회**
+   ```sql
+   SELECT
+       id,
+       text,
+       created_at,
+       visibility,
+       in_reply_to_id,
+       in_reply_to_account_id
+   FROM statuses
+   WHERE account_id = '115565546282398331'
+   ORDER BY created_at DESC;
+   ```
+7. **미디어 첨부 조회** (있는 경우)
+   ```sql
+   SELECT
+       ma.id,
+       ma.type,
+       ma.remote_url,
+       ma.description
+   FROM media_attachments ma
+   JOIN statuses_media sm ON ma.id = sm.media_attachment_id
+   WHERE sm.status_id = ?;
+   ```
+8. **SQLite에 아카이빙**
+   ```sql
+   BEGIN TRANSACTION;
+
+   -- 각 툿마다 INSERT (중복 방지)
+   INSERT OR IGNORE INTO archived_toots
+   (user_id, toot_id, content, created_at, visibility,
+    in_reply_to_id, in_reply_to_account_id, media_attachments,
+    archived_reason, warning_count_at_archive)
+   VALUES
+   ('115565546282398331',
+    '115570000000000001',
+    '툿 내용 예시',
+    '2025-11-15 10:30:00',
+    'public',
+    NULL,
+    NULL,
+    '[{"id":"media1","type":"image","url":"..."}]',
+    '경고 3회 누적',
+    3);
+
+   -- 다음 툿...
+   INSERT OR IGNORE INTO archived_toots (...);
+
+   COMMIT;
+   ```
+9. **아카이빙 로그 기록**
+   ```sql
+   INSERT INTO admin_logs
+   (admin_name, action_type, target_user, details)
+   VALUES
+   ('system', 'archive_toots', '115565546282398331',
+    '경고 3회 누적으로 자동 아카이빙 (총 150개 툿)');
+   ```
+10. 관리자에게 알림 (선택)
+    - 관리자 웹 대시보드에 알림 표시
+    - 또는 관리자 봇으로 DM 발송
+
+### 대안 흐름
+
+**6-1. PostgreSQL 연결 실패**
+- 재시도 (최대 3회)
+- 실패 시 아카이빙 실패 로그 기록
+- 관리자에게 알림
+
+**8-1. SQLite 저장 실패**
+- ROLLBACK
+- 에러 로그 기록
+- 다음 경고 시 재시도
+
+**8-2. 일부 툿만 아카이빙 성공**
+- 성공한 툿은 저장됨 (UNIQUE 제약)
+- 실패한 툿은 다음 기회에 재시도
+
+**5-1. 이미 아카이빙 있음**
+- 새로운 툿만 추가 아카이빙
+- 날짜 기준: 마지막 아카이빙 이후 작성된 툿
+
+### 후행조건
+- archived_toots 테이블에 유저의 모든 툿 저장됨
+- admin_logs에 아카이빙 로그 추가
+- 중복 아카이빙 방지됨 (UNIQUE 제약)
+- 증거 보존 완료 (밴 시 활용 가능)
+
+---
+
+## UC-17: 관리자 웹 - 아카이빙된 툿 조회
+
+### 액터
+- 관리자
+
+### 전제조건
+- 관리자 웹에 로그인됨
+- archived_toots 데이터가 존재함
+
+### 기본 흐름
+1. 관리자가 "툿 아카이빙" 메뉴 클릭
+2. 아카이빙된 유저 목록 조회
+   ```sql
+   SELECT
+       user_id,
+       u.username,
+       COUNT(*) as total_toots,
+       MIN(archived_at) as first_archived,
+       MAX(archived_at) as last_archived,
+       MAX(warning_count_at_archive) as max_warnings
+   FROM archived_toots at
+   JOIN users u ON at.user_id = u.mastodon_id
+   GROUP BY user_id, u.username
+   ORDER BY last_archived DESC;
+   ```
+3. 목록 표시
+   ```
+   [아카이빙된 유저 (10명)]
+
+   • @user1
+     툿 개수: 150개
+     최초 아카이빙: 2025-11-15 04:00
+     최근 아카이빙: 2025-11-18 04:00
+     최대 경고 횟수: 3회
+     [상세 보기]
+
+   • @user2
+     툿 개수: 85개
+     최초 아카이빙: 2025-11-16 10:00
+     최근 아카이빙: 2025-11-16 10:00
+     최대 경고 횟수: 3회
+     [상세 보기]
+   ```
+4. "상세 보기" 클릭 → 유저별 아카이빙 툿 조회
+   ```sql
+   SELECT
+       toot_id,
+       content,
+       created_at,
+       visibility,
+       in_reply_to_id,
+       archived_at,
+       archived_reason,
+       warning_count_at_archive
+   FROM archived_toots
+   WHERE user_id = '115565546282398331'
+   ORDER BY created_at DESC;
+   ```
+5. 툿 목록 표시
+   ```
+   [@user1의 아카이빙된 툿 (150개)]
+
+   필터: [전체] [공개] [답글만] [미디어 있음]
+   검색: [_______________] [검색]
+
+   • 2025-11-17 14:30 [public]
+     "오늘 점심 뭐 먹지..."
+     [상세]
+
+   • 2025-11-17 12:15 [unlisted] 답글
+     "@user2 나도 그렇게 생각해!"
+     → @user2에게 답글
+     [상세]
+
+   • 2025-11-16 20:00 [public] 미디어 1개
+     "오늘 산책하면서 찍은 사진"
+     📷 이미지 1개
+     [상세]
+
+   [엑셀 다운로드]
+   ```
+6. "상세" 클릭 → 툿 상세 모달
+   ```
+   [툿 상세 정보]
+
+   작성 시각: 2025-11-16 20:00
+   공개 범위: public
+   답글 대상: 없음
+
+   내용:
+   오늘 산책하면서 찍은 사진
+
+   미디어 첨부:
+   • 이미지 1: [URL 보기]
+     설명: 공원 풍경
+
+   아카이빙 정보:
+   • 아카이빙 일시: 2025-11-18 04:00
+   • 아카이빙 사유: 경고 3회 누적
+   • 당시 경고 횟수: 3회
+
+   [닫기]
+   ```
+
+### 필터 및 검색
+**필터 옵션:**
+- 공개 범위: 전체/public/unlisted/private
+- 답글 여부: 전체/답글만/원글만
+- 미디어 유무: 전체/미디어 있음
+- 날짜 범위: 기간 선택
+
+**검색:**
+- 툿 내용 키워드 검색 (SQLite FTS 또는 LIKE)
+
+### 엑셀 다운로드
+- CSV 또는 XLSX 형식
+- 포함 항목:
+  - 툿 ID, 내용, 작성 시각
+  - 공개 범위, 답글 정보
+  - 아카이빙 일시, 사유
+- 증거 보존용
+
+### 후행조건
+- 관리자가 아카이빙된 툿 확인
+- 필요 시 밴 증거로 활용 가능
+
+---
+
 ## 추가 검토 필요 사항
 
 ### 1. 연속 출석 계산 (UC-04)

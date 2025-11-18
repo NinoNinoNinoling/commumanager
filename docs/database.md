@@ -19,6 +19,7 @@ erDiagram
     users ||--o{ inventory : owns
     users ||--o{ attendances : attends
     users ||--o{ calendar_events : creates
+    users ||--o{ archived_toots : archives
     items ||--o{ inventory : in
     items ||--o{ transactions : relates
     attendance_posts ||--o{ attendances : receives
@@ -145,6 +146,19 @@ erDiagram
         timestamp expires_at "만료 시각"
         int total_attendees "출석 인원"
     }
+
+    archived_toots {
+        int id PK
+        text user_id FK "users.mastodon_id"
+        text toot_id "마스토돈 status ID"
+        text content "툿 내용"
+        timestamp created_at "원본 작성 시각"
+        text visibility "공개 범위"
+        timestamp archived_at "아카이빙 시각"
+        text archived_reason "아카이빙 사유"
+        int warning_count_at_archive "경고 횟수"
+        unique user_toot "UNIQUE(user_id, toot_id)"
+    }
 ```
 
 ## SQLite 테이블 (economy.db)
@@ -246,7 +260,8 @@ INSERT INTO settings (key, value, description) VALUES
 ('check_period_hours', '48', '체크 기간'),
 ('min_replies_48h', '20', '최소 답글 수'),
 ('replies_per_reward', '1', '답글당 재화'),
-('reward_amount', '10', '지급량');
+('reward_amount', '10', '지급량'),
+('archive_warning_threshold', '3', '툿 아카이빙 경고 임계값 (N회 이상)');
 ```
 
 ### vacation
@@ -583,6 +598,47 @@ CREATE INDEX idx_ban_records_active ON ban_records(is_active);
 - 수동 밴 전용 (관리자 판단)
 - 밴 시 증거물 자동 저장 (경고 이력, 최근 통계)
 - 언밴 가능 (is_active=0 처리)
+
+### archived_toots (툿 아카이빙)
+```sql
+CREATE TABLE archived_toots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    toot_id TEXT NOT NULL,                    -- 마스토돈 status ID
+    content TEXT,                              -- 툿 내용
+    created_at TIMESTAMP,                      -- 원본 작성 시각
+    visibility TEXT,                           -- public/unlisted/private/direct
+    in_reply_to_id TEXT,                      -- 답글 대상 ID
+    in_reply_to_account_id TEXT,              -- 답글 대상 계정 ID
+    media_attachments TEXT,                    -- 미디어 첨부파일 JSON
+    archived_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 아카이빙 시각
+    archived_reason TEXT,                      -- 아카이빙 사유
+    warning_count_at_archive INTEGER,          -- 아카이빙 당시 경고 횟수
+    FOREIGN KEY(user_id) REFERENCES users(mastodon_id)
+);
+CREATE INDEX idx_archived_toots_user ON archived_toots(user_id, archived_at DESC);
+CREATE INDEX idx_archived_toots_toot ON archived_toots(toot_id);
+CREATE UNIQUE INDEX idx_archived_toots_unique ON archived_toots(user_id, toot_id);
+```
+
+**아카이빙 정책:**
+- 경고 횟수가 설정된 임계값 이상일 때 자동 아카이빙
+- 기본 임계값: 3회 (settings에서 조정 가능)
+- PostgreSQL에서 유저의 모든 statuses 조회 → SQLite에 저장
+- 중복 아카이빙 방지: UNIQUE(user_id, toot_id)
+- 목적: 밴 증거 보존, 문제 패턴 분석
+
+**media_attachments 구조 (JSON):**
+```json
+[
+  {
+    "id": "media_id_1",
+    "type": "image",
+    "url": "https://example.com/media/1.jpg",
+    "description": "이미지 설명"
+  }
+]
+```
 
 ---
 
