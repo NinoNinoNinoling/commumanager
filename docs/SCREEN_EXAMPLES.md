@@ -11,7 +11,7 @@
 <details open>
 <summary>📸 화면 보기</summary>
 
-```svg
+
 <svg width="1000" height="700" xmlns="http://www.w3.org/2000/svg">
   <!-- 배경 -->
   <rect width="1000" height="700" fill="#f8f9fa"/>
@@ -99,7 +99,6 @@
   <rect x="900" y="268" width="70" height="24" rx="12" fill="#6c757d"/>
   <text x="935" y="285" font-family="Arial" font-size="11" fill="white" text-anchor="middle">총 1,247명</text>
 </svg>
-```
 
 </details>
 
@@ -110,7 +109,7 @@
 <details>
 <summary>📸 화면 보기</summary>
 
-```svg
+
 <svg width="1000" height="700" xmlns="http://www.w3.org/2000/svg">
   <!-- 배경 -->
   <rect width="1000" height="700" fill="#f8f9fa"/>
@@ -191,7 +190,6 @@
 
   <text x="540" y="415" font-family="Arial" font-size="11" fill="#adb5bd">생성일: 2025-01-15 | 관리자: 운영진A</text>
 </svg>
-```
 
 </details>
 
@@ -202,7 +200,7 @@
 <details>
 <summary>📸 화면 보기</summary>
 
-```svg
+
 <svg width="1000" height="700" xmlns="http://www.w3.org/2000/svg">
   <!-- 배경 -->
   <rect width="1000" height="700" fill="#f8f9fa"/>
@@ -293,7 +291,6 @@
   <line x1="700" y1="440" x2="950" y2="440" stroke="#dee2e6" stroke-width="1"/>
   <text x="700" y="460" font-family="Arial" font-size="11" fill="#adb5bd">수정: 2025-01-12 | 운영진B</text>
 </svg>
-```
 
 </details>
 

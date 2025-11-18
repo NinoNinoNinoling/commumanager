@@ -30,7 +30,6 @@ http://[서버주소]:5000/
 <details>
 <summary>📸 로그인 화면 예시 (클릭하여 보기)</summary>
 
-```svg
 <svg width="800" height="500" xmlns="http://www.w3.org/2000/svg">
   <!-- 배경 그라데이션 -->
   <defs>
@@ -60,7 +59,6 @@ http://[서버주소]:5000/
   <!-- 하단 텍스트 -->
   <text x="400" y="360" font-family="Arial" font-size="12" fill="#999" text-anchor="middle">Mastodon OAuth 2.0 인증</text>
 </svg>
-```
 
 </details>
 
@@ -89,7 +87,6 @@ http://[서버주소]:5000/
 <details>
 <summary>📸 대시보드 화면 예시 (클릭하여 보기)</summary>
 
-```svg
 <svg width="1000" height="600" xmlns="http://www.w3.org/2000/svg">
   <!-- 배경 -->
   <rect width="1000" height="600" fill="#f8f9fa"/>
@@ -144,7 +141,6 @@ http://[서버주소]:5000/
   <text x="680" y="380" font-family="Arial" font-size="13" fill="#495057" font-weight="600">재화 지급 비율</text>
   <text x="680" y="405" font-family="Arial" font-size="13" fill="#6c757d">답글 1개당 10원</text>
 </svg>
-```
 
 </details>
 
@@ -192,7 +188,6 @@ http://[서버주소]:5000/
 <details>
 <summary>📸 로그 뷰어 화면 예시 (클릭하여 보기)</summary>
 
-```svg
 <svg width="1000" height="700" xmlns="http://www.w3.org/2000/svg">
   <!-- 배경 -->
   <rect width="1000" height="700" fill="#f8f9fa"/>
@@ -270,7 +265,6 @@ http://[서버주소]:5000/
   <text x="440" y="540" font-family="Courier New" font-size="11" fill="#9cdcfe">-</text>
   <text x="560" y="540" font-family="Courier New" font-size="11" fill="#ce9178">activity_threshold 변경: 20 → 25</text>
 </svg>
-```
 
 </details>
 
