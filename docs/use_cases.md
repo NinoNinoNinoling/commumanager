@@ -5,28 +5,213 @@
 
 ---
 
-## UC-01: 신규 유저 등록
+## UC-01: 주기적 유저 동기화
 
 ### 액터
-- 봇 시스템
+- Celery beat (스케줄러)
 
 ### 전제조건
-- 유저가 마스토돈에 답글 작성
-- 해당 유저가 DB에 없음
+- PostgreSQL (마스토돈 DB) 접근 가능
+- SQLite (economy.db) 접근 가능
+- settings에 `user_sync_interval` 설정됨
 
 ### 기본 흐름
-1. 봇이 Streaming API로 답글 이벤트 수신
-2. 마스토돈 API에서 유저 정보 조회 (id, username, display_name)
-3. users 테이블에 INSERT
+1. **실행 시점**
+   - 새벽 4시 활동량 벌크 체크와 함께 자동 실행
+   - 관리자 웹에서 "수동 동기화" 버튼 클릭 시 실행
+
+2. **PostgreSQL에서 신규/업데이트 계정 조회**
    ```sql
-   INSERT INTO users (mastodon_id, username, display_name, role, balance)
-   VALUES ('115565546282398331', 'user1', '유저1', 'user', 0);
+   -- 마지막 동기화 이후 생성/수정된 계정
+   SELECT id, username, display_name, created_at, updated_at
+   FROM accounts
+   WHERE updated_at > :last_sync_time
+   ORDER BY updated_at;
    ```
-4. 로그 기록
+
+3. **SQLite와 비교 및 동기화**
+   ```python
+   for account in pg_accounts:
+       # SQLite에 존재하는지 확인
+       existing = sqlite.execute(
+           "SELECT mastodon_id FROM users WHERE mastodon_id = ?",
+           (account.id,)
+       ).fetchone()
+
+       if not existing:
+           # 신규 유저 생성
+           sqlite.execute("""
+               INSERT INTO users (mastodon_id, username, display_name, currency)
+               VALUES (?, ?, ?, 0)
+           """, (account.id, account.username, account.display_name))
+           logger.info(f"New user synced: {account.username}")
+       else:
+           # 기존 유저 정보 업데이트 (username, display_name 변경 대응)
+           sqlite.execute("""
+               UPDATE users
+               SET username = ?, display_name = ?, updated_at = CURRENT_TIMESTAMP
+               WHERE mastodon_id = ?
+           """, (account.username, account.display_name, account.id))
+   ```
+
+4. **마지막 동기화 시각 업데이트**
+   ```sql
+   UPDATE system_config
+   SET value = CURRENT_TIMESTAMP
+   WHERE key = 'last_user_sync_time';
+   ```
+
+5. **동기화 로그 기록**
+   ```python
+   logger.info(f"User sync completed: {new_count} new, {update_count} updated")
+   ```
+
+### 대안 흐름
+
+**2-1. PostgreSQL 연결 실패**
+- 재시도 (최대 3회)
+- 실패 시 에러 로그 + 관리자 알림
+- 다음 주기에 재시도
+
+**3-1. 유저 정보 업데이트**
+- username, display_name 변경 감지
+- SQLite에 반영하여 일관성 유지
+
+**백업: Lazy Creation**
+- 동기화 누락 대비
+- 답글 재화 지급 시 유저 없으면 즉시 생성
+- Redis 캐시로 중복 체크 최소화
+```python
+def ensure_user_exists(mastodon_id):
+    """백업: 동기화 누락 시 즉시 생성"""
+    if redis.exists(f"user:{mastodon_id}"):
+        return True
+
+    if not db_user_exists(mastodon_id):
+        # PostgreSQL에서 정보 조회 → SQLite 생성
+        create_user_from_pg(mastodon_id)
+        logger.warning(f"Lazy user creation: {mastodon_id}")
+
+    redis.set(f"user:{mastodon_id}", "1", ex=3600)
+    return True
+```
 
 ### 후행조건
-- users 테이블에 신규 유저 등록됨
-- balance = 0
+- 신규 유저가 economy.db에 등록됨
+- 기존 유저 정보가 최신 상태로 유지됨
+- last_user_sync_time 업데이트됨
+- 동기화 실패 시 로그 기록됨
+
+**참고**: UC-01B 팔로우 이벤트가 1순위 등록 방법이며, 이 주기적 동기화는 백업 용도
+
+---
+
+## UC-01B: 팔로우 이벤트 기반 유저 등록 (실시간, 1순위)
+
+### 액터
+- Streaming API 리스너 (봇)
+
+### 전제조건
+- 신규 유저가 어드민 계정 팔로우
+- Mastodon Streaming API 연결 활성화
+- SQLite (economy.db) 접근 가능
+
+### 기본 흐름
+1. **Streaming API로 팔로우 이벤트 수신**
+   ```python
+   @stream.notification()
+   def on_notification(notification):
+       if notification['type'] == 'follow':
+           handle_new_follower(notification)
+   ```
+
+2. **팔로우 대상 확인**
+   ```python
+   # 어드민 계정 팔로우인지 확인
+   admin_account_id = get_setting('admin_account_id')
+
+   if notification.account.id == admin_account_id:
+       # 어드민 팔로우 → 신규 유저 등록 처리
+       new_user = notification.account
+   ```
+
+3. **중복 체크**
+   ```sql
+   SELECT COUNT(*) FROM users
+   WHERE mastodon_id = '115565546282398331';
+   ```
+   - 결과 > 0 → 이미 등록됨 → 종료
+   - 결과 = 0 → 신규 유저 → 계속
+
+4. **신규 유저 등록**
+   ```sql
+   INSERT INTO users (mastodon_id, username, display_name, currency, created_at)
+   VALUES (
+       '115565546282398331',
+       'user1',
+       '유저1',
+       0,
+       CURRENT_TIMESTAMP
+   );
+   ```
+
+5. **Redis 캐시 갱신**
+   ```python
+   # 캐시에 유저 존재 표시 (lazy creation 백업용)
+   redis.set(f"user:{new_user.id}", "1", ex=3600)
+   ```
+
+6. **로그 기록**
+   ```python
+   logger.info(f"New user registered via follow: {new_user.username} ({new_user.id})")
+   ```
+
+7. **환영 메시지 발송 (선택)**
+   ```python
+   # 어드민 봇으로 환영 DM 발송
+   mastodon.status_post(
+       f"@{new_user.username} 환영합니다! 커뮤니티 가입을 환영해요 🎉",
+       visibility='direct',
+       in_reply_to_id=None
+   )
+   ```
+
+### 대안 흐름
+
+**2-1. 어드민 외 다른 계정 팔로우**
+- 무시 (유저 등록 안 함)
+- 어드민 팔로우만 신규 가입으로 간주
+
+**3-1. 이미 등록된 유저**
+- 중복 등록 방지
+- username/display_name 변경 감지 시 업데이트
+```sql
+UPDATE users
+SET username = ?, display_name = ?, updated_at = CURRENT_TIMESTAMP
+WHERE mastodon_id = ?;
+```
+
+**4-1. DB 저장 실패**
+- 에러 로그 기록
+- 재시도 큐에 등록
+- UC-01 주기적 동기화가 백업으로 처리
+
+**언팔로우 처리**
+- 유저가 언팔로우해도 DB에서 삭제 안 함
+- 계정은 유지 (재화, 인벤토리 보존)
+- is_active 플래그로 비활성화 (선택적)
+
+### 후행조건
+- 신규 유저가 economy.db에 즉시 등록됨
+- Redis 캐시에 유저 정보 저장됨
+- 환영 메시지 발송됨 (선택)
+- 답글 작성 시 재화 지급 가능한 상태
+
+**장점**:
+- ⚡ **실시간 등록**: 팔로우 즉시 DB 생성
+- 🎯 **정확성**: 가입 의사가 명확 (팔로우 = 참여)
+- 💪 **성능**: 이벤트 기반, 오버헤드 제로
+- 🔄 **UC-01 백업**: 주기적 동기화가 누락 방지
 
 ---
 

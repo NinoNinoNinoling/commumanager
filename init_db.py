@@ -273,6 +273,8 @@ def init_database(db_path='economy.db'):
         ('reward_reply_count', '1', '재화 지급 기준 답글 수'),
         ('timezone', 'Asia/Seoul', '타임존'),
         ('archive_warning_threshold', '3', '툿 아카이빙 경고 임계값 (N회 이상)'),
+        ('admin_account_id', '', '어드민 마스토돈 계정 ID (팔로우 감지용)'),
+        ('last_user_sync_time', '2025-01-01 00:00:00', '마지막 유저 동기화 시각 (새벽 4시 + 수동)'),
     ]
 
     cursor.executemany(
