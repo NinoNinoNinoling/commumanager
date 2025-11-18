@@ -936,6 +936,295 @@ INSERT INTO warning_templates (name, warning_type, template) VALUES
 
 ---
 
+## UC-14: 관리자 웹 - 수동 밴 (유저 차단)
+
+### 액터
+- 관리자
+
+### 전제조건
+- 관리자 웹에 로그인됨
+- 밴 대상 유저가 존재함
+- 밴 사유가 명확함
+
+### 기본 흐름
+1. 관리자가 "밴 관리" 메뉴 클릭
+2. "유저 밴 실행" 버튼 클릭
+3. 유저 검색 폼
+   - 검색 방식: username 또는 mastodon_id
+   - 또는 문제 유저 빠른 선택 (경고 3회 이상 유저 목록 등)
+4. 유저 선택 후 유저 정보 확인
+   ```
+   [선택된 유저]
+   username: user1
+   display_name: 유저1
+   경고 횟수: 3회
+   최근 경고: 2025-11-17 (대화 편중)
+   ```
+5. **증거물 자동 수집** (백그라운드)
+   ```python
+   # 경고 이력 조회
+   warnings_query = """
+   SELECT id, warning_type, message, timestamp, dm_sent
+   FROM warnings
+   WHERE user_id = ?
+   ORDER BY timestamp DESC
+   """
+
+   # 최신 소셜 통계 조회
+   stats_query = """
+   SELECT *
+   FROM user_stats
+   WHERE user_id = ?
+   ORDER BY analyzed_at DESC
+   LIMIT 1
+   """
+
+   # JSON 증거물 생성
+   evidence = {
+       "user_info": {
+           "username": username,
+           "mastodon_id": user_id,
+           "role": role,
+           "banned_at": datetime.now().isoformat()
+       },
+       "warning_history": warning_records,
+       "latest_stats": stats_record
+   }
+   ```
+6. 밴 실행 폼 입력
+   - 밴 사유: (필수) 텍스트 영역
+     - 예: "반복적인 대화 편중 경고 무시 (3회), 커뮤니티 참여 불성실"
+   - 자동 수집된 증거물 요약 표시
+     ```
+     [자동 수집된 증거물]
+     • 경고 이력: 3건
+       - 2025-11-15: 대화 편중 (편중률 80%)
+       - 2025-11-16: 활동량 미달 (15/20개)
+       - 2025-11-17: 대화 편중 (편중률 85%)
+     • 최근 통계 (2025-11-18 04:00)
+       - 대화 상대: 2명 (고립)
+       - 편중률: 80% (편중)
+       - 접속률: 42% (비활동)
+     ```
+7. "밴 실행" 버튼 클릭
+8. **확인 팝업**
+   ```
+   정말로 @user1 유저를 밴하시겠습니까?
+
+   사유: 반복적인 대화 편중 경고 무시 (3회), 커뮤니티 참여 불성실
+
+   • 이 작업은 취소할 수 없습니다 (언밴은 가능)
+   • 모든 증거물이 영구 보존됩니다
+
+   [취소] [밴 실행]
+   ```
+9. "밴 실행" 확인
+10. **트랜잭션 처리**
+    ```sql
+    BEGIN TRANSACTION;
+
+    -- 밴 기록
+    INSERT INTO ban_records
+    (user_id, banned_at, banned_by, reason, warning_count, evidence_snapshot, is_active)
+    VALUES
+    ('115565546282398331',
+     CURRENT_TIMESTAMP,
+     'admin_user',
+     '반복적인 대화 편중 경고 무시 (3회), 커뮤니티 참여 불성실',
+     3,
+     '{"user_info": {...}, "warning_history": [...], "latest_stats": {...}}',
+     1);
+
+    -- 관리 로그
+    INSERT INTO admin_logs
+    (admin_name, action_type, target_user, details)
+    VALUES
+    ('admin_user', 'ban_user', '115565546282398331',
+     '밴 사유: 반복적인 대화 편중 경고 무시 (3회)');
+
+    COMMIT;
+    ```
+11. **마스토돈에서 계정 차단** (선택 - 관리자 판단)
+    ```python
+    # 마스토돈 API 호출 (관리자 권한 필요)
+    mastodon.account_mute(account_id)  # 또는 account_block()
+    ```
+12. 성공 메시지 표시
+    ```
+    ✅ @user1 유저가 밴되었습니다.
+    • 밴 ID: 42
+    • 증거물이 영구 보존되었습니다.
+    • 밴 목록에서 확인할 수 있습니다.
+    ```
+
+### 대안 흐름
+
+**3-1. 경고 3회 이상 유저 빠른 선택**
+- 경고 횟수 ≥ 3회 유저 목록 표시
+- 클릭하면 자동으로 해당 유저 선택
+
+**11-1. 마스토돈 차단 실패**
+- DB에는 밴 기록 저장됨
+- 관리자에게 알림: "마스토돈 차단 실패, 수동 처리 필요"
+
+**11-2. 마스토돈 차단 안 함**
+- DB에만 기록 (경고 목적)
+- 실제 차단은 관리자가 수동으로 마스토돈에서 처리
+
+### 후행조건
+- ban_records 테이블에 밴 기록 추가
+- evidence_snapshot에 증거물 JSON 영구 저장
+- admin_logs에 관리 로그 추가
+- (선택) 마스토돈에서 계정 차단됨
+
+---
+
+## UC-15: 관리자 웹 - 밴 목록 및 언밴
+
+### 액터
+- 관리자
+
+### 전제조건
+- 관리자 웹에 로그인됨
+- ban_records 데이터가 존재함
+
+### 기본 흐름
+1. 관리자가 "밴 관리" → "밴 목록" 클릭
+2. 밴 유저 목록 조회
+   ```sql
+   SELECT
+       br.id,
+       br.user_id,
+       u.username,
+       br.banned_at,
+       br.banned_by,
+       br.reason,
+       br.warning_count,
+       br.is_active
+   FROM ban_records br
+   JOIN users u ON br.user_id = u.mastodon_id
+   WHERE br.is_active = 1
+   ORDER BY br.banned_at DESC;
+   ```
+3. 목록 표시
+   ```
+   [밴 유저 목록 (5명)]
+
+   • @user1
+     밴 일시: 2025-11-18 10:30
+     관리자: admin_user
+     사유: 반복적인 대화 편중 경고 무시 (3회)
+     경고 횟수: 3회
+     [증거물 보기] [언밴]
+
+   • @user2
+     밴 일시: 2025-11-17 15:20
+     관리자: admin_user2
+     사유: 커뮤니티 규칙 위반
+     경고 횟수: 5회
+     [증거물 보기] [언밴]
+   ```
+4. 필터 옵션
+   - 활성 밴 / 해제된 밴 (is_active)
+   - 날짜 범위
+   - 관리자별
+
+### 증거물 조회
+1. "증거물 보기" 버튼 클릭
+2. 모달 팝업에 JSON 포맷팅 표시
+   ```json
+   {
+     "user_info": {
+       "username": "user1",
+       "mastodon_id": "115565546282398331",
+       "role": "user",
+       "banned_at": "2025-11-18 10:30:00"
+     },
+     "warning_history": [
+       {
+         "id": 1,
+         "warning_type": "social_bias",
+         "message": "편중 경고",
+         "timestamp": "2025-11-15 04:00:00",
+         "dm_sent": 0
+       },
+       {
+         "id": 2,
+         "warning_type": "activity",
+         "message": "활동량 미달",
+         "timestamp": "2025-11-16 04:00:00",
+         "dm_sent": 0
+       },
+       {
+         "id": 3,
+         "warning_type": "social_bias",
+         "message": "편중 경고",
+         "timestamp": "2025-11-17 04:00:00",
+         "dm_sent": 0
+       }
+     ],
+     "latest_stats": {
+       "unique_partners": 2,
+       "total_replies": 25,
+       "top_partner_ratio": 0.8,
+       "active_days_7d": 3,
+       "login_rate": 0.42,
+       "is_isolated": 1,
+       "is_biased": 1,
+       "is_inactive": 1
+     }
+   }
+   ```
+3. 다운로드 버튼 (JSON 파일로 저장 가능)
+
+### 언밴 (밴 해제)
+1. "언밴" 버튼 클릭
+2. 언밴 폼 표시
+   - 언밴 사유: (필수) 텍스트 영역
+     - 예: "경고 기간 경과 후 태도 개선 확인, 재기회 부여"
+3. "언밴 실행" 버튼 클릭
+4. **확인 팝업**
+   ```
+   @user1 유저를 언밴하시겠습니까?
+
+   사유: 경고 기간 경과 후 태도 개선 확인, 재기회 부여
+
+   • 밴 기록은 영구 보존됩니다
+   • 유저는 정상 활동이 가능합니다
+
+   [취소] [언밴]
+   ```
+5. **트랜잭션 처리**
+   ```sql
+   BEGIN TRANSACTION;
+
+   -- 밴 해제
+   UPDATE ban_records
+   SET is_active = 0,
+       unbanned_at = CURRENT_TIMESTAMP,
+       unbanned_by = 'admin_user',
+       unban_reason = '경고 기간 경과 후 태도 개선 확인, 재기회 부여'
+   WHERE id = 42;
+
+   -- 관리 로그
+   INSERT INTO admin_logs
+   (admin_name, action_type, target_user, details)
+   VALUES
+   ('admin_user', 'unban_user', '115565546282398331',
+    '언밴 사유: 경고 기간 경과 후 태도 개선 확인');
+
+   COMMIT;
+   ```
+6. 성공 메시지: "언밴이 완료되었습니다"
+
+### 후행조건
+- ban_records.is_active = 0으로 변경
+- unbanned_at, unbanned_by, unban_reason 기록됨
+- admin_logs에 언밴 로그 추가
+- 밴 기록은 영구 보존됨 (삭제 안 됨)
+
+---
+
 ## 추가 검토 필요 사항
 
 ### 1. 연속 출석 계산 (UC-04)

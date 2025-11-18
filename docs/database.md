@@ -514,6 +514,76 @@ INSERT INTO warning_templates (name, warning_type, template) VALUES
 - `{top_partner}`: 최다 대화 상대
 - `{ratio}`: 최다 대화 비율 (%)
 
+### ban_records (밴 기록)
+```sql
+CREATE TABLE ban_records (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    banned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    banned_by TEXT NOT NULL,                  -- 관리자 username
+    reason TEXT NOT NULL,                     -- 밴 사유
+    warning_count INTEGER,                    -- 경고 횟수 (참고용)
+    evidence_snapshot TEXT,                   -- 증거물 JSON (경고 이력, 통계 등)
+    is_active BOOLEAN DEFAULT 1,              -- 활성화 여부
+    unbanned_at TIMESTAMP,
+    unbanned_by TEXT,
+    unban_reason TEXT,
+    FOREIGN KEY(user_id) REFERENCES users(mastodon_id)
+);
+CREATE INDEX idx_ban_records_user ON ban_records(user_id);
+CREATE INDEX idx_ban_records_active ON ban_records(is_active);
+```
+
+**evidence_snapshot 구조 (JSON):**
+```json
+{
+  "user_info": {
+    "username": "user1",
+    "mastodon_id": "115565546282398331",
+    "role": "user",
+    "banned_at": "2025-11-18 04:30:00"
+  },
+  "warning_history": [
+    {
+      "id": 1,
+      "warning_type": "social_bias",
+      "message": "편중 경고",
+      "timestamp": "2025-11-15 04:00:00",
+      "dm_sent": 0
+    },
+    {
+      "id": 2,
+      "warning_type": "activity",
+      "message": "활동량 미달",
+      "timestamp": "2025-11-16 04:00:00",
+      "dm_sent": 0
+    },
+    {
+      "id": 3,
+      "warning_type": "social_bias",
+      "message": "편중 경고",
+      "timestamp": "2025-11-17 04:00:00",
+      "dm_sent": 0
+    }
+  ],
+  "latest_stats": {
+    "unique_partners": 2,
+    "total_replies": 25,
+    "top_partner_ratio": 0.8,
+    "active_days_7d": 3,
+    "login_rate": 0.42,
+    "is_isolated": 1,
+    "is_biased": 1,
+    "is_inactive": 1
+  }
+}
+```
+
+**밴 운영 정책:**
+- 수동 밴 전용 (관리자 판단)
+- 밴 시 증거물 자동 저장 (경고 이력, 최근 통계)
+- 언밴 가능 (is_active=0 처리)
+
 ---
 
 ## 초기화
