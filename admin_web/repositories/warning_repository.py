@@ -85,3 +85,14 @@ class WarningRepository:
                 WHERE timestamp > datetime('now', '-7 days')
             """)
             return cursor.fetchone()[0]
+
+    @staticmethod
+    def count_since(since_datetime) -> int:
+        """특정 시간 이후의 경고 수 조회"""
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT COUNT(*) FROM warnings
+                WHERE timestamp > ?
+            """, (since_datetime.isoformat(),))
+            return cursor.fetchone()[0]

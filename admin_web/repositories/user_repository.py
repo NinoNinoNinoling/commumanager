@@ -125,3 +125,22 @@ class UserRepository:
                 return cursor.fetchone()[0]
         except Exception:
             return 0
+
+    @staticmethod
+    def count_all() -> int:
+        """전체 사용자 수 조회"""
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM users")
+            return cursor.fetchone()[0]
+
+    @staticmethod
+    def count_active_since(since_datetime) -> int:
+        """특정 시간 이후 활동한 사용자 수 조회"""
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT COUNT(*) FROM users
+                WHERE last_active > ?
+            """, (since_datetime.isoformat(),))
+            return cursor.fetchone()[0]

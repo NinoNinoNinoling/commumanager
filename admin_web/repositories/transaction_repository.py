@@ -72,3 +72,16 @@ class TransactionRepository:
             cursor.execute("SELECT SUM(total_spent) FROM users")
             result = cursor.fetchone()[0]
             return result or 0
+
+    @staticmethod
+    def find_by_user_id(mastodon_id: str, limit: int = 20) -> List[Transaction]:
+        """유저별 거래 내역 조회 (간단한 버전, 페이징 없음)"""
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT * FROM transactions
+                WHERE user_id = ?
+                ORDER BY timestamp DESC
+                LIMIT ?
+            """, (mastodon_id, limit))
+            return [Transaction(**dict(row)) for row in cursor.fetchall()]

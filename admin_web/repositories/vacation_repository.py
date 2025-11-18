@@ -89,3 +89,13 @@ class VacationRepository:
                 WHERE date('now') BETWEEN date(start_date) AND date(end_date)
             """)
             return cursor.fetchone()[0]
+
+    @staticmethod
+    def count_active_vacations() -> int:
+        """현재 휴가 중인 유저 수 (alias for count_active)"""
+        return VacationRepository.count_active()
+
+    @staticmethod
+    def is_user_on_vacation(mastodon_id: str) -> bool:
+        """휴가 중인지 확인 (alias for is_on_vacation)"""
+        return VacationRepository.is_on_vacation(mastodon_id)
