@@ -1,154 +1,127 @@
-"""
-User Repository
-유저 데이터베이스 접근을 담당
-"""
-import sqlite3
-from typing import Optional, List, Dict, Any
+"""User repository"""
+from typing import List, Optional
+from admin_web.models.user import User
+from admin_web.repositories.database import get_economy_db, get_mastodon_db
 
 
 class UserRepository:
-    """유저 데이터 접근 객체"""
+    """유저 데이터 저장소"""
 
-    def __init__(self, db_path: str):
-        """
-        Args:
-            db_path: SQLite 데이터베이스 경로
-        """
-        self.db_path = db_path
-
-    def _get_connection(self) -> sqlite3.Connection:
-        """데이터베이스 연결 반환"""
-        conn = sqlite3.connect(self.db_path)
-        conn.row_factory = sqlite3.Row
-        return conn
-
-    def get_user_by_mastodon_id(self, mastodon_id: str) -> Optional[Dict[str, Any]]:
-        """
-        마스토돈 ID로 유저 조회
-
-        Args:
-            mastodon_id: 마스토돈 유저 ID
-
-        Returns:
-            유저 정보 딕셔너리 또는 None
-        """
-        conn = self._get_connection()
-        try:
-            cursor = conn.execute(
-                "SELECT * FROM users WHERE mastodon_id = ?",
-                (mastodon_id,)
-            )
+    @staticmethod
+    def find_by_id(mastodon_id: str) -> Optional[User]:
+        """ID로 유저 조회"""
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT * FROM users WHERE mastodon_id = ?
+            """, (mastodon_id,))
             row = cursor.fetchone()
-            return dict(row) if row else None
-        finally:
-            conn.close()
+            if row:
+                return User(**dict(row))
+            return None
 
-    def get_user_by_id(self, user_id: int) -> Optional[Dict[str, Any]]:
-        """
-        내부 ID로 유저 조회
+    @staticmethod
+    def find_all(page: int = 1, limit: int = 50, search: str = None,
+                 role: str = None, sort: str = 'created_desc') -> tuple[List[User], int]:
+        """유저 목록 조회"""
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
 
-        Args:
-            user_id: 내부 유저 ID
+            # WHERE 조건
+            conditions = []
+            params = []
 
-        Returns:
-            유저 정보 딕셔너리 또는 None
-        """
-        conn = self._get_connection()
-        try:
-            cursor = conn.execute(
-                "SELECT * FROM users WHERE id = ?",
-                (user_id,)
-            )
-            row = cursor.fetchone()
-            return dict(row) if row else None
-        finally:
-            conn.close()
+            if search:
+                conditions.append("(username LIKE ? OR display_name LIKE ?)")
+                params.extend([f"%{search}%", f"%{search}%"])
 
-    def create_user(self, mastodon_id: str, username: str, display_name: str,
-                   is_admin: bool = False) -> int:
-        """
-        새 유저 생성
+            if role:
+                conditions.append("role = ?")
+                params.append(role)
 
-        Args:
-            mastodon_id: 마스토돈 유저 ID
-            username: 유저명
-            display_name: 표시 이름
-            is_admin: 관리자 여부
+            where_clause = " AND ".join(conditions) if conditions else "1=1"
 
-        Returns:
-            생성된 유저의 ID
-        """
-        conn = self._get_connection()
-        try:
-            cursor = conn.execute(
-                """
-                INSERT INTO users (mastodon_id, username, display_name, is_admin, currency)
-                VALUES (?, ?, ?, ?, 0)
-                """,
-                (mastodon_id, username, display_name, is_admin)
-            )
+            # 정렬
+            sort_map = {
+                'balance_desc': 'balance DESC',
+                'balance_asc': 'balance ASC',
+                'created_desc': 'created_at DESC',
+                'created_asc': 'created_at ASC',
+            }
+            order_by = sort_map.get(sort, 'created_at DESC')
+
+            # 전체 개수
+            cursor.execute(f"SELECT COUNT(*) FROM users WHERE {where_clause}", params)
+            total = cursor.fetchone()[0]
+
+            # 페이징
+            offset = (page - 1) * limit
+            cursor.execute(f"""
+                SELECT * FROM users
+                WHERE {where_clause}
+                ORDER BY {order_by}
+                LIMIT ? OFFSET ?
+            """, params + [limit, offset])
+
+            users = [User(**dict(row)) for row in cursor.fetchall()]
+            return users, total
+
+    @staticmethod
+    def create(user: User) -> User:
+        """유저 생성"""
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO users (mastodon_id, username, display_name, role, dormitory)
+                VALUES (?, ?, ?, ?, ?)
+            """, (user.mastodon_id, user.username, user.display_name, user.role, user.dormitory))
             conn.commit()
-            return cursor.lastrowid
-        finally:
-            conn.close()
+            return UserRepository.find_by_id(user.mastodon_id)
 
-    def update_user_currency(self, user_id: int, amount: int) -> bool:
-        """
-        유저 재화 업데이트
-
-        Args:
-            user_id: 유저 ID
-            amount: 변경할 재화량
-
-        Returns:
-            성공 여부
-        """
-        conn = self._get_connection()
-        try:
-            conn.execute(
-                "UPDATE users SET currency = currency + ? WHERE id = ?",
-                (amount, user_id)
-            )
+    @staticmethod
+    def update_role(mastodon_id: str, role: str) -> bool:
+        """역할 변경"""
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                UPDATE users SET role = ? WHERE mastodon_id = ?
+            """, (role, mastodon_id))
             conn.commit()
-            return True
+            return cursor.rowcount > 0
+
+    @staticmethod
+    def update_balance(mastodon_id: str, amount: int) -> bool:
+        """재화 조정"""
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+            if amount > 0:
+                cursor.execute("""
+                    UPDATE users
+                    SET balance = balance + ?, total_earned = total_earned + ?
+                    WHERE mastodon_id = ?
+                """, (amount, amount, mastodon_id))
+            else:
+                cursor.execute("""
+                    UPDATE users
+                    SET balance = balance + ?, total_spent = total_spent + ?
+                    WHERE mastodon_id = ?
+                """, (amount, abs(amount), mastodon_id))
+            conn.commit()
+            return cursor.rowcount > 0
+
+    @staticmethod
+    def get_activity_48h(mastodon_id: str) -> int:
+        """48시간 답글 수 조회 (PostgreSQL)"""
+        try:
+            with get_mastodon_db() as conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT COUNT(*)
+                    FROM statuses
+                    WHERE account_id = %s
+                    AND in_reply_to_id IS NOT NULL
+                    AND created_at > NOW() - INTERVAL '48 hours'
+                """, (mastodon_id,))
+                return cursor.fetchone()[0]
         except Exception:
-            return False
-        finally:
-            conn.close()
-
-    def get_all_users(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
-        """
-        모든 유저 조회 (페이지네이션)
-
-        Args:
-            limit: 최대 결과 수
-            offset: 건너뛸 결과 수
-
-        Returns:
-            유저 정보 리스트
-        """
-        conn = self._get_connection()
-        try:
-            cursor = conn.execute(
-                "SELECT * FROM users ORDER BY id DESC LIMIT ? OFFSET ?",
-                (limit, offset)
-            )
-            rows = cursor.fetchall()
-            return [dict(row) for row in rows]
-        finally:
-            conn.close()
-
-    def get_user_count(self) -> int:
-        """
-        전체 유저 수 조회
-
-        Returns:
-            유저 수
-        """
-        conn = self._get_connection()
-        try:
-            cursor = conn.execute("SELECT COUNT(*) as count FROM users")
-            row = cursor.fetchone()
-            return row['count'] if row else 0
-        finally:
-            conn.close()
+            return 0

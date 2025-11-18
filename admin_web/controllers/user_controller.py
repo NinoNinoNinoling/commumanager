@@ -1,179 +1,155 @@
-"""
-User Controller
-유저 관련 HTTP 요청/응답을 처리
-"""
-from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for
-from functools import wraps
+"""User controller"""
+from flask import request, jsonify
 from admin_web.services.user_service import UserService
-from admin_web.config import Config
-
-# Blueprint 생성
-user_bp = Blueprint('user', __name__, url_prefix='/users')
-
-# Service 인스턴스 (app context에서 초기화 필요)
-user_service = None
+from admin_web.repositories.transaction_repository import TransactionRepository
 
 
-def init_user_controller(app):
-    """
-    컨트롤러 초기화 (app factory에서 호출)
+class UserController:
+    """유저 API 컨트롤러"""
 
-    Args:
-        app: Flask app 인스턴스
-    """
-    global user_service
-    db_path = app.config.get('DATABASE_PATH', 'economy.db')
-    user_service = UserService(db_path)
+    def __init__(self):
+        self.user_service = UserService()
+        self.transaction_repo = TransactionRepository()
 
+    def get_users(self):
+        """유저 목록 조회 API"""
+        try:
+            page = int(request.args.get('page', 1))
+            limit = int(request.args.get('limit', 50))
+            search = request.args.get('search')
+            role = request.args.get('role')
+            sort = request.args.get('sort', 'created_desc')
 
-def login_required(f):
-    """로그인 필수 데코레이터"""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            return redirect(url_for('auth.login'))
-        return f(*args, **kwargs)
-    return decorated_function
+            result = self.user_service.get_users(page, limit, search, role, sort)
+            return jsonify(result), 200
+        except Exception as e:
+            return jsonify({
+                'error': {
+                    'code': 'INTERNAL_ERROR',
+                    'message': str(e)
+                }
+            }), 500
 
+    def get_user(self, mastodon_id):
+        """유저 상세 조회 API"""
+        try:
+            user_detail = self.user_service.get_user_detail(mastodon_id)
+            if not user_detail:
+                return jsonify({
+                    'error': {
+                        'code': 'NOT_FOUND',
+                        'message': 'User not found'
+                    }
+                }), 404
 
-def admin_required(f):
-    """관리자 권한 필수 데코레이터"""
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            return redirect(url_for('auth.login'))
+            return jsonify(user_detail), 200
+        except Exception as e:
+            return jsonify({
+                'error': {
+                    'code': 'INTERNAL_ERROR',
+                    'message': str(e)
+                }
+            }), 500
 
-        user_id = session['user_id']
-        if not user_service.is_admin(user_id):
-            return jsonify({'error': '관리자 권한이 필요합니다'}), 403
+    def update_role(self, mastodon_id):
+        """역할 변경 API"""
+        try:
+            data = request.get_json()
+            new_role = data.get('role')
 
-        return f(*args, **kwargs)
-    return decorated_function
+            if not new_role:
+                return jsonify({
+                    'error': {
+                        'code': 'INVALID_REQUEST',
+                        'message': 'role is required'
+                    }
+                }), 400
 
+            success = self.user_service.change_role(mastodon_id, new_role)
+            if success:
+                return jsonify({'message': 'Role updated'}), 200
+            else:
+                return jsonify({
+                    'error': {
+                        'code': 'NOT_FOUND',
+                        'message': 'User not found'
+                    }
+                }), 404
+        except ValueError as e:
+            return jsonify({
+                'error': {
+                    'code': 'INVALID_REQUEST',
+                    'message': str(e)
+                }
+            }), 400
+        except Exception as e:
+            return jsonify({
+                'error': {
+                    'code': 'INTERNAL_ERROR',
+                    'message': str(e)
+                }
+            }), 500
 
-@user_bp.route('/', methods=['GET'])
-@admin_required
-def list_users():
-    """
-    유저 목록 조회 (페이지네이션)
-    GET /users?page=1&per_page=20
-    """
-    try:
-        page = request.args.get('page', 1, type=int)
-        per_page = request.args.get('per_page', 20, type=int)
+    def adjust_balance(self):
+        """재화 조정 API"""
+        try:
+            data = request.get_json()
+            mastodon_id = data.get('user_id')
+            amount = data.get('amount')
+            description = data.get('description', '')
+            admin_name = data.get('admin_name')
 
-        # 페이지 번호 유효성 검사
-        if page < 1:
-            page = 1
-        if per_page < 1 or per_page > 100:
-            per_page = 20
+            if not mastodon_id or amount is None:
+                return jsonify({
+                    'error': {
+                        'code': 'INVALID_REQUEST',
+                        'message': 'user_id and amount are required'
+                    }
+                }), 400
 
-        # 서비스 호출
-        result = user_service.get_users_paginated(page=page, per_page=per_page)
+            success = self.user_service.adjust_balance(mastodon_id, amount, description, admin_name)
+            if success:
+                return jsonify({'message': 'Balance adjusted'}), 200
+            else:
+                return jsonify({
+                    'error': {
+                        'code': 'NOT_FOUND',
+                        'message': 'User not found'
+                    }
+                }), 404
+        except Exception as e:
+            return jsonify({
+                'error': {
+                    'code': 'INTERNAL_ERROR',
+                    'message': str(e)
+                }
+            }), 500
 
-        # HTML 렌더링 또는 JSON 반환
-        if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
-            return jsonify(result)
+    def get_transactions(self, mastodon_id):
+        """유저별 거래 내역 조회 API"""
+        try:
+            page = int(request.args.get('page', 1))
+            limit = int(request.args.get('limit', 50))
+            transaction_type = request.args.get('type')
 
-        return render_template('users/list.html', **result)
+            transactions, total = self.transaction_repo.find_by_user(
+                mastodon_id, page, limit, transaction_type
+            )
+            total_pages = (total + limit - 1) // limit
 
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@user_bp.route('/<int:user_id>', methods=['GET'])
-@admin_required
-def get_user(user_id: int):
-    """
-    특정 유저 정보 조회
-    GET /users/<user_id>
-    """
-    try:
-        user = user_service.get_user_info(user_id)
-
-        if not user:
-            return jsonify({'error': '유저를 찾을 수 없습니다'}), 404
-
-        # HTML 렌더링 또는 JSON 반환
-        if request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html:
-            return jsonify(user)
-
-        return render_template('users/detail.html', user=user)
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@user_bp.route('/<int:user_id>/currency', methods=['POST'])
-@admin_required
-def adjust_currency(user_id: int):
-    """
-    유저 재화 조정 (관리자 전용)
-    POST /users/<user_id>/currency
-    Body: {
-        "amount": int,
-        "reason": str
-    }
-    """
-    try:
-        data = request.get_json()
-        amount = data.get('amount')
-        reason = data.get('reason', '관리자 수동 조정')
-
-        # 입력 검증
-        if amount is None:
-            return jsonify({'error': 'amount 필드가 필요합니다'}), 400
-
-        if not isinstance(amount, int):
-            return jsonify({'error': 'amount는 정수여야 합니다'}), 400
-
-        # 서비스 호출
-        success = user_service.adjust_user_currency(user_id, amount, reason)
-
-        if not success:
-            return jsonify({'error': '재화 조정에 실패했습니다 (잔액 부족 또는 유저 없음)'}), 400
-
-        # 업데이트된 유저 정보 반환
-        user = user_service.get_user_info(user_id)
-        return jsonify({
-            'success': True,
-            'user': user
-        })
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@user_bp.route('/stats', methods=['GET'])
-@admin_required
-def get_statistics():
-    """
-    유저 통계 조회 (대시보드용)
-    GET /users/stats
-    """
-    try:
-        stats = user_service.get_user_statistics()
-        return jsonify(stats)
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-
-@user_bp.route('/me', methods=['GET'])
-@login_required
-def get_current_user():
-    """
-    현재 로그인한 유저 정보 조회
-    GET /users/me
-    """
-    try:
-        user_id = session['user_id']
-        user = user_service.get_user_info(user_id)
-
-        if not user:
-            return jsonify({'error': '유저를 찾을 수 없습니다'}), 404
-
-        return jsonify(user)
-
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+            return jsonify({
+                'transactions': [t.to_dict() for t in transactions],
+                'pagination': {
+                    'page': page,
+                    'limit': limit,
+                    'total': total,
+                    'total_pages': total_pages,
+                }
+            }), 200
+        except Exception as e:
+            return jsonify({
+                'error': {
+                    'code': 'INTERNAL_ERROR',
+                    'message': str(e)
+                }
+            }), 500

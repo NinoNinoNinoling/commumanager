@@ -20,16 +20,10 @@ app.config.from_object(config[os.getenv('FLASK_ENV', 'default')])
 # Blueprint 등록
 # ============================================================================
 
-from admin_web.routes.auth import auth_bp, init_auth_routes
-from admin_web.routes.main import main_bp, init_main_routes
+from admin_web.routes.api import api_bp
 
-# Blueprint 초기화
-init_auth_routes(app)
-init_main_routes(app)
-
-# Blueprint 등록
-app.register_blueprint(auth_bp)
-app.register_blueprint(main_bp)
+# API Blueprint 등록
+app.register_blueprint(api_bp)
 
 
 # ============================================================================
@@ -39,14 +33,14 @@ app.register_blueprint(main_bp)
 @app.errorhandler(404)
 def not_found(error):
     """404 오류 핸들러"""
-    return render_template('errors/404.html'), 404
+    return {'error': {'code': 'NOT_FOUND', 'message': 'Not found'}}, 404
 
 
 @app.errorhandler(500)
 def internal_error(error):
     """500 오류 핸들러"""
     app.logger.error(f"서버 오류: {error}")
-    return render_template('errors/500.html'), 500
+    return {'error': {'code': 'INTERNAL_ERROR', 'message': 'Internal server error'}}, 500
 
 
 # ============================================================================
@@ -66,7 +60,7 @@ if __name__ == '__main__':
     print("=" * 60)
     print(f"환경: {app.config['DEBUG'] and 'development' or 'production'}")
     print(f"DB: {db_path}")
-    print(f"마스토돈: {app.config['MASTODON_INSTANCE_URL']}")
+    print(f"API: /api/v1")
     print(f"아키텍처: Model-Repository-Service-Controller-Route")
     print("=" * 60)
 
