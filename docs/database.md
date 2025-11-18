@@ -440,6 +440,49 @@ GROUP BY u.id, u.username;
 0 6 * * 0 find /backups -name "*.db" -mtime +60 -delete
 ```
 
+### user_stats (소셜 분석 통계)
+```sql
+CREATE TABLE user_stats (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    analyzed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    -- 대화 상대 분석 (48시간)
+    unique_conversation_partners INTEGER DEFAULT 0,  -- 대화한 서로 다른 계정 수
+    total_replies_sent INTEGER DEFAULT 0,             -- 보낸 답글 수
+    top_partner_id TEXT,                              -- 가장 많이 대화한 계정 ID
+    top_partner_username TEXT,                        -- 최다 대화 상대 username
+    top_partner_count INTEGER DEFAULT 0,              -- 최다 상대와의 대화 횟수
+    top_partner_ratio REAL DEFAULT 0.0,               -- 최다 대화 상대 비율 (0.0~1.0)
+
+    -- 접속률 분석 (7일)
+    active_days_7d INTEGER DEFAULT 0,                 -- 7일 중 활동한 날 수
+    login_rate_7d REAL DEFAULT 0.0,                   -- 접속률 (0.0~1.0)
+
+    -- 문제 지표
+    is_isolated BOOLEAN DEFAULT 0,                    -- 고립: 대화 상대 < 3명
+    is_inactive BOOLEAN DEFAULT 0,                    -- 비활동: 접속률 < 50%
+    is_biased BOOLEAN DEFAULT 0,                      -- 편중: 특정 1명과 > 70% 대화
+
+    FOREIGN KEY(user_id) REFERENCES users(mastodon_id)
+);
+CREATE INDEX idx_user_stats_user ON user_stats(user_id, analyzed_at DESC);
+CREATE INDEX idx_user_stats_isolated ON user_stats(is_isolated);
+CREATE INDEX idx_user_stats_biased ON user_stats(is_biased);
+```
+
+**분석 기준:**
+- **고립 (is_isolated)**: 48시간 내 대화 상대 < 3명
+- **비활동 (is_inactive)**: 7일 접속률 < 50%
+- **편중 (is_biased)**: 특정 1명과의 대화 > 70%
+
+**활용:**
+- 새벽 4시 벌크 분석 시 자동 계산
+- 관리자 웹에서 문제 유저 목록 조회
+- 편중 유저에게 자동 경고 발송 가능
+
+---
+
 ## 초기화
 ```bash
 python3 init_db.py

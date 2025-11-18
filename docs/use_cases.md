@@ -554,6 +554,222 @@
 
 ---
 
+---
+
+## UC-10: 소셜 분석 - 편중/고립 유저 탐지 (새벽 4시)
+
+### 액터
+- Celery 스케줄러
+- 관리자 봇 (경고 발송)
+
+### 전제조건
+- 현재 시각: 새벽 4시 (Asia/Seoul)
+- PostgreSQL 연결 가능
+- settings에 분석 기준 설정되어 있음
+
+### 기본 흐름
+
+#### 1. 대화 상대 분석 (PostgreSQL)
+```sql
+-- 유저별 48시간 내 대화 패턴 분석
+WITH user_conversations AS (
+    SELECT
+        s.account_id as user_id,
+        s.in_reply_to_account_id as partner_id,
+        COUNT(*) as reply_count
+    FROM statuses s
+    WHERE s.in_reply_to_id IS NOT NULL
+      AND s.created_at > NOW() - INTERVAL '48 hours'
+    GROUP BY s.account_id, s.in_reply_to_account_id
+),
+user_totals AS (
+    SELECT
+        account_id as user_id,
+        COUNT(DISTINCT in_reply_to_account_id) as unique_partners,
+        COUNT(*) as total_replies
+    FROM statuses
+    WHERE in_reply_to_id IS NOT NULL
+      AND created_at > NOW() - INTERVAL '48 hours'
+    GROUP BY account_id
+),
+top_partners AS (
+    SELECT DISTINCT ON (user_id)
+        user_id,
+        partner_id as top_partner_id,
+        reply_count as top_partner_count
+    FROM user_conversations
+    ORDER BY user_id, reply_count DESC
+)
+SELECT
+    t.user_id,
+    t.unique_partners,
+    t.total_replies,
+    tp.top_partner_id,
+    tp.top_partner_count,
+    ROUND(tp.top_partner_count::REAL / t.total_replies, 2) as top_partner_ratio
+FROM user_totals t
+LEFT JOIN top_partners tp ON t.user_id = tp.user_id;
+```
+
+#### 2. 접속률 분석 (PostgreSQL)
+```sql
+SELECT
+    account_id as user_id,
+    COUNT(DISTINCT DATE(created_at)) as active_days
+FROM statuses
+WHERE created_at > NOW() - INTERVAL '7 days'
+GROUP BY account_id;
+```
+
+#### 3. 마스토돈 username 조회
+```sql
+SELECT id, username FROM accounts WHERE id IN (...);
+```
+
+#### 4. SQLite에 통계 저장
+```sql
+INSERT INTO user_stats
+(user_id, analyzed_at, unique_conversation_partners, total_replies_sent,
+ top_partner_id, top_partner_username, top_partner_count, top_partner_ratio,
+ active_days_7d, login_rate_7d, is_isolated, is_inactive, is_biased)
+VALUES
+('115565546282398331', CURRENT_TIMESTAMP, 2, 25,
+ '115565546282398332', 'user2', 20, 0.80,
+ 6, 0.86, 1, 0, 1);
+```
+
+#### 5. 문제 유저 판정
+```python
+is_isolated = unique_partners < 3
+is_inactive = login_rate_7d < 0.5
+is_biased = top_partner_ratio > 0.7
+```
+
+#### 6. 경고 발송 (편중 유저)
+```sql
+-- 경고 기록
+INSERT INTO warnings
+(user_id, warning_type, message, dm_sent, admin_name)
+VALUES
+('115565546282398331', 'social_bias',
+ '특정 계정과의 대화 편중 (80%)', 1, 'system');
+```
+
+```python
+# DM 발송
+mastodon.status_post(
+    f"""@{username} 커뮤니티 참여 안내
+
+최근 48시간 대화 분석 결과:
+- 전체 답글: {total_replies}개
+- 대화 상대: {unique_partners}명
+- @{top_partner_username}와의 대화: {top_partner_count}개 ({int(top_partner_ratio*100)}%)
+
+⚠️ 특정 계정과의 대화가 70% 이상입니다.
+다양한 커뮤니티 멤버와 소통해보세요!""",
+    visibility="direct"
+)
+```
+
+### 대안 흐름
+
+**1-1. PostgreSQL 연결 실패**
+- 재시도 (최대 3회)
+- 실패 시 관리자에게 알림
+- 다음 날까지 대기
+
+**5-1. 전역 휴식기간**
+- 분석은 실행하되 경고 발송 안 함
+- user_stats에는 저장 (히스토리 유지)
+
+**6-1. 복합 문제 (고립 + 편중)**
+- is_isolated=1, is_biased=1
+- DM 메시지 조정: "대화 상대가 적고, 특정 계정과만 대화 중"
+
+**6-2. DM 발송 실패**
+- warnings.dm_sent = 0
+- 재시도 큐에 등록
+
+### 후행조건
+- user_stats 테이블에 금일 분석 결과 저장
+- 편중 유저에게 경고 DM 발송됨
+- warnings 테이블에 경고 기록 추가
+- 관리자 웹에서 문제 유저 목록 조회 가능
+
+---
+
+## UC-11: 관리자 웹 - 편중 유저 목록 조회
+
+### 액터
+- 관리자
+
+### 전제조건
+- 관리자 웹에 로그인됨
+- user_stats 데이터가 존재함
+
+### 기본 흐름
+1. 관리자가 "커뮤니티 건강도" 메뉴 클릭
+2. 대시보드에 요약 표시
+   ```
+   ┌─────────────────────────────┐
+   │ 커뮤니티 건강도             │
+   ├─────────────────────────────┤
+   │ 🔴 대화 편중 유저: 3명      │
+   │ 🟡 고립 위험 유저: 5명      │
+   │ 🟢 건강한 유저: 42명        │
+   └─────────────────────────────┘
+   ```
+3. "대화 편중 유저" 클릭
+4. 편중 유저 목록 조회 (최근 분석 결과)
+   ```sql
+   SELECT
+       us.user_id,
+       u.username,
+       us.unique_conversation_partners,
+       us.top_partner_username,
+       us.top_partner_ratio,
+       us.analyzed_at
+   FROM user_stats us
+   JOIN users u ON us.user_id = u.mastodon_id
+   WHERE us.is_biased = 1
+     AND DATE(us.analyzed_at) = DATE('now', 'localtime')
+   ORDER BY us.top_partner_ratio DESC;
+   ```
+5. 목록 표시
+   ```
+   [대화 편중 유저 (3명)]
+
+   @user1  대화 상대: 2명 | @user2와 80% (20/25개)
+   @user3  대화 상대: 1명 | @user4와 100% (15/15개) ⚠️
+   @user5  대화 상대: 3명 | @user6와 75% (30/40개)
+   ```
+6. 특정 유저 클릭 → 상세 페이지
+   ```
+   [user1 상세]
+
+   소셜 통계 (최근 48시간)
+   - 대화 상대: 2명
+   - 총 답글: 25개
+   - 최다 대화: @user2 (20회, 80%) ⚠️
+
+   접속 패턴 (최근 7일)
+   - 활동 일수: 6일
+   - 접속률: 85.7%
+
+   경고 이력
+   - 2025-11-18 04:00 대화 편중 경고 발송
+   ```
+
+### 대안 흐름
+**4-1. 편중 유저 없음**
+- 메시지: "현재 대화 편중 유저가 없습니다 ✅"
+
+### 후행조건
+- 관리자가 문제 유저 현황 파악
+- 필요 시 수동 조치 가능 (휴식 등록, 재화 조정 등)
+
+---
+
 ## 추가 검토 필요 사항
 
 ### 1. 연속 출석 계산 (UC-04)
