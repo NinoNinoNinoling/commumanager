@@ -2,17 +2,53 @@
 
 휘핑 에디션 마스토돈용 활동량 기반 자동 운영 관리 시스템
 
+## 📊 현재 상태 (2025-11-18)
+
+> ⚠️ **중요**: 이 프로젝트는 현재 **부분 완료** 상태입니다.
+
+### ✅ 완료 (67%)
+- **Admin Web** - 100% 구현 완료 (2,192줄)
+  - Flask 5-layer 아키텍처
+  - Mastodon OAuth 인증
+  - 대시보드, 사용자/경고/휴가/이벤트/상점 관리
+- **Database** - 스키마 완료 (init_db.py)
+- **Testing Tools** - API 테스트, 데이터 생성 스크립트
+- **Documentation** - 11개 문서 파일
+
+### ❌ 미구현 (33%)
+- **Mastodon Bot** - 0% (모든 파일 0바이트)
+  - 재화 지급, 출석 체크, 활동량 감시
+  - 사용자/관리자 명령어
+  - 자동 포스트 스케줄링
+- **Tests** - Unit/Integration/E2E 테스트 없음
+- **Deployment** - Docker, systemd 미설정
+
+**다음 단계**: docs/로드맵.md의 "당장 할일" 참고
+
+---
+
 ## 개요
 
-마스토돈 커뮤니티를 위한 활동량 기반 자동 관리 봇. 답글 감지로 재화를 지급하고, 활동량을 체크하여 경고를 발송합니다.
+마스토돈 커뮤니티를 위한 활동량 기반 자동 관리 시스템. Admin Web으로 사용자를 관리하고, Bot(미구현)으로 자동화된 운영을 수행합니다.
 
 ## 핵심 기능
+
+### ✅ Admin Web (구현 완료)
+1. **사용자 관리** - 목록, 상세, 재화 조정
+2. **경고 관리** - 경고 발송, 내역 조회
+3. **휴가 관리** - 신청, 승인/거부
+4. **일정 관리** - 이벤트, 전역 휴식기간
+5. **상점 관리** - 아이템 CRUD
+6. **설정 관리** - 시스템 설정
+7. **관리자 로그** - 모든 액션 기록
+
+### ❌ Mastodon Bot (미구현 - Phase 2)
 1. 재화 지급 (하루 2회 정산, 오전 4시/오후 4시)
 2. 출석 체크 (매일 오전 10시, 자정까지 출석 가능)
 3. 활동량 체크 (소셜 분석, 경고 발송)
-4. 휴식 관리 (활동량 체크 제외)
-5. 일정 관리 (이벤트, 전역 휴식기간)
-6. 상점 시스템 (아이템 구매)
+4. 사용자 명령어 (`@봇 내재화`, `@봇 상점`, `@봇 도움말` 등)
+5. 관리자 명령어 (재화 지급/차감, 시스템 상태)
+6. 자동 포스트 스케줄링
 
 ## 기술 스택
 - 마스토돈: Ruby 3.2.2 (휘핑 에디션)
@@ -38,23 +74,25 @@ commumanager/
 │   ├── templates/         # Jinja2 템플릿
 │   └── utils/             # 유틸리티 함수
 │
-├── bot/                   # 관리 봇 시스템 (4개 계정)
-│   ├── admin_bot.py       # 총괄계정 (팔로우 등록, 공지)
-│   ├── story_bot.py       # 스토리계정 (콘텐츠 발행)
-│   ├── system_bot.py      # 시스템계정 (재화, 출석, 명령어)
-│   ├── supervisor_bot.py  # 감독봇 (분석, 경고, 알림)
-│   ├── database.py        # 데이터베이스 유틸
-│   └── utils.py           # 봇 유틸리티
+├── bot/                   # Mastodon 봇 시스템 ❌ 미구현 (Phase 2 대기 중)
+│   ├── reward_bot.py      # 메인 봇 (재화, 출석, 명령어) - 0 bytes
+│   ├── activity_checker.py # 활동량 체크 시스템 - 0 bytes
+│   ├── command_handler.py # 사용자 명령어 처리 - 0 bytes
+│   ├── database.py        # DB 헬퍼 - 0 bytes
+│   └── utils.py           # 유틸리티 - 0 bytes
 │
-├── docs/                  # 프로젝트 문서
-│   ├── project_overview.md
-│   ├── bot_architecture.md
-│   ├── features.md
-│   ├── use_cases.md
-│   ├── database.md
-│   ├── admin_oauth.md
-│   ├── server_setup.md
-│   └── 로드맵.md
+├── docs/                  # 프로젝트 문서 (11개)
+│   ├── 로드맵.md           # 개발 로드맵 (당장 할일 포함)
+│   ├── bot_architecture.md # Bot 구조 (계획)
+│   ├── features.md        # 기능 목록 (Admin Web ✅, Bot ❌)
+│   ├── use_cases.md       # 유스케이스
+│   ├── database.md        # DB 설계 및 ERD
+│   ├── admin_oauth.md     # Mastodon OAuth
+│   ├── api_design.md      # REST API 설계
+│   ├── server_setup.md    # 서버 구축 가이드
+│   ├── ADMIN_GUIDE.md     # 관리자 가이드
+│   ├── EMERGENCY.md       # 긴급 대응 매뉴얼
+│   └── SCREEN_EXAMPLES.md # UI 예시
 │
 ├── .env.example           # 환경 변수 예시
 ├── .gitignore             # Git 제외 파일 목록
@@ -104,19 +142,24 @@ python app.py
 
 ## 문서
 
-### 개요
-- [프로젝트 개요](docs/project_overview.md)
-- [봇 구조](docs/bot_architecture.md) - 4개 계정 구조
-- [기능 목록](docs/features.md)
-- [유즈케이스](docs/use_cases.md)
+### 시작하기
+- **[개발 로드맵](docs/로드맵.md)** - 당장 할일, 진행 상황 ⭐
+- [서버 구축](docs/server_setup.md) - 서버 설치 가이드
 
-### 기술
-- [데이터베이스 설계](docs/database.md)
-- [관리자 OAuth](docs/admin_oauth.md)
-- [서버 구축](docs/server_setup.md)
+### 기능 및 설계
+- [기능 목록](docs/features.md) - Admin Web ✅, Bot ❌
+- [봇 구조](docs/bot_architecture.md) - Bot 계획 (미구현)
+- [유즈케이스](docs/use_cases.md) - 상세 시나리오
+- [데이터베이스 설계](docs/database.md) - ERD, 테이블 구조
+- [API 설계](docs/api_design.md) - REST API 스펙
 
-### 개발
-- [개발 로드맵](docs/로드맵.md)
+### 운영 가이드
+- [관리자 가이드](docs/ADMIN_GUIDE.md) - Admin Web 사용법
+- [긴급 대응](docs/EMERGENCY.md) - 장애 대응 매뉴얼
+- [OAuth 설정](docs/admin_oauth.md) - Mastodon OAuth
+
+### UI
+- [화면 예시](docs/SCREEN_EXAMPLES.md) - SVG 목업
 
 ## 디렉토리 구조
 
