@@ -17,8 +17,10 @@ erDiagram
     users ||--o{ warnings : receives
     users ||--o{ vacation : takes
     users ||--o{ inventory : owns
+    users ||--o{ attendances : attends
     items ||--o{ inventory : in
     items ||--o{ transactions : relates
+    attendance_posts ||--o{ attendances : receives
 
     users {
         text mastodon_id PK
@@ -112,6 +114,23 @@ erDiagram
         text mastodon_scheduled_id
         text created_by
         timestamp published_at
+    }
+
+    attendances {
+        int id PK
+        text user_id FK
+        text attendance_post_id FK
+        timestamp attended_at
+        int reward_amount
+        int streak_days
+    }
+
+    attendance_posts {
+        int id PK
+        text post_id
+        timestamp posted_at
+        timestamp expires_at
+        int total_attendees
     }
 ```
 
@@ -278,6 +297,43 @@ INSERT INTO settings (key, value, description) VALUES
 ('story_account', 'story_account_name', '스토리 계정명'),
 ('announcement_account', 'notice_account_name', '공지 계정명'),
 ('admin_bot_account', 'admin_bot_name', '관리자 봇 계정명 (운영진 공지용)');
+```
+
+### attendances (출석 기록)
+```sql
+CREATE TABLE attendances (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id TEXT NOT NULL,
+    attendance_post_id TEXT NOT NULL,     -- 출석 트윗 ID
+    attended_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reward_amount INTEGER NOT NULL,       -- 지급된 재화 (기본 + 연속 보너스)
+    streak_days INTEGER DEFAULT 1,        -- 연속 출석 일수
+    FOREIGN KEY(user_id) REFERENCES users(mastodon_id)
+);
+CREATE INDEX idx_attendances_user ON attendances(user_id, attended_at DESC);
+CREATE INDEX idx_attendances_post ON attendances(attendance_post_id);
+```
+
+### attendance_posts (출석 트윗 기록)
+```sql
+CREATE TABLE attendance_posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id TEXT UNIQUE NOT NULL,         -- 마스토돈 status ID
+    posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP,                 -- 출석 마감 시간 (posted_at + 23h 59m)
+    total_attendees INTEGER DEFAULT 0
+);
+CREATE INDEX idx_attendance_posts_posted ON attendance_posts(posted_at DESC);
+```
+
+**출석 설정** (settings 테이블에 추가):
+```sql
+INSERT INTO settings (key, value, description) VALUES
+('attendance_time', '10:00', '출석 트윗 발행 시간'),
+('attendance_base_reward', '50', '기본 출석 보상'),
+('attendance_streak_7', '20', '7일 연속 보너스'),
+('attendance_streak_14', '50', '14일 연속 보너스'),
+('attendance_streak_30', '100', '30일 연속 보너스');
 ```
 
 ### 추후 구현
