@@ -645,20 +645,21 @@ is_inactive = login_rate_7d < 0.5
 is_biased = top_partner_ratio > 0.3
 ```
 
-#### 6. 경고 발송 (편중 유저)
+#### 6. 자동 경고 발송 (편중 유저만)
 ```sql
 -- 경고 기록
 INSERT INTO warnings
 (user_id, warning_type, message, dm_sent, admin_name)
 VALUES
 ('115565546282398331', 'social_bias',
- '특정 계정과의 대화 편중 (80%)', 1, 'system');
+ '특정 계정과의 대화 편중 (40%)', 1, 'system');
 ```
 
 ```python
-# DM 발송
-mastodon.status_post(
-    f"""@{username} 커뮤니티 참여 안내
+# 편중 유저에게만 자동 DM 발송
+if is_biased:
+    mastodon.status_post(
+        f"""@{username} 커뮤니티 참여 안내
 
 최근 48시간 대화 분석 결과:
 - 전체 답글: {total_replies}개
@@ -667,9 +668,14 @@ mastodon.status_post(
 
 ⚠️ 특정 계정과의 대화가 30% 이상입니다.
 다양한 커뮤니티 멤버와 소통해보세요!""",
-    visibility="direct"
-)
+        visibility="direct"
+    )
 ```
+
+**고립/비활동 유저는 자동 DM 발송 안 함:**
+- user_stats 테이블에만 기록 (is_isolated, is_inactive)
+- 관리자 웹에서 목록 조회 가능
+- 관리자가 수동으로 판단 후 경고 발송 (UC-12)
 
 ### 대안 흐름
 
@@ -769,6 +775,164 @@ mastodon.status_post(
 ### 후행조건
 - 관리자가 문제 유저 현황 파악
 - 필요 시 수동 조치 가능 (휴식 등록, 재화 조정 등)
+
+---
+
+## UC-12: 관리자 웹 - 수동 경고 발송
+
+### 액터
+- 관리자
+
+### 전제조건
+- 관리자 웹에 로그인됨
+- 경고 발송 대상 유저 존재
+
+### 기본 흐름 (유저 상세 페이지에서)
+1. 관리자가 "커뮤니티 건강도" → "고립 유저 목록" 클릭
+2. 특정 유저 클릭 → 상세 페이지
+3. 유저 소셜 통계 확인
+   - 대화 상대: 5명
+   - 총 답글: 18개
+   - 접속률: 42%
+4. "경고 발송" 버튼 클릭
+5. 경고 발송 폼 표시
+   - 경고 유형: 드롭다운 (활동량 미달/고립 위험/비활동/기타)
+   - 메시지: 텍스트 영역 (기본 템플릿 제공)
+   - 발송 방식: 체크박스 (DM 발송/관리자만 기록)
+6. 폼 입력
+   ```
+   경고 유형: 고립 위험
+   메시지:
+   안녕하세요 @user3님,
+
+   최근 48시간 대화 분석 결과 대화 상대가 5명으로 적습니다.
+   다양한 커뮤니티 멤버와 소통해보시는 건 어떨까요?
+
+   - 커뮤니티 이벤트 참여하기
+   - 새로운 주제 대화방 둘러보기
+
+   ✅ DM 발송
+   ```
+7. "발송" 버튼 클릭
+8. **트랜잭션 처리**
+   ```sql
+   BEGIN TRANSACTION;
+
+   -- 경고 기록
+   INSERT INTO warnings
+   (user_id, warning_type, message, dm_sent, admin_name)
+   VALUES
+   ('115565546282398333', 'isolation',
+    '대화 상대 5명으로 적음. 다양한 소통 권장', 1, 'admin_user');
+
+   -- 관리 로그
+   INSERT INTO admin_logs
+   (admin_name, action_type, target_user, details)
+   VALUES
+   ('admin_user', 'send_warning', '115565546282398333',
+    '고립 위험 경고 발송 (수동)');
+
+   COMMIT;
+   ```
+9. 관리자 봇으로 DM 발송
+   ```python
+   mastodon.status_post(
+       f"@{username} {message}",
+       visibility="direct"
+   )
+   ```
+10. 성공 메시지 표시: "경고가 발송되었습니다"
+
+### 기본 흐름 (일괄 발송)
+1. 관리자가 "고립 유저 목록" 페이지
+2. 유저 체크박스 선택 (복수 선택 가능)
+3. "일괄 경고 발송" 버튼 클릭
+4. 일괄 발송 폼
+   - 경고 유형: 고립 위험
+   - 메시지 템플릿 (변수 사용 가능: {username}, {unique_partners} 등)
+5. "발송" 버튼 클릭
+6. 선택된 유저들에게 순차적으로 발송
+
+### 대안 흐름
+**6-1. 메시지 템플릿 선택**
+- 사전 정의된 템플릿 선택
+  - 활동량 미달 템플릿
+  - 고립 위험 템플릿
+  - 비활동 템플릿
+- 커스텀 메시지 작성
+
+**9-1. DM 발송 실패**
+- warnings.dm_sent = 0
+- 에러 메시지 표시
+- 재시도 옵션 제공
+
+**9-2. DM 발송 안 함 (관리자만 기록)**
+- DM 체크박스 해제 시
+- DB에만 기록 (warnings.dm_sent = 0)
+- 관리 로그에 "경고 기록 (DM 미발송)" 표시
+
+### 후행조건
+- warnings 테이블에 경고 기록 추가
+- admin_logs에 관리 로그 추가
+- 선택 시 유저에게 DM 발송됨
+
+---
+
+## UC-13: 관리자 웹 - 경고 발송 페이지 (통합)
+
+### 액터
+- 관리자
+
+### 전제조건
+- 관리자 웹에 로그인됨
+
+### 기본 흐름
+1. 관리자가 "경고 발송" 메뉴 클릭
+2. 경고 발송 통합 페이지 표시
+   ```
+   ┌─────────────────────────────────────┐
+   │ 경고 발송                           │
+   ├─────────────────────────────────────┤
+   │ [유저 검색]                         │
+   │ username: ___________  [검색]       │
+   │                                     │
+   │ 또는 문제 유저 빠른 선택:           │
+   │ • 편중 유저 (3명) [보기]            │
+   │ • 고립 유저 (5명) [보기]            │
+   │ • 비활동 유저 (2명) [보기]          │
+   │ • 활동량 미달 (7명) [보기]          │
+   └─────────────────────────────────────┘
+   ```
+3. "고립 유저 (5명)" 클릭
+4. 고립 유저 목록 표시 (체크박스 포함)
+5. 유저 선택 후 "경고 발송" 버튼
+6. 경고 발송 폼 (UC-12와 동일)
+7. 발송 처리
+
+### 템플릿 관리
+```sql
+CREATE TABLE warning_templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    warning_type TEXT NOT NULL,
+    template TEXT NOT NULL,
+    created_by TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 기본 템플릿
+INSERT INTO warning_templates (name, warning_type, template) VALUES
+('활동량 미달 기본', 'activity',
+ '@{username}님, 최근 48시간 답글이 {actual_replies}개로 기준({required_replies}개)에 미달했습니다.'),
+('고립 위험 기본', 'isolation',
+ '@{username}님, 최근 대화 상대가 {unique_partners}명으로 적습니다. 다양한 멤버와 소통해보세요!'),
+('비활동 기본', 'inactive',
+ '@{username}님, 최근 7일 접속률이 {login_rate}%입니다. 커뮤니티 활동에 관심 부탁드립니다.');
+```
+
+### 후행조건
+- 선택된 유저들에게 경고 발송됨
+- warnings, admin_logs 기록됨
 
 ---
 

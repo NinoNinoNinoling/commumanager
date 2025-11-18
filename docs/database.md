@@ -481,6 +481,39 @@ CREATE INDEX idx_user_stats_biased ON user_stats(is_biased);
 - 관리자 웹에서 문제 유저 목록 조회
 - 편중 유저에게 자동 경고 발송 가능
 
+### warning_templates (경고 메시지 템플릿)
+```sql
+CREATE TABLE warning_templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    warning_type TEXT NOT NULL,              -- activity/isolation/inactive/bias/custom
+    template TEXT NOT NULL,                   -- 템플릿 문자열 (변수 사용 가능)
+    created_by TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(created_by) REFERENCES users(mastodon_id)
+);
+
+-- 기본 템플릿
+INSERT INTO warning_templates (name, warning_type, template) VALUES
+('활동량 미달 기본', 'activity',
+ '@{username}님, 최근 48시간 답글이 {actual_replies}개로 기준({required_replies}개)에 미달했습니다. 커뮤니티 활동에 관심 부탁드립니다.'),
+('고립 위험 기본', 'isolation',
+ '@{username}님, 최근 대화 상대가 {unique_partners}명으로 적습니다. 다양한 멤버와 소통해보세요!'),
+('비활동 기본', 'inactive',
+ '@{username}님, 최근 7일 접속률이 {login_rate}%입니다. 커뮤니티에 관심 가져주세요!'),
+('편중 경고 기본', 'bias',
+ '@{username}님, @{top_partner}와의 대화가 {ratio}%입니다. 다양한 멤버와 소통해보세요!');
+```
+
+**사용 가능한 변수:**
+- `{username}`: 유저명
+- `{unique_partners}`: 대화 상대 수
+- `{actual_replies}`: 실제 답글 수
+- `{required_replies}`: 요구 답글 수
+- `{login_rate}`: 접속률 (%)
+- `{top_partner}`: 최다 대화 상대
+- `{ratio}`: 최다 대화 비율 (%)
+
 ---
 
 ## 초기화
