@@ -384,38 +384,18 @@ WHERE mastodon_id = ?;
 
 ---
 
-## UC-05: 활동량 체크 (자동)
+## UC-05: 활동량 조회 (관리자 웹 전용)
 
 ### 액터
-- Celery 스케줄러
-- 관리자 봇
+- 관리자 (웹 UI)
 
 ### 전제조건
-- 현재 시각: 오전 4시 또는 오후 4시 (Asia/Seoul)
-- settings에 `check_times=04:00,16:00`, `activity_check_enabled=true`
-- settings에 `check_period_hours=48`, `min_replies_48h=20`
+- 관리자가 웹에서 개인별 분석 페이지 접속
+- settings에 `check_period_hours=48`, `min_replies_48h=20` 설정됨
 
 ### 기본 흐름
-1. Celery Beat가 4시/16시(서울 시간)에 태스크 실행
-2. **전역 휴식기간 체크**
-   ```sql
-   SELECT COUNT(*) FROM calendar_events
-   WHERE event_date = DATE('now', 'localtime')
-   AND is_global_vacation = 1;
-   ```
-   - 결과 > 0이면 **활동량 체크 건너뜀** → 종료
-3. **체크 대상 유저 조회** (role=user, 휴식 중 아님)
-   ```sql
-   SELECT u.mastodon_id, u.username
-   FROM users u
-   WHERE u.role = 'user'
-   AND NOT EXISTS (
-       SELECT 1 FROM vacation v
-       WHERE v.user_id = u.mastodon_id
-       AND DATE('now', 'localtime') BETWEEN v.start_date AND v.end_date
-   );
-   ```
-4. **각 유저별 48시간 답글 수 조회** (PostgreSQL)
+1. 관리자가 특정 유저의 개인별 분석 페이지 접속
+2. **48시간 답글 수 조회** (PostgreSQL)
    ```sql
    SELECT COUNT(*) as reply_count
    FROM statuses
@@ -423,54 +403,50 @@ WHERE mastodon_id = ?;
    AND in_reply_to_id IS NOT NULL
    AND created_at > NOW() - INTERVAL '48 hours';
    ```
-5. **기준 미달 유저 처리**
-   - reply_count < 20인 유저
+
+3. **휴식 상태 확인** (SQLite)
    ```sql
-   -- 경고 기록
-   INSERT INTO warnings
-   (user_id, warning_type, check_period_hours, required_replies, actual_replies, message, dm_sent)
-   VALUES
-   ('115565546282398331', 'auto', 48, 20, 15, '활동량 기준 미달', 1);
+   SELECT COUNT(*) as is_on_vacation FROM vacation
+   WHERE user_id = '115565546282398331'
+   AND DATE('now', 'localtime') BETWEEN start_date AND end_date;
    ```
-6. **관리자 봇으로 DM 발송**
+
+4. **활동량 결과 표시**
    ```python
-   mastodon.status_post(
-       f"@{username} 활동량 체크 결과\n48시간 내 답글: {reply_count}개 (기준: 20개)",
-       visibility="direct"
-   )
+   result = {
+       'reply_count': 15,
+       'required_replies': 20,
+       'status': 'below_threshold',  # 'ok' or 'below_threshold'
+       'is_on_vacation': False,
+       'last_updated': datetime.now()
+   }
    ```
-7. SQLite DB에 체크 시각 기록
-   ```sql
-   UPDATE users
-   SET last_check = CURRENT_TIMESTAMP
-   WHERE mastodon_id = '115565546282398331';
-   ```
+
+5. **웹 UI에 표시**
+   - 🟢 정상: `reply_count >= 20`
+   - 🔴 기준 미달: `reply_count < 20`
+   - 💤 휴식 중: 체크 제외 표시
 
 ### 대안 흐름
-**2-1. 전역 휴식기간**
-- 활동량 체크 건너뜀
-- 로그: "전역 휴식기간으로 활동량 체크 건너뜀"
 
-**3-1. 휴식 중인 유저**
-- vacation 테이블에 해당 날짜 포함된 기록 있음
-- 체크 대상에서 제외
-- 로그: "휴식 중인 유저 제외: {username}"
-
-**4-1. PostgreSQL 연결 실패**
+**2-1. PostgreSQL 연결 실패**
 - 재시도 (최대 3회)
-- 실패 시 관리자에게 알림
-- 다음 체크 시간까지 대기
+- 실패 시 웹 UI에 에러 메시지 표시
+- "현재 활동량을 조회할 수 없습니다. 잠시 후 다시 시도해주세요."
 
-**6-1. DM 발송 실패**
-- 마스토돈 API 오류
-- warnings.dm_sent = 0으로 기록
-- 재시도 큐에 등록
+**2-2. 유저가 존재하지 않음**
+- PostgreSQL에 account_id 없음
+- 웹 UI에 "유저 정보를 찾을 수 없습니다" 표시
 
 ### 후행조건
-- warnings 테이블에 경고 기록 추가
-- 기준 미달 유저에게 DM 발송됨
-- users.last_check 업데이트됨
-- 휴식 중/전역 휴식기간에는 체크 안 됨
+- 실시간 조회만, **DB 저장 안 함**
+- **경고 기록 안 함** (warnings 테이블 사용 안 함)
+- **DM 발송 안 함**
+- 관리자 웹에서 조회 결과만 확인
+
+**참고:**
+- 자동 경고 시스템 없음
+- 관리자가 필요 시 수동으로 경고 발송 (UC-별도)
 
 ---
 
@@ -524,7 +500,7 @@ WHERE mastodon_id = ?;
 7. **확인 DM 발송**
    ```python
    mastodon.status_post(
-       f"@{username} 휴식이 등록되었습니다.\n기간: {start_date} ~ {end_date} ({days}일간)\n이 기간 동안 활동량 체크가 제외됩니다.",
+       f"@{username} 휴식이 등록되었습니다.\n기간: {start_date} ~ {end_date} ({days}일간)\n이 기간 동안 관리자 웹에서 💤 휴식 중으로 표시됩니다.",
        visibility='direct'
    )
    ```
@@ -552,7 +528,7 @@ WHERE mastodon_id = ?;
 5. **확인 DM 발송**
    ```python
    mastodon.status_post(
-       f"@{username} 휴식이 해제되었습니다.\n다음 활동량 체크부터 정상 체크가 재개됩니다.",
+       f"@{username} 휴식이 해제되었습니다.\n관리자 웹에서 휴식 상태가 해제됩니다.",
        visibility='direct'
    )
    ```
@@ -615,7 +591,7 @@ WHERE mastodon_id = ?;
 
 ### 후행조건
 - vacation 테이블에 휴식 기간 등록/수정됨
-- 휴식 기간 동안 활동량 체크 제외됨 (UC-05의 3-1)
+- 휴식 기간 동안 관리자 웹에서 💤 휴식 중으로 표시됨 (UC-05)
 - 유저에게 확인 DM 발송됨
 
 ---
@@ -655,7 +631,6 @@ WHERE mastodon_id = ?;
 - calendar_events 테이블에 휴식기간 등록됨
 - 2025-12-25에는:
   - 출석 트윗 발행 안 됨 (UC-03의 2-1)
-  - 활동량 체크 안 됨 (UC-05의 2-1)
 
 ---
 

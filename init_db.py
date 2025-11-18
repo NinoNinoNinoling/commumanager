@@ -271,11 +271,9 @@ def init_database(db_path='economy.db'):
         # 타임존
         ('timezone', 'Asia/Seoul', '타임존'),
 
-        # 활동량 체크
-        ('check_times', '04:00,16:00', '활동량 체크 시간'),
-        ('check_period_hours', '48', '체크 기간 (시간)'),
-        ('min_replies_48h', '20', '최소 답글 수'),
-        ('activity_check_enabled', '1', '활동량 체크 시스템 활성화'),
+        # 활동량 조회 (관리자 웹 전용)
+        ('check_period_hours', '48', '조회 기간 (시간)'),
+        ('min_replies_48h', '20', '최소 답글 수 기준'),
 
         # 재화 지급
         ('reward_reply_count', '100', '재화 지급 기준 답글 수 (N개)'),
