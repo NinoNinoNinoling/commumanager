@@ -591,8 +591,18 @@ WHERE mastodon_id = ?;
 - 등록 안 함
 
 **3-1. 잘못된 일수 (흐름 1)**
-- 일수가 0 이하 또는 너무 큼 (> 90)
-- DM: "휴식 기간은 1~90일 사이여야 합니다."
+- 일수가 0 이하 또는 max_vacation_days 초과
+   ```python
+   max_days = int(get_setting('max_vacation_days'))  # 기본 90
+   if days <= 0 or days > max_days:
+       # 에러 처리
+   ```
+- DM: "휴식 기간은 1~{max_days}일 사이여야 합니다."
+- 등록 안 함
+
+**3-2. 셀프 등록 비활성화 (흐름 1)**
+- vacation_self_service_enabled = 0
+- DM: "현재 휴식 셀프 등록이 비활성화되어 있습니다. 관리자에게 문의해주세요."
 - 등록 안 함
 
 **3-1. 휴식 중 아님 (흐름 2)**
