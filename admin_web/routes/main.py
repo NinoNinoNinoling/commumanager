@@ -20,7 +20,7 @@ def init_main_routes(app):
         app: Flask app 인스턴스
     """
     global dashboard_controller
-    dashboard_controller = DashboardController(app.config)
+    dashboard_controller = DashboardController()
 
 
 @main_bp.route('/')

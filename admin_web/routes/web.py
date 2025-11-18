@@ -125,10 +125,20 @@ def user_detail(mastodon_id):
     """사용자 상세 페이지"""
     try:
         user = user_service.get_user(mastodon_id)
-        transactions = user_service.get_user_transactions(mastodon_id, limit=20)
-        warnings = warning_service.get_user_warnings(mastodon_id)
+        if not user:
+            return render_template('error.html', error_title="사용자 없음", error_message="사용자를 찾을 수 없습니다."), 404
 
-        return render_template('user_detail.html', user=user, transactions=transactions, warnings=warnings)
+        transactions_data = user_service.get_user_transactions(mastodon_id, limit=20)
+        warnings_data = warning_service.get_warnings(page=1, limit=100, user_id=mastodon_id)
+        vacations_data = vacation_service.get_vacations(page=1, limit=100, user_id=mastodon_id)
+
+        return render_template(
+            'user_detail.html',
+            user=user,
+            transactions=transactions_data.get('transactions', []),
+            warnings=warnings_data.get('warnings', []),
+            vacations=vacations_data.get('vacations', [])
+        )
     except Exception as e:
         return render_template('error.html', error_title="오류", error_message=str(e)), 500
 
@@ -142,8 +152,32 @@ def user_detail(mastodon_id):
 def warnings():
     """경고 목록 페이지"""
     try:
-        warnings_data = warning_service.get_warnings(limit=100)
-        return render_template('warnings.html', warnings=warnings_data)
+        page = int(request.args.get('page', 1))
+        user_id = request.args.get('user_id', '')
+        date_from = request.args.get('date_from', '')
+        date_to = request.args.get('date_to', '')
+
+        warnings_data = warning_service.get_warnings(
+            page=page,
+            limit=50,
+            user_id=user_id if user_id else None
+        )
+
+        # 통계 계산
+        stats = {
+            'this_week': 0,  # TODO: 주간 통계
+            'today': 0  # TODO: 오늘 통계
+        }
+
+        return render_template(
+            'warnings.html',
+            warnings=warnings_data.get('warnings', []),
+            pagination=warnings_data.get('pagination', {}),
+            stats=stats,
+            user_id=user_id,
+            date_from=date_from,
+            date_to=date_to
+        )
     except Exception as e:
         return render_template('error.html', error_title="오류", error_message=str(e)), 500
 
@@ -157,8 +191,32 @@ def warnings():
 def vacations():
     """휴가 목록 페이지"""
     try:
-        vacations_data = vacation_service.get_vacations(limit=100)
-        return render_template('vacations.html', vacations=vacations_data)
+        page = int(request.args.get('page', 1))
+        user_id = request.args.get('user_id', '')
+        status = request.args.get('status', '')
+        month = request.args.get('month', '')
+
+        vacations_data = vacation_service.get_vacations(
+            page=page,
+            limit=50,
+            user_id=user_id if user_id else None
+        )
+
+        # 통계 계산
+        stats = {
+            'active': 0,  # TODO: 현재 휴가 중
+            'this_month': 0  # TODO: 이번 달 휴가
+        }
+
+        return render_template(
+            'vacations.html',
+            vacations=vacations_data.get('vacations', []),
+            pagination=vacations_data.get('pagination', {}),
+            stats=stats,
+            user_id=user_id,
+            status=status,
+            month=month
+        )
     except Exception as e:
         return render_template('error.html', error_title="오류", error_message=str(e)), 500
 
@@ -172,8 +230,33 @@ def vacations():
 def events():
     """이벤트 목록 페이지"""
     try:
-        events_data = calendar_service.get_events(limit=100)
-        return render_template('events.html', events=events_data)
+        page = int(request.args.get('page', 1))
+        search = request.args.get('search', '')
+        event_type = request.args.get('event_type', '')
+        status = request.args.get('status', '')
+
+        events_data = calendar_service.get_events(
+            page=page,
+            limit=50,
+            event_type=event_type if event_type else None
+        )
+
+        # 통계 계산
+        stats = {
+            'active': 0,  # TODO: 진행 중 이벤트
+            'upcoming': 0,  # TODO: 예정 이벤트
+            'completed': 0  # TODO: 종료된 이벤트
+        }
+
+        return render_template(
+            'events.html',
+            events=events_data.get('events', []),
+            pagination=events_data.get('pagination', {}),
+            stats=stats,
+            search=search,
+            event_type=event_type,
+            status=status
+        )
     except Exception as e:
         return render_template('error.html', error_title="오류", error_message=str(e)), 500
 
@@ -187,8 +270,33 @@ def events():
 def items():
     """아이템 목록 페이지"""
     try:
-        items_data = item_service.get_items()
-        return render_template('items.html', items=items_data)
+        page = int(request.args.get('page', 1))
+        search = request.args.get('search', '')
+        is_active_str = request.args.get('is_active', '')
+        is_active = None
+        if is_active_str:
+            is_active = is_active_str.lower() == 'true'
+
+        items_data = item_service.get_items(
+            page=page,
+            limit=50,
+            is_active=is_active
+        )
+
+        # 통계 계산
+        stats = {
+            'active': 0,  # TODO: 활성 아이템
+            'inactive': 0  # TODO: 비활성 아이템
+        }
+
+        return render_template(
+            'items.html',
+            items=items_data.get('items', []),
+            pagination=items_data.get('pagination', {}),
+            stats=stats,
+            search=search,
+            is_active=is_active_str
+        )
     except Exception as e:
         return render_template('error.html', error_title="오류", error_message=str(e)), 500
 
@@ -202,7 +310,20 @@ def items():
 def settings():
     """시스템 설정 페이지"""
     try:
-        settings_data = setting_service.get_all_settings()
-        return render_template('settings.html', settings=settings_data)
+        page = int(request.args.get('page', 1))
+        search = request.args.get('search', '')
+
+        settings_data = setting_service.get_settings(
+            page=page,
+            limit=100,
+            search=search if search else None
+        )
+
+        return render_template(
+            'settings.html',
+            settings=settings_data.get('settings', []),
+            pagination=settings_data.get('pagination', {}),
+            search=search
+        )
     except Exception as e:
         return render_template('error.html', error_title="오류", error_message=str(e)), 500

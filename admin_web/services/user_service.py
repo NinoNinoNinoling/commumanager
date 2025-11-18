@@ -34,17 +34,29 @@ class UserService:
 
     def get_user_detail(self, mastodon_id: str) -> Optional[dict]:
         """유저 상세 정보"""
+        from admin_web.repositories.vacation_repository import VacationRepository
+        from admin_web.repositories.warning_repository import WarningRepository
+
         user = self.user_repo.find_by_id(mastodon_id)
         if not user:
             return None
 
+        vacation_repo = VacationRepository()
+        warning_repo = WarningRepository()
+
         # 48시간 활동량 조회 (PostgreSQL)
         activity_48h = self.user_repo.get_activity_48h(mastodon_id)
 
+        # 휴가 여부 확인
+        is_on_vacation = vacation_repo.is_user_on_vacation(mastodon_id)
+
+        # 경고 카운트
+        warning_count = warning_repo.count_by_user(mastodon_id)
+
         detail = user.to_dict()
         detail['activity_48h'] = activity_48h
-        detail['is_on_vacation'] = False  # TODO: vacation 체크
-        detail['warning_count'] = 0  # TODO: warning 카운트
+        detail['is_on_vacation'] = is_on_vacation
+        detail['warning_count'] = warning_count
 
         return detail
 
@@ -75,3 +87,48 @@ class UserService:
         self.transaction_repo.create(transaction)
 
         return True
+
+    def get_user_statistics(self) -> dict:
+        """사용자 통계 조회 (대시보드용)"""
+        from admin_web.repositories.vacation_repository import VacationRepository
+        from admin_web.repositories.warning_repository import WarningRepository
+        from datetime import datetime, timedelta
+
+        vacation_repo = VacationRepository()
+        warning_repo = WarningRepository()
+
+        # 전체 사용자 수
+        total_users = self.user_repo.count_all()
+
+        # 24시간 활성 사용자 (last_activity 기준)
+        active_24h = self.user_repo.count_active_since(
+            datetime.now() - timedelta(hours=24)
+        )
+
+        # 현재 휴가 중인 사용자
+        on_vacation = vacation_repo.count_active_vacations()
+
+        # 7일간 경고 발송
+        warnings_7d = warning_repo.count_since(
+            datetime.now() - timedelta(days=7)
+        )
+
+        return {
+            'users': {
+                'total': total_users,
+                'active_24h': active_24h,
+                'on_vacation': on_vacation
+            },
+            'warnings': {
+                'this_week': warnings_7d
+            }
+        }
+
+    def get_user_transactions(self, mastodon_id: str, limit: int = 20) -> dict:
+        """사용자 거래 내역 조회"""
+        transactions = self.transaction_repo.find_by_user_id(mastodon_id, limit)
+
+        return {
+            'transactions': [t.to_dict() for t in transactions],
+            'total': len(transactions)
+        }

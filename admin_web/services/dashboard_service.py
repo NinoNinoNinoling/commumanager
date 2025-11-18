@@ -24,15 +24,20 @@ class DashboardService:
             """)
             active_24h = cursor.fetchone()[0]
 
-            # TODO: on_vacation 체크
-            on_vacation = 0
+            # 현재 휴가 중인 사용자 수
+            cursor.execute("""
+                SELECT COUNT(DISTINCT user_id) FROM vacations
+                WHERE date('now') BETWEEN start_date AND end_date
+            """)
+            on_vacation = cursor.fetchone()[0]
 
             # 재화 통계
             total_earned = self.transaction_repo.get_total_earned()
             total_spent = self.transaction_repo.get_total_spent()
             total_circulating = total_earned - total_spent
 
-            # 활동량 통계 (TODO: PostgreSQL 연동)
+            # 활동량 통계 (PostgreSQL 연동 필요 - Mastodon DB)
+            # PostgreSQL이 연동되면 replies_48h와 users_below_threshold를 조회
             replies_48h = 0
             users_below_threshold = 0
 
