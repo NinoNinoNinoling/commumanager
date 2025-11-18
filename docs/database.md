@@ -21,6 +21,16 @@ erDiagram
     items ||--o{ inventory : in
     items ||--o{ transactions : relates
     attendance_posts ||--o{ attendances : receives
+    calendar_events {
+        int id PK
+        text title
+        text description
+        date event_date
+        text event_type
+        bool is_global_vacation
+        text created_by
+        timestamp created_at
+    }
 
     users {
         text mastodon_id PK
@@ -333,8 +343,37 @@ INSERT INTO settings (key, value, description) VALUES
 ('attendance_base_reward', '50', '기본 출석 보상'),
 ('attendance_streak_7', '20', '7일 연속 보너스'),
 ('attendance_streak_14', '50', '14일 연속 보너스'),
-('attendance_streak_30', '100', '30일 연속 보너스');
+('attendance_streak_30', '100', '30일 연속 보너스'),
+('attendance_enabled', 'true', '출석 체크 시스템 활성화'),
+('activity_check_enabled', 'true', '활동량 체크 시스템 활성화');
 ```
+
+### calendar_events (커뮤니티 일정/이벤트)
+```sql
+CREATE TABLE calendar_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT,
+    event_date DATE NOT NULL,
+    event_type TEXT DEFAULT 'event',    -- event/holiday/notice
+    is_global_vacation BOOLEAN DEFAULT 0,  -- 전역 휴식기간 여부
+    created_by TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX idx_calendar_events_date ON calendar_events(event_date DESC);
+CREATE INDEX idx_calendar_events_vacation ON calendar_events(is_global_vacation);
+```
+
+**event_type 설명**:
+- `event`: 일반 커뮤니티 이벤트
+- `holiday`: 공휴일/기념일
+- `notice`: 중요 공지 날짜
+
+**전역 휴식기간 (is_global_vacation=true)**:
+- 해당 날짜에는 출석 체크 및 활동량 체크 비활성화
+- 커뮤니티 전체 휴식 기간 지정 가능
+- 관리자 웹에서 설정
 
 ### 추후 구현
 - 게임 시스템 관련 테이블 (게임 종류 및 세부 사항 결정 후 추가)
