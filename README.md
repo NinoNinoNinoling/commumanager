@@ -7,18 +7,20 @@
 마스토돈 커뮤니티를 위한 활동량 기반 자동 관리 봇. 답글 감지로 재화를 지급하고, 활동량을 체크하여 경고를 발송합니다.
 
 ## 핵심 기능
-1. 활동량 체크 (하루 2회, 오전 4시/오후 4시)
-2. 재화 지급 (실시간 답글 감지)
-3. 상점 시스템 (아이템 구매)
-4. 휴식계 (활동량 체크 제외)
+1. 재화 지급 (하루 2회 정산, 오전 4시/오후 4시)
+2. 출석 체크 (매일 오전 10시, 자정까지 출석 가능)
+3. 활동량 체크 (소셜 분석, 경고 발송)
+4. 휴식 관리 (활동량 체크 제외)
+5. 일정 관리 (이벤트, 전역 휴식기간)
+6. 상점 시스템 (아이템 구매)
 
 ## 기술 스택
-- 마스토돈: Ruby 3.2.2
+- 마스토돈: Ruby 3.2.2 (휘핑 에디션)
 - 봇: Python 3.9+
 - 웹: Flask 3.x + Bootstrap 5
-- DB: PostgreSQL + SQLite
+- DB: PostgreSQL (마스토돈, 읽기 전용) + SQLite (economy.db)
 - 캐시/큐: Redis + Celery
-- 인프라: 오라클 클라우드 (무료)
+- 인프라: GCP (Google Cloud Platform)
 
 ## 프로젝트 구조
 
@@ -36,17 +38,21 @@ commumanager/
 │   ├── templates/         # Jinja2 템플릿
 │   └── utils/             # 유틸리티 함수
 │
-├── bot/                   # 관리 봇 시스템
-│   ├── reward_bot.py      # 재화 지급 봇
-│   ├── activity_checker.py # 활동량 체크 봇
-│   ├── command_handler.py # 명령어 처리기
+├── bot/                   # 관리 봇 시스템 (4개 계정)
+│   ├── admin_bot.py       # 총괄계정 (팔로우 등록, 공지)
+│   ├── story_bot.py       # 스토리계정 (콘텐츠 발행)
+│   ├── system_bot.py      # 시스템계정 (재화, 출석, 명령어)
+│   ├── supervisor_bot.py  # 감독봇 (분석, 경고, 알림)
 │   ├── database.py        # 데이터베이스 유틸
 │   └── utils.py           # 봇 유틸리티
 │
 ├── docs/                  # 프로젝트 문서
 │   ├── project_overview.md
+│   ├── bot_architecture.md
 │   ├── features.md
+│   ├── use_cases.md
 │   ├── database.md
+│   ├── admin_oauth.md
 │   ├── server_setup.md
 │   └── 로드맵.md
 │
@@ -97,10 +103,19 @@ python app.py
 ```
 
 ## 문서
+
+### 개요
 - [프로젝트 개요](docs/project_overview.md)
+- [봇 구조](docs/bot_architecture.md) - 4개 계정 구조
 - [기능 목록](docs/features.md)
-- [데이터베이스](docs/database.md)
+- [유즈케이스](docs/use_cases.md)
+
+### 기술
+- [데이터베이스 설계](docs/database.md)
+- [관리자 OAuth](docs/admin_oauth.md)
 - [서버 구축](docs/server_setup.md)
+
+### 개발
 - [개발 로드맵](docs/로드맵.md)
 
 ## 디렉토리 구조
