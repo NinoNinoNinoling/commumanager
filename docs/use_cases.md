@@ -7,7 +7,7 @@
 
 **흐름**:
 1. Streaming API에서 follow 이벤트 수신
-2. 어드민 계정 팔로우인지 확인 (아니면 무시)
+2. 총괄계정 팔로우인지 확인 (아니면 무시)
 3. 중복 체크
    ```sql
    SELECT COUNT(*) FROM users WHERE mastodon_id = ?;
@@ -548,9 +548,9 @@ ORDER BY at.created_at DESC;
    ```
 2. 각 예약 건별 처리:
    - post_type에 따라 계정 선택:
-     - `story`: settings.story_account
-     - `announcement`: settings.announcement_account
-     - `admin_notice`: settings.admin_bot_account (visibility='private')
+     - `story`: settings.story_account (스토리계정)
+     - `announcement`: settings.admin_account (총괄계정)
+     - `admin_notice`: settings.supervisor_bot_account (감독봇, visibility='private')
    - 마스토돈 API로 발송:
      ```python
      status = mastodon.status_post(content, visibility=visibility)
