@@ -1,0 +1,77 @@
+<svg width="1000" height="700" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
+  <rect width="1000" height="700" fill="#f8f9fa"/>
+
+  <!-- 네비게이션 바 -->
+  <rect width="1000" height="60" fill="#212529"/>
+  <text x="20" y="38" font-family="Arial" font-size="18" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
+  <text x="200" y="38" font-family="Arial" font-size="14" fill="#6c757d">대시보드</text>
+  <text x="300" y="38" font-family="Arial" font-size="14" fill="#6c757d">사용자</text>
+  <text x="380" y="38" font-family="Arial" font-size="14" fill="#adb5bd">로그</text>
+
+  <!-- 제목 -->
+  <text x="40" y="110" font-family="Arial" font-size="24" fill="#333" font-weight="bold">관리자 로그</text>
+  <text x="40" y="135" font-family="Arial" font-size="13" fill="#6c757d">시스템 관리자 활동 로그를 실시간으로 모니터링합니다</text>
+
+  <!-- 통계 카드들 -->
+  <rect x="40" y="160" width="220" height="80" rx="8" fill="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"/>
+  <text x="60" y="185" font-family="Arial" font-size="12" fill="white">총 로그</text>
+  <text x="60" y="220" font-family="Arial" font-size="28" fill="white" font-weight="bold">1,523</text>
+
+  <rect x="280" y="160" width="220" height="80" rx="8" fill="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"/>
+  <text x="300" y="185" font-family="Arial" font-size="12" fill="white">현재 페이지</text>
+  <text x="300" y="220" font-family="Arial" font-size="28" fill="white" font-weight="bold">1 / 31</text>
+
+  <!-- 필터 영역 -->
+  <rect x="40" y="260" width="940" height="100" rx="8" fill="#e9ecef"/>
+  <text x="60" y="285" font-family="Arial" font-size="13" fill="#495057" font-weight="600">관리자 필터</text>
+  <rect x="60" y="295" width="200" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="70" y="318" font-family="Arial" font-size="13" fill="#495057">전체</text>
+
+  <text x="290" y="285" font-family="Arial" font-size="13" fill="#495057" font-weight="600">액션 타입 필터</text>
+  <!-- 체크박스들 -->
+  <rect x="290" y="300" width="15" height="15" rx="3" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <text x="312" y="312" font-family="Arial" font-size="12" fill="#495057">재화 조정</text>
+
+  <rect x="410" y="300" width="15" height="15" rx="3" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <text x="432" y="312" font-family="Arial" font-size="12" fill="#495057">경고 발송</text>
+
+  <rect x="530" y="300" width="15" height="15" rx="3" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <text x="552" y="312" font-family="Arial" font-size="12" fill="#495057">휴가 승인</text>
+
+  <!-- 로그 뷰어 (터미널 스타일) -->
+  <rect x="40" y="380" width="940" height="270" rx="8" fill="#1e1e1e"/>
+  <rect x="40" y="380" width="940" height="40" rx="8" fill="#2d2d30"/>
+  <text x="60" y="405" font-family="Courier New" font-size="13" fill="white">🖥️ 로그 뷰어 (라인별)</text>
+
+  <!-- 로그 라인들 -->
+  <text x="60" y="440" font-family="Courier New" font-size="11" fill="#569cd6">2025-11-18 14:30:25</text>
+  <text x="220" y="440" font-family="Courier New" font-size="11" fill="#4ec9b0">마녀봇</text>
+  <text x="310" y="440" font-family="Courier New" font-size="11" fill="#4ec9b0" font-weight="bold">adjust_balance</text>
+  <text x="440" y="440" font-family="Courier New" font-size="11" fill="#9cdcfe">→ user_123</text>
+  <text x="560" y="440" font-family="Courier New" font-size="11" fill="#ce9178">+1000원 지급</text>
+
+  <text x="60" y="465" font-family="Courier New" font-size="11" fill="#569cd6">2025-11-18 14:15:10</text>
+  <text x="220" y="465" font-family="Courier New" font-size="11" fill="#4ec9b0">운영진A</text>
+  <text x="310" y="465" font-family="Courier New" font-size="11" fill="#f48771" font-weight="bold">create_warning</text>
+  <text x="440" y="465" font-family="Courier New" font-size="11" fill="#9cdcfe">→ user_456</text>
+  <text x="560" y="465" font-family="Courier New" font-size="11" fill="#ce9178">활동량 부족 경고</text>
+
+  <text x="60" y="490" font-family="Courier New" font-size="11" fill="#569cd6">2025-11-18 13:45:33</text>
+  <text x="220" y="490" font-family="Courier New" font-size="11" fill="#4ec9b0">총괄관리자</text>
+  <text x="310" y="490" font-family="Courier New" font-size="11" fill="#4fc1ff" font-weight="bold">create_vacation</text>
+  <text x="440" y="490" font-family="Courier New" font-size="11" fill="#9cdcfe">→ user_789</text>
+  <text x="560" y="490" font-family="Courier New" font-size="11" fill="#ce9178">휴가 승인 (2025-11-20 ~ 2025-11-27)</text>
+
+  <text x="60" y="515" font-family="Courier New" font-size="11" fill="#569cd6">2025-11-18 13:20:15</text>
+  <text x="220" y="515" font-family="Courier New" font-size="11" fill="#4ec9b0">마녀봇</text>
+  <text x="310" y="515" font-family="Courier New" font-size="11" fill="#b5cea8" font-weight="bold">create_event</text>
+  <text x="440" y="515" font-family="Courier New" font-size="11" fill="#9cdcfe">-</text>
+  <text x="560" y="515" font-family="Courier New" font-size="11" fill="#ce9178">신년 이벤트 생성</text>
+
+  <text x="60" y="540" font-family="Courier New" font-size="11" fill="#569cd6">2025-11-18 12:50:42</text>
+  <text x="220" y="540" font-family="Courier New" font-size="11" fill="#4ec9b0">운영진B</text>
+  <text x="310" y="540" font-family="Courier New" font-size="11" fill="#c586c0" font-weight="bold">update_setting</text>
+  <text x="440" y="540" font-family="Courier New" font-size="11" fill="#9cdcfe">-</text>
+  <text x="560" y="540" font-family="Courier New" font-size="11" fill="#ce9178">activity_threshold 변경: 20 → 25</text>
+</svg>
