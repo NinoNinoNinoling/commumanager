@@ -365,7 +365,7 @@ WHERE mastodon_id = ?;
 ### 대안 흐름
 **3-1. 만료된 출석 트윗**
 - expires_at < 현재 시각
-- 처리 안 함, 유저에게 DM: "출석 시간이 지났습니다"
+- 조용히 무시 (처리 안 함, 응답 안 함)
 
 **4-1. 중복 출석 시도**
 - UNIQUE 제약 위반 → SQLite 에러
@@ -1736,7 +1736,7 @@ INSERT INTO warning_templates (name, warning_type, template) VALUES
 ### 2. 만료된 출석 트윗 처리
 - 23시간 59분 후 자동 만료
 - 만료된 트윗에 답글 달면?
-- **현재 설계**: 처리 안 함, DM 안내
+- **현재 설계**: 조용히 무시 (처리 안 함, 응답 안 함)
 
 ### 3. PostgreSQL 답글 수 조회 성능
 - 유저 100명 × 매일 2회 = 200 쿼리
@@ -1751,3 +1751,11 @@ INSERT INTO warning_templates (name, warning_type, template) VALUES
 - attendance_posts 삭제 시 attendances도 삭제?
 - **현재 설계**: FK 제약만, CASCADE 없음
 - 추가 필요?
+
+### 6. 봇 응답 방식 검토
+- **현재 설계**: DM (Direct Message) 기반 응답
+- **검토사항**: 멘션에 대한 답글(reply) 방식 고려
+  - 장점: 공개적 피드백, 다른 유저도 참고 가능
+  - 단점: 타임라인 노출, 프라이버시 이슈 가능
+  - 고려: 성공/실패 여부에 따라 정해진 답글 템플릿 사용
+- **결정 보류**: 추후 사용자 피드백 기반 결정
