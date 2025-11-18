@@ -436,6 +436,7 @@
 - add/edit/delete_event: 일정 관리
 - ban_user: 유저 밴
 - unban_user: 유저 언밴
+- archive_toots: 툿 아카이빙 (자동)
 
 ### calendar_events (일정/이벤트)
 - 커뮤니티 일정 기록
