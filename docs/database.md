@@ -333,15 +333,20 @@ CREATE INDEX idx_scheduled_posts_type ON scheduled_posts(post_type);
 CREATE INDEX idx_scheduled_posts_public ON scheduled_posts(is_public);
 ```
 
-**post_type**: `story` (스토리 계정), `announcement` (공지 계정), `admin_notice` (관리자 봇, private)
+**post_type**:
+- `story`: 스토리 계정 발행
+- `announcement`: 총괄계정 발행 (공지)
+- `admin_notice`: 감독봇 발행 (운영진 전용, private)
+
 **is_public**: 1 (공개, `@봇 공지`에 표시), 0 (비공개, 관리자 전용)
 
 **계정 설정**:
 ```sql
 INSERT INTO settings (key, value, description) VALUES
+('admin_account', 'admin_account_name', '총괄계정명'),
 ('story_account', 'story_account_name', '스토리 계정명'),
-('announcement_account', 'notice_account_name', '공지 계정명'),
-('admin_bot_account', 'admin_bot_name', '관리자 봇 계정명'),
+('system_bot_account', 'system_bot_name', '시스템계정명 (@봇)'),
+('supervisor_bot_account', 'supervisor_bot_name', '감독봇 계정명'),
 ('attendance_tweet_template', '🌟 오늘의 출석 체크!\n이 트윗에 답글 달아주세요!', '출석 트윗 템플릿');
 ```
 
