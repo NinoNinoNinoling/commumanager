@@ -640,9 +640,9 @@ VALUES
 
 #### 5. 문제 유저 판정
 ```python
-is_isolated = unique_partners < 3
+is_isolated = unique_partners < 7
 is_inactive = login_rate_7d < 0.5
-is_biased = top_partner_ratio > 0.7
+is_biased = top_partner_ratio > 0.3
 ```
 
 #### 6. 경고 발송 (편중 유저)
@@ -665,7 +665,7 @@ mastodon.status_post(
 - 대화 상대: {unique_partners}명
 - @{top_partner_username}와의 대화: {top_partner_count}개 ({int(top_partner_ratio*100)}%)
 
-⚠️ 특정 계정과의 대화가 70% 이상입니다.
+⚠️ 특정 계정과의 대화가 30% 이상입니다.
 다양한 커뮤니티 멤버와 소통해보세요!""",
     visibility="direct"
 )
@@ -737,20 +737,22 @@ mastodon.status_post(
    ```
 5. 목록 표시
    ```
-   [대화 편중 유저 (3명)]
+   [대화 편중 유저 (5명)]
 
-   @user1  대화 상대: 2명 | @user2와 80% (20/25개)
-   @user3  대화 상대: 1명 | @user4와 100% (15/15개) ⚠️
-   @user5  대화 상대: 3명 | @user6와 75% (30/40개)
+   @user1  대화 상대: 6명 | @user2와 40% (20/50개)
+   @user3  대화 상대: 4명 | @user4와 50% (15/30개) ⚠️
+   @user5  대화 상대: 5명 | @user6와 35% (14/40개)
+   @user7  대화 상대: 8명 | @user8와 32% (16/50개)
+   @user9  대화 상대: 3명 | @user10와 60% (12/20개) 🔴
    ```
 6. 특정 유저 클릭 → 상세 페이지
    ```
    [user1 상세]
 
    소셜 통계 (최근 48시간)
-   - 대화 상대: 2명
-   - 총 답글: 25개
-   - 최다 대화: @user2 (20회, 80%) ⚠️
+   - 대화 상대: 6명
+   - 총 답글: 50개
+   - 최다 대화: @user2 (20회, 40%) ⚠️
 
    접속 패턴 (최근 7일)
    - 활동 일수: 6일

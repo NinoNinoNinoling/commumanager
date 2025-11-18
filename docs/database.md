@@ -472,9 +472,9 @@ CREATE INDEX idx_user_stats_biased ON user_stats(is_biased);
 ```
 
 **분석 기준:**
-- **고립 (is_isolated)**: 48시간 내 대화 상대 < 3명
+- **고립 (is_isolated)**: 48시간 내 대화 상대 < 7명
 - **비활동 (is_inactive)**: 7일 접속률 < 50%
-- **편중 (is_biased)**: 특정 1명과의 대화 > 70%
+- **편중 (is_biased)**: 특정 1명과의 대화 > 30%
 
 **활용:**
 - 새벽 4시 벌크 분석 시 자동 계산
