@@ -1,0 +1,1191 @@
+openapi: 3.0.0
+info:
+  title: 마녀봇 관리 시스템 API
+  version: 1.0.0
+  description: |
+    마스토돈 커뮤니티 관리 시스템 REST API
+
+    ## 인증
+    현재 버전은 세션 기반 OAuth 인증을 사용합니다.
+
+    ## 에러 응답
+    모든 에러는 다음 형식으로 반환됩니다:
+    ```json
+    {
+      "error": {
+        "code": "ERROR_CODE",
+        "message": "Error message"
+      }
+    }
+    ```
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:5000/api/v1
+    description: Development server
+
+tags:
+  - name: Dashboard
+    description: 대시보드 통계
+  - name: Users
+    description: 유저 관리
+  - name: Transactions
+    description: 거래 내역 및 재화 관리
+  - name: Warnings
+    description: 경고 관리
+  - name: Vacations
+    description: 휴가 관리
+  - name: Calendar
+    description: 캘린더 이벤트 관리
+  - name: Items
+    description: 아이템/상점 관리
+  - name: Settings
+    description: 시스템 설정
+  - name: Admin Logs
+    description: 관리자 로그
+
+paths:
+  /dashboard/stats:
+    get:
+      tags:
+        - Dashboard
+      summary: 대시보드 통계 조회
+      description: 전체 시스템 통계 정보를 조회합니다.
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardStats'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /users:
+    get:
+      tags:
+        - Users
+      summary: 유저 목록 조회
+      description: 페이지네이션, 검색, 필터링을 지원하는 유저 목록 조회
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: search
+          in: query
+          description: 유저명 또는 표시명 검색
+          schema:
+            type: string
+        - name: role
+          in: query
+          description: 역할 필터
+          schema:
+            type: string
+            enum: [user, admin]
+        - name: sort
+          in: query
+          description: 정렬 방식
+          schema:
+            type: string
+            enum: [balance_desc, balance_asc, created_desc, created_asc]
+            default: created_desc
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /users/{mastodon_id}:
+    get:
+      tags:
+        - Users
+      summary: 유저 상세 조회
+      parameters:
+        - name: mastodon_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetail'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /users/{mastodon_id}/role:
+    patch:
+      tags:
+        - Users
+      summary: 유저 역할 변경
+      parameters:
+        - name: mastodon_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - role
+              properties:
+                role:
+                  type: string
+                  enum: [user, admin]
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /users/{mastodon_id}/transactions:
+    get:
+      tags:
+        - Transactions
+      summary: 유저별 거래 내역 조회
+      parameters:
+        - name: mastodon_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: type
+          in: query
+          description: 거래 타입 필터
+          schema:
+            type: string
+            enum: [earn_reply, earn_attendance, spend_item, admin_adjust]
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /transactions/adjust:
+    post:
+      tags:
+        - Transactions
+      summary: 재화 조정 (관리자)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - amount
+              properties:
+                user_id:
+                  type: string
+                amount:
+                  type: integer
+                  description: 양수는 지급, 음수는 차감
+                description:
+                  type: string
+                admin_name:
+                  type: string
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /warnings:
+    get:
+      tags:
+        - Warnings
+      summary: 경고 목록 조회
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  warnings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Warning'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags:
+        - Warnings
+      summary: 경고 생성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - reason
+              properties:
+                user_id:
+                  type: string
+                reason:
+                  type: string
+                count:
+                  type: integer
+                  default: 1
+                admin_name:
+                  type: string
+      responses:
+        '201':
+          description: 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Warning'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /users/{mastodon_id}/warnings:
+    get:
+      tags:
+        - Warnings
+      summary: 유저별 경고 조회
+      parameters:
+        - name: mastodon_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  warnings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Warning'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /vacations:
+    get:
+      tags:
+        - Vacations
+      summary: 휴가 목록 조회
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vacations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Vacation'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags:
+        - Vacations
+      summary: 휴가 생성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_id
+                - start_date
+                - end_date
+              properties:
+                user_id:
+                  type: string
+                start_date:
+                  type: string
+                  format: date
+                end_date:
+                  type: string
+                  format: date
+                start_time:
+                  type: string
+                  example: "09:00"
+                end_time:
+                  type: string
+                  example: "18:00"
+                reason:
+                  type: string
+                admin_name:
+                  type: string
+      responses:
+        '201':
+          description: 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vacation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /vacations/{vacation_id}:
+    delete:
+      tags:
+        - Vacations
+      summary: 휴가 삭제
+      parameters:
+        - name: vacation_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                admin_name:
+                  type: string
+      responses:
+        '200':
+          description: 삭제 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /calendar/events:
+    get:
+      tags:
+        - Calendar
+      summary: 캘린더 이벤트 목록 조회
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: type
+          in: query
+          description: 이벤트 타입 필터
+          schema:
+            type: string
+            enum: [general, holiday, community]
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CalendarEvent'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags:
+        - Calendar
+      summary: 이벤트 생성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                event_type:
+                  type: string
+                  enum: [general, holiday, community]
+                  default: general
+                start_date:
+                  type: string
+                  format: date
+                end_date:
+                  type: string
+                  format: date
+                start_time:
+                  type: string
+                end_time:
+                  type: string
+                admin_name:
+                  type: string
+      responses:
+        '201':
+          description: 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEvent'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /calendar/events/{event_id}:
+    put:
+      tags:
+        - Calendar
+      summary: 이벤트 수정
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                event_type:
+                  type: string
+                  enum: [general, holiday, community]
+                start_date:
+                  type: string
+                  format: date
+                end_date:
+                  type: string
+                  format: date
+                start_time:
+                  type: string
+                end_time:
+                  type: string
+                admin_name:
+                  type: string
+      responses:
+        '200':
+          description: 수정 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags:
+        - Calendar
+      summary: 이벤트 삭제
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                admin_name:
+                  type: string
+      responses:
+        '200':
+          description: 삭제 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /items:
+    get:
+      tags:
+        - Items
+      summary: 아이템 목록 조회
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: is_active
+          in: query
+          description: 활성화 상태 필터
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Item'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    post:
+      tags:
+        - Items
+      summary: 아이템 생성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: integer
+                  default: 0
+                is_active:
+                  type: boolean
+                  default: true
+                admin_name:
+                  type: string
+      responses:
+        '201':
+          description: 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /items/{item_id}:
+    put:
+      tags:
+        - Items
+      summary: 아이템 수정
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: integer
+                is_active:
+                  type: boolean
+                admin_name:
+                  type: string
+      responses:
+        '200':
+          description: 수정 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    delete:
+      tags:
+        - Items
+      summary: 아이템 삭제
+      parameters:
+        - name: item_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                admin_name:
+                  type: string
+      responses:
+        '200':
+          description: 삭제 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /settings:
+    get:
+      tags:
+        - Settings
+      summary: 전체 설정 조회
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  settings:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Setting'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /settings/{key}:
+    put:
+      tags:
+        - Settings
+      summary: 설정 업데이트
+      parameters:
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - value
+              properties:
+                value:
+                  type: string
+                admin_name:
+                  type: string
+      responses:
+        '200':
+          description: 수정 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /admin-logs:
+    get:
+      tags:
+        - Admin Logs
+      summary: 관리자 로그 조회
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: admin_name
+          in: query
+          description: 관리자명 필터
+          schema:
+            type: string
+        - name: action
+          in: query
+          description: 액션 타입 필터
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 성공
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  logs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminLog'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        mastodon_id:
+          type: string
+        username:
+          type: string
+        display_name:
+          type: string
+        role:
+          type: string
+          enum: [user, admin]
+        dormitory:
+          type: string
+        balance:
+          type: integer
+        total_earned:
+          type: integer
+        total_spent:
+          type: integer
+        reply_count:
+          type: integer
+        last_active:
+          type: string
+          format: date-time
+        last_check:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+
+    UserDetail:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            activity_48h:
+              type: integer
+              description: 48시간 내 답글 수
+            is_on_vacation:
+              type: boolean
+            warning_count:
+              type: integer
+
+    Transaction:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: string
+        transaction_type:
+          type: string
+          enum: [earn_reply, earn_attendance, spend_item, admin_adjust]
+        amount:
+          type: integer
+        status_id:
+          type: string
+        item_id:
+          type: integer
+        description:
+          type: string
+        admin_name:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    Warning:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: string
+        reason:
+          type: string
+        count:
+          type: integer
+        admin_name:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    Vacation:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+        end_time:
+          type: string
+        reason:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    CalendarEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        event_type:
+          type: string
+          enum: [general, holiday, community]
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+        end_time:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    Item:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: integer
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+
+    Setting:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+        description:
+          type: string
+
+    AdminLog:
+      type: object
+      properties:
+        id:
+          type: integer
+        admin_name:
+          type: string
+        action:
+          type: string
+        target_user:
+          type: string
+        details:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+    DashboardStats:
+      type: object
+      properties:
+        users:
+          type: object
+          properties:
+            total:
+              type: integer
+            active_24h:
+              type: integer
+            on_vacation:
+              type: integer
+        currency:
+          type: object
+          properties:
+            circulating:
+              type: integer
+            total_earned:
+              type: integer
+            total_spent:
+              type: integer
+        activity:
+          type: object
+          properties:
+            replies_48h:
+              type: integer
+            users_below_threshold:
+              type: integer
+        warnings:
+          type: object
+          properties:
+            total:
+              type: integer
+            this_week:
+              type: integer
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+
+  responses:
+    BadRequest:
+      description: 잘못된 요청
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: INVALID_REQUEST
+                  message:
+                    type: string
+
+    NotFound:
+      description: 리소스를 찾을 수 없음
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: NOT_FOUND
+                  message:
+                    type: string
+
+    InternalError:
+      description: 서버 내부 오류
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    example: INTERNAL_ERROR
+                  message:
+                    type: string

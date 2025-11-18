@@ -209,6 +209,17 @@ __marimo__/
 # Project specific
 *.db
 *.db-journal
+*.db-shm
+*.db-wal
 /backups/
 config_local.py
 .DS_Store
+
+# Bot and admin web specific
+/logs/
+/uploads/
+/temp/
+/data/exports/
+economy.db*
+mastodon_credentials.secret
+client_secret.json
