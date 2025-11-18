@@ -31,8 +31,28 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'web.users' %}active{% endif %}" href="{{ url_for('web.users') }}">
+                            <i class="bi bi-people"></i> 사용자
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'web.events' %}active{% endif %}" href="{{ url_for('web.events') }}">
+                            <i class="bi bi-calendar-event"></i> 이벤트
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'web.items' %}active{% endif %}" href="{{ url_for('web.items') }}">
+                            <i class="bi bi-shop"></i> 상점
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'web.logs' %}active{% endif %}" href="{{ url_for('web.logs') }}">
-                            <i class="bi bi-list-check"></i> 로그 뷰어
+                            <i class="bi bi-list-check"></i> 로그
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'web.settings' %}active{% endif %}" href="{{ url_for('web.settings') }}">
+                            <i class="bi bi-gear"></i> 설정
                         </a>
                     </li>
                 </ul>

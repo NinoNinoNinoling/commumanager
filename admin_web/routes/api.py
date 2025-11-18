@@ -14,42 +14,42 @@ api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 
 def get_dashboard_controller():
     """대시보드 컨트롤러 인스턴스 가져오기"""
-    return DashboardController(current_app.config)
+    return DashboardController()
 
 
 def get_user_controller():
     """사용자 컨트롤러 인스턴스 가져오기"""
-    return UserController(current_app.config)
+    return UserController()
 
 
 def get_warning_controller():
     """경고 컨트롤러 인스턴스 가져오기"""
-    return WarningController(current_app.config)
+    return WarningController()
 
 
 def get_vacation_controller():
     """휴가 컨트롤러 인스턴스 가져오기"""
-    return VacationController(current_app.config)
+    return VacationController()
 
 
 def get_calendar_controller():
     """일정 컨트롤러 인스턴스 가져오기"""
-    return CalendarController(current_app.config)
+    return CalendarController()
 
 
 def get_item_controller():
     """아이템 컨트롤러 인스턴스 가져오기"""
-    return ItemController(current_app.config)
+    return ItemController()
 
 
 def get_setting_controller():
     """설정 컨트롤러 인스턴스 가져오기"""
-    return SettingController(current_app.config)
+    return SettingController()
 
 
 def get_admin_log_controller():
     """관리자 로그 컨트롤러 인스턴스 가져오기"""
-    return AdminLogController(current_app.config)
+    return AdminLogController()
 
 
 # Dashboard

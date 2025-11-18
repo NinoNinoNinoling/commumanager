@@ -22,6 +22,10 @@ app.config.from_object(config[os.getenv('FLASK_ENV', 'default')])
 
 from admin_web.routes.api import api_bp
 from admin_web.routes.web import web_bp
+from admin_web.routes.auth import auth_bp
+
+# Auth Blueprint 등록 (인증)
+app.register_blueprint(auth_bp)
 
 # API Blueprint 등록 (JSON API)
 app.register_blueprint(api_bp)

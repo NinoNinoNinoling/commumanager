@@ -9,13 +9,11 @@ from admin_web.services.user_service import UserService
 class DashboardController:
     """대시보드 컨트롤러"""
 
-    def __init__(self, config):
+    def __init__(self):
         """
         Args:
             config: Flask app config
-        """
-        self.config = config
-        self.user_service = UserService(config['DATABASE_PATH'])
+        """        self.user_service = UserService()
 
     def show_dashboard(self):
         """

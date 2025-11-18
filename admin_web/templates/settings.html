@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}설정 관리 - 마녀봇 관리자{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2">
+                <i class="bi bi-gear"></i> 설정 관리
+            </h1>
+            <p class="text-muted">시스템 설정을 조회하고 관리합니다</p>
+        </div>
+    </div>
+
+    <!-- 검색 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('web.settings') }}" class="row g-3">
+                <div class="col-md-10">
+                    <label for="search" class="form-label">검색</label>
+                    <input type="text" class="form-control" id="search" name="search"
+                           value="{{ search or '' }}" placeholder="설정 키 또는 설명 검색">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> 검색
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 설정 그룹 -->
+    {% if settings %}
+        {% set groups = {} %}
+        {% for setting in settings %}
+            {% set group = setting.key.split('_')[0] %}
+            {% if group not in groups %}
+                {% set _ = groups.update({group: []}) %}
+            {% endif %}
+            {% set _ = groups[group].append(setting) %}
+        {% endfor %}
+
+        {% for group_name, group_settings in groups.items() %}
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-folder"></i>
+                    {{ group_name|upper }} 설정
+                    <span class="badge bg-secondary ms-2">{{ group_settings|length }}개</span>
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 25%;">키</th>
+                                <th style="width: 35%;">값</th>
+                                <th style="width: 25%;">설명</th>
+                                <th style="width: 15%;">수정일</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for setting in group_settings %}
+                            <tr>
+                                <td>
+                                    <code class="text-primary">{{ setting.key }}</code>
+                                </td>
+                                <td>
+                                    <strong>{{ setting.value }}</strong>
+                                </td>
+                                <td>
+                                    <small class="text-muted">{{ setting.description or '-' }}</small>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        {{ setting.updated_at[:10] if setting.updated_at else '-' }}
+                                    </small>
+                                    {% if setting.admin_name %}
+                                        <br><span class="badge bg-secondary">{{ setting.admin_name }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="card">
+            <div class="card-body text-center text-muted py-5">
+                <i class="bi bi-inbox fs-1"></i>
+                <p class="mb-0 mt-3">설정이 없습니다</p>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- 시스템 정보 카드 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="bi bi-info-circle"></i> 시스템 정보
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-5">활동량 체크 주기</dt>
+                        <dd class="col-sm-7">오전 4시, 오후 4시 (12시간 간격)</dd>
+
+                        <dt class="col-sm-5">최소 답글 기준</dt>
+                        <dd class="col-sm-7">48시간 내 20개</dd>
+
+                        <dt class="col-sm-5">재화 지급 비율</dt>
+                        <dd class="col-sm-7">답글 1개당 10원</dd>
+                    </dl>
+                </div>
+                <div class="col-md-6">
+                    <dl class="row">
+                        <dt class="col-sm-5">데이터베이스</dt>
+                        <dd class="col-sm-7">economy.db (SQLite)</dd>
+
+                        <dt class="col-sm-5">인증 방식</dt>
+                        <dd class="col-sm-7">Mastodon OAuth 2.0</dd>
+
+                        <dt class="col-sm-5">관리자 역할</dt>
+                        <dd class="col-sm-7">
+                            <span class="badge bg-warning text-dark">admin</span>
+                            <span class="badge bg-danger">super_admin</span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 페이지네이션 -->
+    {% if pagination and pagination.total_pages > 1 %}
+    <nav aria-label="설정 목록 페이지네이션" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {% if pagination.page == 1 %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('web.settings', page=pagination.page-1, search=search) }}">
+                    이전
+                </a>
+            </li>
+
+            {% for p in range(1, pagination.total_pages + 1) %}
+                {% if p == 1 or p == pagination.total_pages or (p >= pagination.page - 2 and p <= pagination.page + 2) %}
+                <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('web.settings', page=p, search=search) }}">
+                        {{ p }}
+                    </a>
+                </li>
+                {% elif p == pagination.page - 3 or p == pagination.page + 3 %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            <li class="page-item {% if pagination.page == pagination.total_pages %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('web.settings', page=pagination.page+1, search=search) }}">
+                    다음
+                </a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
