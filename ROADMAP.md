@@ -4,6 +4,72 @@
 
 ---
 
+## 🎯 당장 할일 (2시간 테스트 플랜)
+
+### 1단계: 환경 준비 (10분)
+- [ ] 프로젝트 디렉토리로 이동
+- [ ] Python 가상환경 생성 및 활성화
+  ```bash
+  python3 -m venv venv
+  source venv/bin/activate  # Linux/Mac
+  ```
+- [ ] 의존성 설치: `pip install -r requirements.txt`
+- [ ] `.env` 파일 생성 (`.env.example` 복사)
+- [ ] `.env` 편집 - 최소한 `SECRET_KEY`, `MASTODON_*` 설정
+
+### 2단계: 데이터베이스 초기화 (5분)
+- [ ] DB 생성: `python init_db.py`
+- [ ] 테스트 데이터 삽입: `python scripts/seed_test_data.py`
+- [ ] DB 확인:
+  ```bash
+  sqlite3 economy.db "SELECT COUNT(*) FROM users;"
+  sqlite3 economy.db "SELECT COUNT(*) FROM transactions;"
+  ```
+
+### 3단계: Admin Web 서버 실행 (5분)
+- [ ] Flask 서버 시작: `cd admin_web && python app.py`
+- [ ] 브라우저 접속: `http://localhost:5000`
+- [ ] 로그인 페이지 확인
+- [ ] 에러 로그 확인
+
+### 4단계: API 자동 테스트 (20분)
+- [ ] API 테스트 실행: `python scripts/test_all_api.py`
+- [ ] 성공/실패 결과 확인
+- [ ] 실패한 API 목록 기록
+
+### 5단계: 수동 웹 테스트 (40분)
+**OAuth 우회 (테스트용)** - `admin_web/app.py`에 임시 라우트 추가:
+```python
+@app.route('/debug-login')
+def debug_login():
+    session['user_id'] = 'test_admin'
+    session['username'] = 'TestAdmin'
+    return redirect('/dashboard')
+```
+
+**체크리스트:**
+- [ ] `/debug-login` 접속 → 대시보드 이동 확인
+- [ ] 대시보드 - 통계 표시 확인
+- [ ] 사용자 목록 - 테스트 사용자 표시 확인
+- [ ] 사용자 상세 - 거래 내역 확인
+- [ ] 경고 목록 - 경고 생성/삭제 테스트
+- [ ] 휴가 목록 - 휴가 신청/승인 테스트
+- [ ] 이벤트 관리 - 이벤트 생성/수정/삭제 테스트
+- [ ] 상점 - 아이템 생성/수정 테스트
+- [ ] 설정 - 설정값 변경 테스트
+- [ ] 로그 - 관리자 로그 기록 확인
+
+### 6단계: 문제 기록 (30분)
+- [ ] 발견한 에러 문서화
+- [ ] 성능 문제 기록
+- [ ] UI/UX 개선사항 메모
+
+### 7단계: 버그 수정 (시간 남으면)
+- [ ] 심각한 버그 1-2개 수정
+- [ ] 수정 사항 커밋
+
+---
+
 ## ✅ Phase 1: 기본 아키텍처 설계 (완료)
 
 - [x] 프로젝트 구조 설계 (5-layer architecture)
