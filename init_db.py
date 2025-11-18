@@ -267,11 +267,13 @@ def init_database(db_path='economy.db'):
     print("\n기본 설정 삽입 중...")
 
     default_configs = [
-        ('activity_check_period_hours', '48', '활동량 체크 기간 (시간)'),
-        ('activity_check_min_replies', '20', '최소 답글 수'),
-        ('reward_per_replies', '10', 'N개 답글당 재화량'),
-        ('reward_reply_count', '1', '재화 지급 기준 답글 수'),
         ('timezone', 'Asia/Seoul', '타임존'),
+        ('check_times', '04:00,16:00', '활동량 체크 시간 (12시간 간격)'),
+        ('check_period_hours', '48', '체크 기간'),
+        ('min_replies_48h', '20', '최소 답글 수'),
+        ('reward_reply_count', '100', '재화 지급 기준 답글 수 (N개)'),
+        ('reward_per_replies', '10', 'N개당 지급할 재화량 (M원)'),
+        ('last_reward_settlement_time', '2025-01-01 00:00:00', '마지막 재화 정산 시각'),
         ('archive_warning_threshold', '3', '툿 아카이빙 경고 임계값 (N회 이상)'),
         ('admin_account_id', '', '어드민 마스토돈 계정 ID (팔로우 감지용)')
     ]

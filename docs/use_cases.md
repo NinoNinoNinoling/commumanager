@@ -114,62 +114,119 @@ WHERE mastodon_id = ?;
 
 ---
 
-## UC-02: 답글 작성 → 재화 지급
+## UC-02: 답글 재화 일괄 정산
 
 ### 액터
-- 일반 유저
-- 재화봇
+- Celery 스케줄러
 
 ### 전제조건
-- 유저가 DB에 등록되어 있음
-- settings에 `replies_per_reward=1`, `reward_amount=10` 설정됨
+- 현재 시각: 오전 4시 또는 오후 4시 (Asia/Seoul)
+- settings에 `reward_reply_count=100`, `reward_per_replies=10` 설정됨 (100개당 10원)
+- settings에 `last_reward_settlement_time` 존재 (마지막 정산 시각)
 
 ### 기본 흐름
-1. 유저가 마스토돈에서 답글 작성
-2. 재화봇이 Streaming API로 답글 이벤트 수신
-   - notification type: mention 또는 답글
-3. **중복 체크**: transactions 테이블에서 status_id 조회
+1. Celery Beat가 4시/16시(서울 시간)에 태스크 실행
+2. **마지막 정산 시각 조회**
    ```sql
-   SELECT COUNT(*) FROM transactions WHERE status_id = '115567956961536330';
+   SELECT value FROM system_config WHERE key = 'last_reward_settlement_time';
+   -- 결과: '2025-11-18 04:00:00'
    ```
-   - 결과 > 0이면 중복 → 종료
-4. 재화 계산
-   - 답글 1개 → 10원
-5. 트랜잭션 시작
+
+3. **PostgreSQL에서 유저별 답글 수 집계** (마지막 정산 이후)
+   ```sql
+   SELECT
+       account_id,
+       array_agg(id) as status_ids,  -- 답글 ID 목록
+       COUNT(*) as reply_count
+   FROM statuses
+   WHERE in_reply_to_id IS NOT NULL
+     AND created_at > '2025-11-18 04:00:00'
+     AND created_at <= NOW()
+   GROUP BY account_id;
+   ```
+
+4. **각 유저별 처리**
+   ```python
+   for user_data in pg_results:
+       user_id = user_data['account_id']
+       status_ids = user_data['status_ids']
+       reply_count = user_data['reply_count']
+
+       # SQLite에서 이미 지급된 답글 확인
+       processed_ids = get_processed_status_ids(user_id, status_ids)
+
+       # 미지급 답글만 필터링
+       new_status_ids = [sid for sid in status_ids if sid not in processed_ids]
+       new_reply_count = len(new_status_ids)
+
+       # 재화 계산: (답글 수 / 100) * 10원
+       reward_amount = (new_reply_count // 100) * 10
+
+       if reward_amount > 0:
+           # 재화 지급 및 기록
+           settle_reward(user_id, new_status_ids, new_reply_count, reward_amount)
+   ```
+
+5. **재화 지급 트랜잭션**
    ```sql
    BEGIN TRANSACTION;
 
    -- 재화 지급
    UPDATE users
-   SET balance = balance + 10,
-       total_earned = total_earned + 10
+   SET currency = currency + 10,
+       updated_at = CURRENT_TIMESTAMP
    WHERE mastodon_id = '115565546282398331';
 
-   -- 거래 기록
+   -- 거래 기록 (답글 ID 목록 저장)
    INSERT INTO transactions
-   (user_id, transaction_type, amount, status_id, description)
+   (user_id, amount, balance_after, type, description, related_id, created_at)
    VALUES
-   ('115565546282398331', 'earn_reply', 10, '115567956961536330', '답글 작성 보상');
+   ('115565546282398331', 10, 110, 'earn_reply_batch',
+    '답글 정산 (100개)', '["status_id_1","status_id_2",...]', CURRENT_TIMESTAMP);
 
    COMMIT;
    ```
-6. Redis 캐시 무효화 (선택)
+
+6. **정산 시각 업데이트**
+   ```sql
+   UPDATE system_config
+   SET value = CURRENT_TIMESTAMP
+   WHERE key = 'last_reward_settlement_time';
+   ```
+
+7. **정산 로그 기록**
+   ```python
+   logger.info(f"Reward settlement completed: {processed_users} users, {total_reward} total reward")
+   ```
 
 ### 대안 흐름
-**2-1. 중복 답글**
-- status_id가 이미 존재하면 지급하지 않음
-- 로그만 기록 (중복 시도)
+
+**3-1. PostgreSQL 연결 실패**
+- 재시도 (최대 3회)
+- 실패 시 에러 로그 + 관리자 알림
+- 다음 정산 시간에 재시도
+
+**4-1. 유저가 economy.db에 없음**
+- Lazy Creation 실행
+- PostgreSQL에서 유저 정보 조회 → SQLite 생성
+- 재화 지급 계속
 
 **5-1. 트랜잭션 실패**
 - ROLLBACK
 - 에러 로그 기록
-- 재시도 큐에 등록 (선택)
+- 해당 유저만 건너뛰고 다음 유저 처리
+- 다음 정산 때 재시도
+
+**5-2. 재화 지급 없음 (100개 미만)**
+- 재화 지급 안 함
+- transactions 기록 안 함
+- 다음 정산 때 누적 처리
 
 ### 후행조건
-- users.balance += 10
-- users.total_earned += 10
-- transactions 테이블에 기록 추가
-- 중복 답글은 처리 안 됨
+- 정산 기간 내 답글 작성한 유저들에게 재화 지급됨
+- transactions 테이블에 일괄 정산 기록 추가
+- last_reward_settlement_time 업데이트됨
+- 중복 지급 방지됨 (related_id에 status_id 목록 저장)
 
 ---
 
