@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}경고 관리 - 마녀봇 관리자{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2">
+                <i class="bi bi-exclamation-triangle"></i> 경고 관리
+            </h1>
+            <p class="text-muted">사용자 경고를 조회하고 관리합니다</p>
+        </div>
+    </div>
+
+    <!-- 통계 카드 -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">전체 경고</h6>
+                            <h2 class="mb-0">{{ pagination.total or 0 }}</h2>
+                        </div>
+                        <div class="text-danger fs-1">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">이번 주 경고</h6>
+                            <h2 class="mb-0">{{ stats.this_week or 0 }}</h2>
+                        </div>
+                        <div class="text-warning fs-1">
+                            <i class="bi bi-calendar-week"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-2">오늘 경고</h6>
+                            <h2 class="mb-0">{{ stats.today or 0 }}</h2>
+                        </div>
+                        <div class="text-info fs-1">
+                            <i class="bi bi-calendar-day"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 검색 및 필터 -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('web.warnings') }}" class="row g-3">
+                <div class="col-md-6">
+                    <label for="user_id" class="form-label">사용자 검색</label>
+                    <input type="text" class="form-control" id="user_id" name="user_id"
+                           value="{{ user_id or '' }}" placeholder="Mastodon ID 또는 사용자명">
+                </div>
+                <div class="col-md-4">
+                    <label for="date_from" class="form-label">기간</label>
+                    <div class="input-group">
+                        <input type="date" class="form-control" id="date_from" name="date_from"
+                               value="{{ date_from or '' }}">
+                        <span class="input-group-text">~</span>
+                        <input type="date" class="form-control" name="date_to"
+                               value="{{ date_to or '' }}">
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> 검색
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 경고 목록 -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="bi bi-list"></i> 경고 목록
+            </h5>
+            <span class="badge bg-danger">총 {{ pagination.total }}건</span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>사용자</th>
+                            <th>사유</th>
+                            <th>발생일시</th>
+                            <th>처리 관리자</th>
+                            <th>액션</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if warnings %}
+                            {% for warning in warnings %}
+                            <tr>
+                                <td>{{ warning.id }}</td>
+                                <td>
+                                    <a href="{{ url_for('web.user_detail', mastodon_id=warning.mastodon_id) }}"
+                                       class="text-decoration-none">
+                                        @{{ warning.username or warning.mastodon_id }}
+                                    </a>
+                                </td>
+                                <td>{{ warning.reason }}</td>
+                                <td>
+                                    <small class="text-muted">{{ warning.created_at }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">{{ warning.admin_name or '시스템' }}</span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('web.user_detail', mastodon_id=warning.mastodon_id) }}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-eye"></i> 사용자 상세
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox fs-2"></i>
+                                    <p class="mb-0 mt-2">경고 내역이 없습니다</p>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 페이지네이션 -->
+    {% if pagination and pagination.total_pages > 1 %}
+    <nav aria-label="경고 목록 페이지네이션" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {% if pagination.page == 1 %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('web.warnings', page=pagination.page-1, user_id=user_id, date_from=date_from, date_to=date_to) }}">
+                    이전
+                </a>
+            </li>
+
+            {% for p in range(1, pagination.total_pages + 1) %}
+                {% if p == 1 or p == pagination.total_pages or (p >= pagination.page - 2 and p <= pagination.page + 2) %}
+                <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('web.warnings', page=p, user_id=user_id, date_from=date_from, date_to=date_to) }}">
+                        {{ p }}
+                    </a>
+                </li>
+                {% elif p == pagination.page - 3 or p == pagination.page + 3 %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            <li class="page-item {% if pagination.page == pagination.total_pages %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('web.warnings', page=pagination.page+1, user_id=user_id, date_from=date_from, date_to=date_to) }}">
+                    다음
+                </a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

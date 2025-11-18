@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.display_name or user.username }} - 사용자 상세{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- 헤더 -->
+    <div class="row mb-4">
+        <div class="col">
+            <a href="{{ url_for('web.users') }}" class="btn btn-outline-secondary mb-3">
+                <i class="bi bi-arrow-left"></i> 목록으로
+            </a>
+            <h1 class="h2">
+                <i class="bi bi-person-circle"></i> {{ user.display_name or user.username }}
+            </h1>
+            <p class="text-muted">@{{ user.username }} ({{ user.mastodon_id }})</p>
+        </div>
+    </div>
+
+    <!-- 사용자 기본 정보 -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-wallet2 fs-1 text-success mb-3"></i>
+                    <h6 class="text-muted mb-1">잔액</h6>
+                    <h3 class="mb-0">{{ user.balance }}원</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-exclamation-triangle fs-1 text-warning mb-3"></i>
+                    <h6 class="text-muted mb-1">경고 횟수</h6>
+                    <h3 class="mb-0">{{ user.warning_count }}회</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-shield-check fs-1 text-primary mb-3"></i>
+                    <h6 class="text-muted mb-1">역할</h6>
+                    <h3 class="mb-0">
+                        {% if user.role == 'super_admin' %}
+                            <span class="badge bg-danger">최고 관리자</span>
+                        {% elif user.role == 'admin' %}
+                            <span class="badge bg-warning text-dark">관리자</span>
+                        {% else %}
+                            <span class="badge bg-secondary">사용자</span>
+                        {% endif %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <i class="bi bi-suitcase fs-1 text-info mb-3"></i>
+                    <h6 class="text-muted mb-1">휴가 상태</h6>
+                    <h3 class="mb-0">
+                        {% if user.is_on_vacation %}
+                            <span class="badge bg-info">휴가 중</span>
+                        {% else %}
+                            <span class="badge bg-success">활동 중</span>
+                        {% endif %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 상세 정보 -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> 사용자 정보</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Mastodon ID</dt>
+                        <dd class="col-sm-8">{{ user.mastodon_id }}</dd>
+
+                        <dt class="col-sm-4">사용자명</dt>
+                        <dd class="col-sm-8">@{{ user.username }}</dd>
+
+                        <dt class="col-sm-4">표시명</dt>
+                        <dd class="col-sm-8">{{ user.display_name or '-' }}</dd>
+
+                        <dt class="col-sm-4">가입일</dt>
+                        <dd class="col-sm-8">{{ user.created_at or '-' }}</dd>
+
+                        <dt class="col-sm-4">최종 활동</dt>
+                        <dd class="col-sm-8">{{ user.last_activity or '-' }}</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-graph-up"></i> 활동 통계</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted text-center py-5">
+                        상세 활동 통계는 추후 구현 예정입니다
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 경고 내역 -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> 경고 내역</h5>
+            <span class="badge bg-danger">{{ warnings|length }}건</span>
+        </div>
+        <div class="card-body">
+            {% if warnings %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>발생일</th>
+                                <th>사유</th>
+                                <th>처리 관리자</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for warning in warnings %}
+                            <tr>
+                                <td>{{ warning.created_at }}</td>
+                                <td>{{ warning.reason }}</td>
+                                <td>{{ warning.admin_name or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted text-center py-3 mb-0">
+                    경고 내역이 없습니다
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 휴가 내역 -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-suitcase"></i> 휴가 내역</h5>
+            <span class="badge bg-info">{{ vacations|length }}건</span>
+        </div>
+        <div class="card-body">
+            {% if vacations %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>시작일</th>
+                                <th>종료일</th>
+                                <th>사유</th>
+                                <th>처리 관리자</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for vacation in vacations %}
+                            <tr>
+                                <td>{{ vacation.start_date }} {{ vacation.start_time or '' }}</td>
+                                <td>{{ vacation.end_date }} {{ vacation.end_time or '' }}</td>
+                                <td>{{ vacation.reason or '-' }}</td>
+                                <td>{{ vacation.admin_name or '-' }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted text-center py-3 mb-0">
+                    휴가 내역이 없습니다
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 거래 내역 -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-cash-stack"></i> 최근 거래 내역</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted text-center py-5 mb-0">
+                거래 내역은 추후 구현 예정입니다
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

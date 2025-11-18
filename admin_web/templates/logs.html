@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+
+{% block title %}관리자 로그 - 마녀봇 관리자{% endblock %}
+
+{% block extra_css %}
+<style>
+    .log-viewer {
+        background-color: #1e1e1e;
+        color: #d4d4d4;
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        padding: 20px;
+        border-radius: 5px;
+        overflow-x: auto;
+        max-height: 600px;
+        overflow-y: auto;
+    }
+
+    .log-line {
+        padding: 4px 0;
+        border-bottom: 1px solid #333;
+        display: flex;
+        align-items: center;
+    }
+
+    .log-line:hover {
+        background-color: #2d2d30;
+    }
+
+    .log-timestamp {
+        color: #569cd6;
+        min-width: 180px;
+        margin-right: 10px;
+    }
+
+    .log-admin {
+        color: #4ec9b0;
+        min-width: 120px;
+        margin-right: 10px;
+    }
+
+    .log-action {
+        color: #dcdcaa;
+        min-width: 150px;
+        margin-right: 10px;
+        font-weight: bold;
+    }
+
+    .log-action.create_warning { color: #f48771; }
+    .log-action.create_vacation { color: #4fc1ff; }
+    .log-action.delete_vacation { color: #f48771; }
+    .log-action.create_event { color: #b5cea8; }
+    .log-action.update_event { color: #dcdcaa; }
+    .log-action.delete_event { color: #f48771; }
+    .log-action.create_item { color: #b5cea8; }
+    .log-action.update_item { color: #dcdcaa; }
+    .log-action.delete_item { color: #f48771; }
+    .log-action.update_setting { color: #c586c0; }
+    .log-action.adjust_balance { color: #4ec9b0; }
+    .log-action.change_role { color: #569cd6; }
+
+    .log-target {
+        color: #9cdcfe;
+        margin-right: 10px;
+    }
+
+    .log-details {
+        color: #ce9178;
+        flex: 1;
+    }
+
+    .filter-section {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+
+    .filter-group {
+        margin-bottom: 10px;
+    }
+
+    .filter-group label {
+        font-weight: 600;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .stats-card h5 {
+        margin: 0;
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    .stats-card .value {
+        font-size: 28px;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+
+    .action-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .no-logs {
+        text-align: center;
+        padding: 40px;
+        color: #999;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="bi bi-list-check"></i> 관리자 로그</h2>
+            <p class="text-muted">시스템 관리자 활동 로그를 실시간으로 모니터링합니다</p>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <h5>총 로그</h5>
+                <div class="value">{{ pagination.total }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <h5>현재 페이지</h5>
+                <div class="value">{{ pagination.page }} / {{ pagination.total_pages }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <h5>관리자 수</h5>
+                <div class="value">{{ unique_admins|length }}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <h5>액션 종류</h5>
+                <div class="value">{{ unique_actions|length }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-section">
+        <form id="filterForm" method="GET" action="{{ url_for('logs') }}">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="filter-group">
+                        <label>관리자 필터</label>
+                        <select name="admin_name" class="form-select" onchange="this.form.submit()">
+                            <option value="">전체</option>
+                            {% for admin in unique_admins %}
+                            <option value="{{ admin }}" {% if selected_admin == admin %}selected{% endif %}>
+                                {{ admin }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="filter-group">
+                        <label>액션 타입 필터 (체크박스)</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for action in unique_actions %}
+                            <div class="form-check">
+                                <input class="form-check-input action-filter" type="checkbox"
+                                       value="{{ action }}" id="action_{{ loop.index }}"
+                                       {% if action in selected_actions %}checked{% endif %}>
+                                <label class="form-check-label" for="action_{{ loop.index }}">
+                                    <span class="action-badge" style="background-color: {{ action_colors.get(action, '#6c757d') }};">
+                                        {{ action }}
+                                    </span>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <i class="bi bi-funnel"></i> 필터 적용
+                    </button>
+                    <a href="{{ url_for('logs') }}" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-x-circle"></i> 초기화
+                    </a>
+                    <span class="ms-3 text-muted">
+                        총 {{ pagination.total }}개의 로그
+                    </span>
+                </div>
+            </div>
+            <input type="hidden" name="actions" id="actionsInput" value="{{ ','.join(selected_actions) }}">
+            <input type="hidden" name="page" value="1">
+        </form>
+    </div>
+
+    <!-- Log Viewer -->
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <i class="bi bi-terminal"></i> 로그 뷰어 (라인별)
+        </div>
+        <div class="card-body p-0">
+            <div class="log-viewer">
+                {% if logs %}
+                    {% for log in logs %}
+                    <div class="log-line" data-action="{{ log.action }}">
+                        <span class="log-timestamp">{{ log.timestamp }}</span>
+                        <span class="log-admin">{{ log.admin_name }}</span>
+                        <span class="log-action {{ log.action }}">{{ log.action }}</span>
+                        {% if log.target_user %}
+                        <span class="log-target">→ {{ log.target_user }}</span>
+                        {% endif %}
+                        <span class="log-details">{{ log.details or '-' }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-logs">
+                        <i class="bi bi-inbox" style="font-size: 48px;"></i>
+                        <p>필터 조건에 맞는 로그가 없습니다.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.total_pages > 1 %}
+    <nav aria-label="로그 페이지네이션" class="mt-3">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {% if pagination.page == 1 %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('logs', page=pagination.page-1, admin_name=selected_admin, actions=','.join(selected_actions)) }}">
+                    이전
+                </a>
+            </li>
+
+            {% for p in range(1, pagination.total_pages + 1) %}
+                {% if p == 1 or p == pagination.total_pages or (p >= pagination.page - 2 and p <= pagination.page + 2) %}
+                <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('logs', page=p, admin_name=selected_admin, actions=','.join(selected_actions)) }}">
+                        {{ p }}
+                    </a>
+                </li>
+                {% elif p == pagination.page - 3 or p == pagination.page + 3 %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+                {% endif %}
+            {% endfor %}
+
+            <li class="page-item {% if pagination.page == pagination.total_pages %}disabled{% endif %}">
+                <a class="page-link" href="{{ url_for('logs', page=pagination.page+1, admin_name=selected_admin, actions=','.join(selected_actions)) }}">
+                    다음
+                </a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 액션 필터 체크박스 처리
+    document.querySelectorAll('.action-filter').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const selectedActions = Array.from(document.querySelectorAll('.action-filter:checked'))
+                .map(cb => cb.value);
+            document.getElementById('actionsInput').value = selectedActions.join(',');
+
+            // 실시간 필터링 (클라이언트 사이드)
+            filterLogs(selectedActions);
+        });
+    });
+
+    function filterLogs(selectedActions) {
+        const logLines = document.querySelectorAll('.log-line');
+
+        if (selectedActions.length === 0) {
+            // 모든 로그 표시
+            logLines.forEach(line => line.style.display = 'flex');
+        } else {
+            // 선택된 액션만 표시
+            logLines.forEach(line => {
+                const action = line.getAttribute('data-action');
+                if (selectedActions.includes(action)) {
+                    line.style.display = 'flex';
+                } else {
+                    line.style.display = 'none';
+                }
+            });
+        }
+    }
+
+    // 페이지 로드 시 필터 적용
+    window.addEventListener('DOMContentLoaded', function() {
+        const selectedActions = Array.from(document.querySelectorAll('.action-filter:checked'))
+            .map(cb => cb.value);
+        if (selectedActions.length > 0) {
+            filterLogs(selectedActions);
+        }
+    });
+</script>
+{% endblock %}

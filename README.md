@@ -1,213 +1,125 @@
-# 마스토돈 경제 시스템 개발 문서
+# 마녀봇 (Witch Bot)
 
-**버전**: 1.1 (피드백 반영)  
-**작성일**: 2024년 11월  
-**대상**: 휘핑 에디션 마스토돈 + 활동량 기반 경제 시스템
+휘핑 에디션 마스토돈용 활동량 기반 자동 운영 관리 시스템
 
----
+## 개요
 
-## 📚 문서 목록
+마스토돈 커뮤니티를 위한 활동량 기반 자동 관리 봇. 답글 감지로 재화를 지급하고, 활동량을 체크하여 경고를 발송합니다.
 
-### Part 1: 프로젝트 개요 및 요구사항
-**파일**: [01-project-overview.md](01-project-overview.md)
+## 핵심 기능
+1. 재화 지급 (하루 2회 정산, 오전 4시/오후 4시)
+2. 출석 체크 (매일 오전 10시, 자정까지 출석 가능)
+3. 활동량 체크 (소셜 분석, 경고 발송)
+4. 휴식 관리 (활동량 체크 제외)
+5. 일정 관리 (이벤트, 전역 휴식기간)
+6. 상점 시스템 (아이템 구매)
 
-**내용**:
-- 프로젝트 목표 및 규모
-- 휘핑 에디션 소개
-- 핵심 요구사항 (1~5순위)
-- 제약 조건 및 성공 기준
+## 기술 스택
+- 마스토돈: Ruby 3.2.2 (휘핑 에디션)
+- 봇: Python 3.9+
+- 웹: Flask 3.x + Bootstrap 5
+- DB: PostgreSQL (마스토돈, 읽기 전용) + SQLite (economy.db)
+- 캐시/큐: Redis + Celery
+- 인프라: GCP (Google Cloud Platform)
 
-**이런 분께 추천**:
-- 프로젝트 처음 이해하실 때
-- 요구사항 확인하실 때
-- 팀원에게 설명하실 때
-
----
-
-### Part 2: 기술 스택 및 인프라
-**파일**: [02-tech-stack.md](02-tech-stack.md)
-
-**내용**:
-- 서버 인프라 (오라클 클라우드)
-- 기술 스택 (Ruby, Python, Flask)
-- DB 전략 (PostgreSQL + SQLite)
-- 네트워크 구성 및 보안
-
-**이런 분께 추천**:
-- 기술 선택 근거 궁금하실 때
-- 서버 준비하실 때
-- 인프라 이해하실 때
-
----
-
-### Part 3: 시스템 아키텍처
-**파일**: [03-architecture.md](03-architecture.md)
-
-**내용**:
-- 전체 시스템 구조도
-- 데이터 흐름 (재화 지급, 활동량 체크)
-- 컴포넌트 상세 설명
-- 성능 고려사항
-
-**이런 분께 추천**:
-- 시스템 전체 그림 보실 때
-- 각 모듈 어떻게 작동하는지 궁금하실 때
-- 트러블슈팅 하실 때
-
----
-
-### Part 4: 데이터베이스 설계
-**파일**: [04-database.md](04-database.md)
-
-**내용**:
-- SQLite 테이블 상세 (9개)
-- PostgreSQL 참조 방식
-- DB 초기화 스크립트
-- 백업 및 마이그레이션
-
-**이런 분께 추천**:
-- DB 구조 이해하실 때
-- 테이블 추가/수정하실 때
-- 데이터 조회 쿼리 짜실 때
-
----
-
-### Part 5: 관리자 웹 UX
-**파일**: [05-admin-web.md](05-admin-web.md)
-
-**내용**:
-- 전체 메뉴 구조
-- 화면별 상세 설계 (6개 페이지)
-- 사용자 경험 원칙
-- Flask 라우트
-
-**이런 분께 추천**:
-- 관리자 웹 디자인하실 때
-- UI 개선하실 때
-- 새 기능 추가하실 때
-
----
-
-### Part 6: 개발 로드맵
-**파일**: [06-roadmap.md](06-roadmap.md)
-
-**내용**:
-- 6단계 개발 일정
-- Phase별 작업 내용
-- 완료 조건 및 체크리스트
-- 위험 요소 및 대응
-
-**이런 분께 추천**:
-- 개발 계획 세우실 때
-- 진행 상황 체크하실 때
-- 일정 관리하실 때
-
----
-
-## 🎯 빠른 참조
-
-### 핵심 숫자
+## 프로젝트 구조
 
 ```
-규모: 30~50명
-총 개발 기간: 16~24일 (서버 준비 후)
-활동량 체크: 하루 2회 (5시, 12시)
-체크 기준: 48시간 내 20개 답글
-재화 지급: 커스텀 (예: 1개당 10원)
+commumanager/
+├── admin_web/              # Flask 관리자 웹 애플리케이션
+│   ├── app.py             # 애플리케이션 진입점
+│   ├── config.py          # 설정 파일
+│   ├── models/            # 데이터 모델 (Model)
+│   ├── repositories/      # 데이터베이스 접근 (Repository)
+│   ├── services/          # 비즈니스 로직 (Service)
+│   ├── controllers/       # 비즈니스 로직 처리 (Controller)
+│   ├── routes/            # Flask Blueprint (Route)
+│   ├── static/            # 정적 파일 (CSS, JS, 이미지)
+│   ├── templates/         # Jinja2 템플릿
+│   └── utils/             # 유틸리티 함수
+│
+├── bot/                   # 관리 봇 시스템 (4개 계정)
+│   ├── admin_bot.py       # 총괄계정 (팔로우 등록, 공지)
+│   ├── story_bot.py       # 스토리계정 (콘텐츠 발행)
+│   ├── system_bot.py      # 시스템계정 (재화, 출석, 명령어)
+│   ├── supervisor_bot.py  # 감독봇 (분석, 경고, 알림)
+│   ├── database.py        # 데이터베이스 유틸
+│   └── utils.py           # 봇 유틸리티
+│
+├── docs/                  # 프로젝트 문서
+│   ├── project_overview.md
+│   ├── bot_architecture.md
+│   ├── features.md
+│   ├── use_cases.md
+│   ├── database.md
+│   ├── admin_oauth.md
+│   ├── server_setup.md
+│   └── 로드맵.md
+│
+├── .env.example           # 환경 변수 예시
+├── .gitignore             # Git 제외 파일 목록
+├── requirements.txt       # Python 의존성
+└── README.md              # 프로젝트 소개
 ```
 
-### 주요 기술
+## 백엔드 아키텍처
+
+Flask 관리자 웹은 **Model - Repository - Service - Controller - Route** 5계층 아키텍처를 사용합니다.
 
 ```
-마스토돈: Ruby 3.2.2, Node.js 16.20.2
-봇: Python 3.9+
-웹: Flask 3.x + Bootstrap 5
-DB: PostgreSQL (읽기) + SQLite (쓰기)
-서버: 오라클 클라우드 (4코어, 24GB RAM)
+HTTP Request → Route → Controller → Service → Repository → Database
 ```
 
-### 봇 명령어
+## 설치 및 실행
 
-```
-@봇 내재화              → 보유 재화 조회
-@봇 상점                → 구매 가능 아이템
-@봇 구매 [아이템명]     → 아이템 구매
-@봇 내아이템            → 보유 아이템 목록
-@봇 휴식 [날짜]까지     → 휴식 등록
-@봇 게임 [종류] [금액]  → 게임 시작 (추후)
-```
-
-### 우선순위
-
-```
-1순위: 활동량 체크 + 경고 (필수)
-2+3순위: 재화 지급 + 상점 (필수, 동시 구현)
-4순위: 아이템 양도 (선택)
-5순위: 게임 시스템 (선택)
+### 1. 가상환경 생성 및 활성화
+```bash
+python3 -m venv venv
+source venv/bin/activate  # Linux/Mac
+# or
+venv\Scripts\activate     # Windows
 ```
 
----
+### 2. 의존성 설치
+```bash
+pip install -r requirements.txt
+```
 
-## 🔧 트러블슈팅
+### 3. 환경 변수 설정
+```bash
+cp .env.example .env
+# .env 파일을 편집하여 실제 값 입력
+```
 
-### 자주 발생하는 문제
+### 4. 데이터베이스 초기화
+```bash
+python init_db.py economy.db
+```
 
-**Q: 봇이 답글을 감지 안 해요**
-- systemd 서비스 상태 확인: `systemctl status economy-bot`
-- 로그 확인: `tail -f /home/ubuntu/economy_bot/logs/reward.log`
-- Mastodon API 토큰 확인
+### 5. Flask 개발 서버 실행
+```bash
+cd admin_web
+python app.py
+```
 
-**Q: 활동량 체크가 안 돼요**
-- 크론 실행 확인: `crontab -l`
-- 수동 실행: `python3 activity_checker.py`
-- PostgreSQL 연결 확인
+## 문서
 
-**Q: 관리자 웹 접속 안 돼요**
-- Flask 서비스 상태 확인
-- Nginx 설정 확인: `nginx -t`
-- OAuth 설정 확인
+### 개요
+- [프로젝트 개요](docs/project_overview.md)
+- [봇 구조](docs/bot_architecture.md) - 4개 계정 구조
+- [기능 목록](docs/features.md)
+- [유즈케이스](docs/use_cases.md)
 
-**Q: DB 오류가 나요**
-- SQLite 무결성 체크: `sqlite3 economy.db "PRAGMA integrity_check;"`
-- WAL 모드 확인
-- 백업에서 복구
+### 기술
+- [데이터베이스 설계](docs/database.md)
+- [관리자 OAuth](docs/admin_oauth.md)
+- [서버 구축](docs/server_setup.md)
 
----
+### 개발
+- [개발 로드맵](docs/로드맵.md)
 
-## 📞 지원
+## 디렉토리 구조
 
-### 문서 관련
-- 문서 오류: 이슈 등록
-- 개선 제안: Pull Request
-
-### 기술 지원
-- 기술 관리자: [연락처]
-- 개발자: [연락처]
-
----
-
-## 📝 변경 이력
-
-| 버전 | 날짜 | 변경 내용 |
-|------|------|-----------|
-| 1.1 | 2024-11 | 피드백 반영 (벌크 처리, 휴식계, DB 설정) |
-| 1.0 | 2024-11 | 초안 작성 |
-
----
-
-## ✅ 다음 단계
-
-**지금 하셔야 할 것**:
-1. [ ] 오라클 계정 생성 (또는 대안 호스팅)
-2. [ ] 팀원과 요구사항 최종 확인
-3. [ ] 도메인 준비 (DuckDNS)
-4. [ ] Phase 1 시작 (서버 구축)
-
-**이 문서를**:
-- 팀원들과 공유하세요
-- 개발 중 자주 참조하세요
-- 필요에 따라 수정하세요
-
----
-
-**Happy Coding! 🚀**
+- `admin_web/` - Flask 관리자 웹
+- `bot/` - 마스토돈 봇 시스템
+- `docs/` - 프로젝트 문서
