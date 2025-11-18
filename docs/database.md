@@ -255,7 +255,9 @@ CREATE TABLE vacation (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL,
     start_date DATE NOT NULL,
+    start_time TIME,
     end_date DATE NOT NULL,
+    end_time TIME,
     reason TEXT,
     approved BOOLEAN DEFAULT 1,
     registered_by TEXT,
@@ -264,6 +266,10 @@ CREATE TABLE vacation (
 );
 CREATE INDEX idx_vacation_dates ON vacation(start_date, end_date);
 ```
+
+**시간 필드**:
+- `start_time`, `end_time`: NULL이면 전일 (00:00~23:59)
+- 예: 2025-12-25 14:00 ~ 2025-12-26 18:00
 
 ### items
 ```sql
@@ -314,6 +320,7 @@ CREATE TABLE scheduled_posts (
     content TEXT NOT NULL,
     scheduled_at TIMESTAMP NOT NULL,
     visibility TEXT DEFAULT 'public',
+    is_public BOOLEAN DEFAULT 1,
     status TEXT DEFAULT 'pending',
     mastodon_scheduled_id TEXT,
     created_by TEXT NOT NULL,
@@ -323,16 +330,19 @@ CREATE TABLE scheduled_posts (
 CREATE INDEX idx_scheduled_posts_scheduled ON scheduled_posts(scheduled_at);
 CREATE INDEX idx_scheduled_posts_status ON scheduled_posts(status);
 CREATE INDEX idx_scheduled_posts_type ON scheduled_posts(post_type);
+CREATE INDEX idx_scheduled_posts_public ON scheduled_posts(is_public);
 ```
 
 **post_type**: `story` (스토리 계정), `announcement` (공지 계정), `admin_notice` (관리자 봇, private)
+**is_public**: 1 (공개, `@봇 공지`에 표시), 0 (비공개, 관리자 전용)
 
 **계정 설정**:
 ```sql
 INSERT INTO settings (key, value, description) VALUES
 ('story_account', 'story_account_name', '스토리 계정명'),
 ('announcement_account', 'notice_account_name', '공지 계정명'),
-('admin_bot_account', 'admin_bot_name', '관리자 봇 계정명');
+('admin_bot_account', 'admin_bot_name', '관리자 봇 계정명'),
+('attendance_tweet_template', '🌟 오늘의 출석 체크!\n이 트윗에 답글 달아주세요!', '출석 트윗 템플릿');
 ```
 
 ### attendances
@@ -382,7 +392,9 @@ CREATE TABLE calendar_events (
     title TEXT NOT NULL,
     description TEXT,
     event_date DATE NOT NULL,
+    start_time TIME,
     end_date DATE,
+    end_time TIME,
     event_type TEXT DEFAULT 'event',
     is_global_vacation BOOLEAN DEFAULT 0,
     created_by TEXT NOT NULL,
@@ -394,7 +406,12 @@ CREATE INDEX idx_calendar_events_vacation ON calendar_events(is_global_vacation)
 ```
 
 **event_type**: `event` (일반), `holiday` (공휴일), `notice` (공지)
-**기간제**: `end_date = NULL` (단일), `end_date != NULL` (기간)
+**기간제**:
+- `end_date = NULL`: 단일 날짜 (event_date 하루)
+- `end_date != NULL`: 기간 (event_date ~ end_date)
+**시간**:
+- `start_time`, `end_time`: NULL이면 전일 (00:00~23:59)
+- 예: 2025-12-25 19:00 ~ 2025-12-25 22:00 (연말 파티)
 **전역 휴식기간**: `is_global_vacation=1` (출석 트윗 비활성화)
 
 ### user_stats

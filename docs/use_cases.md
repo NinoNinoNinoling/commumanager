@@ -187,9 +187,10 @@
    ```
 6. 휴식 등록
    ```sql
-   INSERT INTO vacation (user_id, start_date, end_date, reason, approved, registered_by)
-   VALUES (?, ?, ?, '봇 자동 등록', 1, 'bot');
+   INSERT INTO vacation (user_id, start_date, start_time, end_date, end_time, reason, approved, registered_by)
+   VALUES (?, ?, NULL, ?, NULL, '봇 자동 등록', 1, 'bot');
    ```
+   - start_time, end_time = NULL (전일 00:00~23:59)
 7. 확인 DM 발송
    ```python
    mastodon.status_post(
@@ -226,17 +227,19 @@
 ### 흐름 1: 일반 이벤트 등록
 ```sql
 INSERT INTO calendar_events
-(title, description, event_date, end_date, event_type, is_global_vacation, created_by)
-VALUES ('커뮤니티 모임', '월말 정기 모임', '2025-11-30', NULL, 'event', 0, 'admin_user');
+(title, description, event_date, start_time, end_date, end_time, event_type, is_global_vacation, created_by)
+VALUES ('커뮤니티 모임', '월말 정기 모임', '2025-11-30', '19:00', '2025-11-30', '22:00', 'event', 0, 'admin_user');
 ```
 - end_date = NULL: 단일 날짜
 - end_date != NULL: 기간제 (예: 12/20~12/31)
+- start_time, end_time = NULL: 전일 (00:00~23:59)
+- 예: 2025-11-30 19:00 ~ 22:00 (연말 파티)
 
 ### 흐름 2: 전역 휴식기간 설정
 ```sql
 INSERT INTO calendar_events
-(title, description, event_date, end_date, event_type, is_global_vacation, created_by)
-VALUES ('크리스마스 휴식기간', '연말 커뮤니티 휴식', '2025-12-25', NULL, 'holiday', 1, 'admin_user');
+(title, description, event_date, start_time, end_date, end_time, event_type, is_global_vacation, created_by)
+VALUES ('크리스마스 휴식기간', '연말 커뮤니티 휴식', '2025-12-25', NULL, '2025-12-25', NULL, 'holiday', 1, 'admin_user');
 ```
 
 ### 흐름 3: 수정/삭제
@@ -267,12 +270,13 @@ VALUES ('크리스마스 휴식기간', '연말 커뮤니티 휴식', '2025-12-2
 4. DM 응답
    ```
    📅 일정 (~ 12/25 전역 휴식 전까지)
-   
-   11/20 (수) 🎉 커뮤니티 모임
+
+   11/20 (수) 19:00-22:00 🎉 커뮤니티 모임
    12/20-12/24 🎄 연말 이벤트 기간
-   
+
    다음 전역 휴식: 12/25 크리스마스
    ```
+   - start_time, end_time이 NULL이 아니면 시간 표시
 
 ---
 
@@ -525,6 +529,47 @@ ORDER BY at.created_at DESC;
 ```
 
 **내보내기**: JSON 파일 다운로드
+
+---
+
+## UC-18: 예약 발송 (스토리/공지)
+
+**액터**: Celery 스케줄러
+**스케줄**: 매 1분마다 체크
+
+**흐름**:
+1. 예약 발송 대상 조회
+   ```sql
+   SELECT id, post_type, content, scheduled_at, visibility, mastodon_scheduled_id
+   FROM scheduled_posts
+   WHERE status = 'pending'
+     AND scheduled_at <= DATETIME('now', 'localtime')
+   ORDER BY scheduled_at ASC;
+   ```
+2. 각 예약 건별 처리:
+   - post_type에 따라 계정 선택:
+     - `story`: settings.story_account
+     - `announcement`: settings.announcement_account
+     - `admin_notice`: settings.admin_bot_account (visibility='private')
+   - 마스토돈 API로 발송:
+     ```python
+     status = mastodon.status_post(content, visibility=visibility)
+     ```
+3. 발송 결과 업데이트
+   ```sql
+   UPDATE scheduled_posts
+   SET status = 'published', published_at = CURRENT_TIMESTAMP, mastodon_scheduled_id = ?
+   WHERE id = ?;
+   ```
+4. 로그 기록
+
+**예외**:
+- API 오류: status = 'failed', 재시도 큐
+- 계정 설정 누락: 에러 로그 + 관리자 알림
+
+**참고**:
+- `@봇 공지` 명령어는 is_public=1인 공지만 표시
+- 관리자 웹에서 is_public 체크박스로 설정
 
 ---
 

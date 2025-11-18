@@ -10,12 +10,6 @@
 - 방화벽: HTTP/HTTPS 허용
 - 고정 IP 예약 및 할당
 
-### Oracle Cloud (대안)
-- Shape: VM.Standard.A1.Flex (4 core, 24GB)
-- Storage: 100GB
-- OS: Ubuntu 22.04 LTS
-- Security List: 22, 80, 443 포트 허용
-
 ## 2. 기본 패키지 설치
 
 ```bash
@@ -449,10 +443,6 @@ docker ps                                      # 전체 상태 확인
 1. VPC 네트워크 → 방화벽
 2. SSH 규칙 확인 (tcp:22 허용)
 
-### Oracle Cloud 방화벽
-1. Security Lists → Add Ingress Rules
-2. Source CIDR: `0.0.0.0/0`, Port: `22`
-
 ### Ubuntu 방화벽
 ```bash
 sudo ufw status
@@ -462,7 +452,7 @@ sudo ufw reload
 
 ### ~/.ssh/config
 ```bash
-Host oracle-server
+Host gcp-server
     HostName your-server-ip
     User ubuntu
     Port 22
