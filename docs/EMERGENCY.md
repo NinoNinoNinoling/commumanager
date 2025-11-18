@@ -1,729 +1,562 @@
-# 🚨 긴급 상황 대응 매뉴얼
+# 마녀봇 시스템 긴급 대응 매뉴얼
 
-> **대상**: 개발자 부재 시 긴급 대응이 필요한 관리자
-> **목적**: 시스템 장애 발생 시 신속한 복구
+> **대상**: 개발자 부재 시 시스템을 관리해야 하는 기술 담당자
+> **목적**: 서버 다운, 오류 등 긴급 상황 대응
 
 ---
 
-## ⚠️ 이 문서를 언제 사용하나요?
+## ⚠️ 긴급 연락처
 
-- ❌ 서버가 다운되어 접속이 안 될 때
-- ❌ API 요청이 응답하지 않을 때
-- ❌ 웹 페이지가 에러를 표시할 때
-- ❌ 데이터베이스 오류가 발생할 때
-- ❌ 봇이 작동하지 않을 때
+**개발자 연락처**: [개발자 연락처]
 
 ---
 
 ## 📋 목차
 
-1. [긴급 연락처](#긴급-연락처)
-2. [서버 상태 확인](#서버-상태-확인)
-3. [서버 재시작](#서버-재시작)
-4. [데이터베이스 문제](#데이터베이스-문제)
-5. [API 응답 없음](#api-응답-없음)
-6. [웹 페이지 에러](#웹-페이지-에러)
-7. [로그 확인 방법](#로그-확인-방법)
-8. [데이터 백업/복구](#데이터-백업복구)
-9. [자주 발생하는 문제](#자주-발생하는-문제)
-10. [최후의 수단](#최후의-수단)
+1. [서버 상태 확인](#1-서버-상태-확인)
+2. [서버 재시작](#2-서버-재시작)
+3. [데이터베이스 문제](#3-데이터베이스-문제)
+4. [로그 확인 방법](#4-로그-확인-방법)
+5. [자주 발생하는 문제](#5-자주-발생하는-문제)
+6. [최후의 수단: 완전 초기화](#6-최후의-수단-완전-초기화)
 
 ---
 
-## 긴급 연락처
+## 1. 서버 상태 확인
 
-### 1순위: 개발자
-- **이름**: [개발자 이름]
-- **연락처**: [전화번호]
-- **이메일**: [이메일]
-- **카카오톡**: [ID]
-
-### 2순위: 시스템 관리자
-- **이름**: [관리자 이름]
-- **연락처**: [전화번호]
-
-### 3순위: 백업 담당자
-- **이름**: [백업 담당자]
-- **연락처**: [전화번호]
-
----
-
-## 서버 상태 확인
-
-### 단계 1: 서버 접속 확인
-
-SSH로 서버에 접속할 수 있는지 확인:
+### 1.1 Flask 서버 실행 여부 확인
 
 ```bash
-ssh 사용자명@서버주소
+ps aux | grep -E "python.*admin_web|flask"
 ```
 
-**접속이 안 되면**:
-- 서버 호스팅 업체에 문의 (GCP, AWS 등)
-- 네트워크 문제일 가능성
-
-**접속이 되면**:
-- 다음 단계로 진행
-
----
-
-### 단계 2: Flask 서버 실행 확인
-
-서버에 접속한 후:
-
-```bash
-# Flask 프로세스 확인
-ps aux | grep flask
-ps aux | grep python
-
-# 실행 중이면 다음과 같이 표시됨:
-# user  12345  0.5  2.0  123456  45678 ?  S  10:00  0:05 python3 -m admin_web.app
+**정상 출력 예시:**
+```
+root  12345  0.1  2.3  123456  45678  python3 -m admin_web.app
 ```
 
-**결과 해석**:
-- ✅ 프로세스가 보이면: Flask 서버가 실행 중
-- ❌ 프로세스가 안 보이면: Flask 서버가 중지됨 → [서버 재시작](#서버-재시작)으로 이동
+**서버가 죽었을 때:**
+- 아무 출력 없음 또는 grep 프로세스만 표시
 
----
-
-### 단계 3: 포트 열림 확인
+### 1.2 포트 사용 확인
 
 ```bash
-# 5000번 포트 확인
-netstat -tuln | grep 5000
+netstat -tulpn | grep :5000
+```
 
-# 또는
+또는
+
+```bash
 lsof -i :5000
 ```
 
-**결과 해석**:
-- ✅ 포트가 LISTEN 상태면: 정상
-- ❌ 아무것도 안 나오면: Flask 서버가 안 띄워짐 → [서버 재시작](#서버-재시작)
-
----
-
-## 서버 재시작
-
-### 🔴 주의사항
-
-**재시작 전 반드시 확인**:
-1. 현재 접속 중인 유저가 있는지 확인
-2. 예정된 작업이 없는지 확인
-3. 가능하면 공지 후 재시작
-
----
-
-### 단계 1: 기존 프로세스 종료
-
-```bash
-# Flask 프로세스 찾기
-ps aux | grep flask
-
-# 프로세스 ID(PID) 확인 후 종료
-kill -9 [PID]
-
-# 예시:
-# ps aux | grep flask
-# user  12345 ...
-# kill -9 12345
+**정상일 때:**
+```
+tcp  0  0  0.0.0.0:5000  0.0.0.0:*  LISTEN  12345/python3
 ```
 
-**모든 Flask 프로세스 강제 종료** (주의!):
-```bash
-pkill -9 -f "python.*admin_web"
-```
+### 1.3 웹 페이지 접속 테스트
 
----
-
-### 단계 2: 프로젝트 디렉토리 이동
-
-```bash
-cd /home/user/commumanager
-```
-
----
-
-### 단계 3: 데이터베이스 확인
-
-```bash
-# economy.db 파일 존재 확인
-ls -lh economy.db
-
-# 파일이 없으면:
-python3 init_db.py economy.db
-```
-
----
-
-### 단계 4: Flask 서버 시작
-
-**개발 모드** (디버깅용):
-```bash
-FLASK_ENV=development DATABASE_PATH=economy.db python3 -m admin_web.app
-```
-
-**프로덕션 모드** (백그라운드 실행):
-```bash
-nohup python3 -m admin_web.app > flask_server.log 2>&1 &
-```
-
-**서버 시작 확인**:
-```bash
-# 로그 확인
-tail -f flask_server.log
-
-# 다음과 같이 표시되면 정상:
-# ============================================================
-# 마녀봇 관리자 웹 서버 시작
-# ============================================================
-# 환경: development
-# DB: economy.db
-# API: /api/v1
-# ============================================================
-```
-
----
-
-### 단계 5: 서버 접속 테스트
-
-**웹 브라우저로 확인**:
-```
-http://서버주소:5000/dashboard
-```
-
-**curl로 확인**:
 ```bash
 curl http://localhost:5000/api/v1/dashboard/stats
 ```
 
-**정상 응답 예시**:
-```json
-{
-  "users": {
-    "total": 10,
-    "active_24h": 5,
-    "on_vacation": 1
-  },
-  ...
-}
+**정상일 때:**
+- JSON 데이터 반환
+
+**서버 다운일 때:**
+```
+curl: (7) Failed to connect to localhost port 5000: Connection refused
 ```
 
 ---
 
-## 데이터베이스 문제
+## 2. 서버 재시작
 
-### 증상
-
-- "unable to open database file" 에러
-- "database is locked" 에러
-- API 요청 시 500 에러
-
----
-
-### 해결 방법 1: 데이터베이스 파일 권한 확인
-
-```bash
-# 권한 확인
-ls -l economy.db
-
-# 권한 수정 (읽기/쓰기 권한 부여)
-chmod 664 economy.db
-
-# 소유자 확인 및 변경
-chown 사용자명:그룹명 economy.db
-```
-
----
-
-### 해결 방법 2: 데이터베이스 잠금 해제
-
-```bash
-# SQLite 프로세스 확인
-lsof | grep economy.db
-
-# 잠금 프로세스 종료
-kill -9 [PID]
-
-# Flask 서버 재시작
-pkill -9 -f "python.*admin_web"
-nohup python3 -m admin_web.app > flask_server.log 2>&1 &
-```
-
----
-
-### 해결 방법 3: 데이터베이스 복구
-
-**백업에서 복구**:
-```bash
-# 백업 파일 확인
-ls -lh backups/
-
-# 최신 백업 복사
-cp backups/economy_backup_YYYYMMDD.db economy.db
-
-# Flask 서버 재시작
-```
-
-**백업이 없으면**:
-```bash
-# 새 데이터베이스 생성 (주의: 기존 데이터 삭제!)
-mv economy.db economy_broken.db
-python3 init_db.py economy.db
-```
-
----
-
-## API 응답 없음
-
-### 증상
-
-- Postman에서 요청 시 타임아웃
-- 웹 페이지가 무한 로딩
-- curl 명령어 응답 없음
-
----
-
-### 단계 1: Flask 서버 로그 확인
-
-```bash
-tail -n 100 flask_server.log
-```
-
-**에러 메시지 찾기**:
-- `Error:` 또는 `Exception:`으로 시작하는 줄
-- `Traceback:` 으로 시작하는 줄
-
-**일반적인 에러**:
-- `sqlite3.OperationalError`: 데이터베이스 문제
-- `ModuleNotFoundError`: 패키지 설치 필요
-- `port already in use`: 포트 충돌
-
----
-
-### 단계 2: 의존성 패키지 확인
-
-```bash
-# 가상환경 활성화 (있는 경우)
-source venv/bin/activate
-
-# 패키지 재설치
-pip install -r requirements.txt
-```
-
----
-
-### 단계 3: 포트 충돌 해결
-
-```bash
-# 5000번 포트 사용 중인 프로세스 확인
-lsof -i :5000
-
-# 프로세스 종료
-kill -9 [PID]
-
-# Flask 서버 재시작
-nohup python3 -m admin_web.app > flask_server.log 2>&1 &
-```
-
----
-
-## 웹 페이지 에러
-
-### 증상: 500 Internal Server Error
-
-**원인**: 서버 내부 오류
-
-**해결**:
-1. Flask 서버 로그 확인:
-   ```bash
-   tail -n 50 flask_server.log
-   ```
-
-2. 에러 메시지 확인 후 [자주 발생하는 문제](#자주-발생하는-문제) 참조
-
-3. 해결 안 되면 서버 재시작
-
----
-
-### 증상: 404 Not Found
-
-**원인**: 잘못된 URL 또는 라우트 문제
-
-**해결**:
-1. URL 확인:
-   - ✅ 올바른 예: `http://서버주소:5000/dashboard`
-   - ❌ 잘못된 예: `http://서버주소:5000/dash`
-
-2. API 엔드포인트 확인:
-   - `docs/postman_collection.json` 참조
-
----
-
-### 증상: 빈 페이지 또는 템플릿 에러
-
-**원인**: 템플릿 파일 누락 또는 데이터 문제
-
-**해결**:
-1. 템플릿 파일 확인:
-   ```bash
-   ls admin_web/templates/
-   # base.html, dashboard.html, logs.html 존재해야 함
-   ```
-
-2. 데이터 확인:
-   ```bash
-   # API가 정상 응답하는지 확인
-   curl http://localhost:5000/api/v1/dashboard/stats
-   ```
-
----
-
-## 로그 확인 방법
-
-### Flask 서버 로그
-
-```bash
-# 실시간 로그 보기
-tail -f flask_server.log
-
-# 최근 100줄 보기
-tail -n 100 flask_server.log
-
-# 에러만 필터링
-grep -i "error" flask_server.log
-grep -i "exception" flask_server.log
-```
-
----
-
-### 시스템 로그
-
-```bash
-# 시스템 로그 확인
-sudo journalctl -u flask-admin-web -n 100
-
-# 또는
-sudo tail -n 100 /var/log/syslog | grep flask
-```
-
----
-
-### 관리자 활동 로그
-
-**웹 페이지에서**:
-```
-http://서버주소:5000/logs
-```
-
-**API로**:
-```bash
-curl http://localhost:5000/api/v1/admin-logs?limit=100
-```
-
----
-
-## 데이터 백업/복구
-
-### 수동 백업
-
-```bash
-# 백업 디렉토리 생성
-mkdir -p backups
-
-# 데이터베이스 백업
-cp economy.db backups/economy_backup_$(date +%Y%m%d_%H%M%S).db
-
-# 백업 확인
-ls -lh backups/
-```
-
----
-
-### 자동 백업 설정 (cron)
-
-```bash
-# cron 편집
-crontab -e
-
-# 매일 새벽 3시 자동 백업 추가
-0 3 * * * cd /home/user/commumanager && cp economy.db backups/economy_backup_$(date +\%Y\%m\%d).db
-
-# 저장 후 종료 (:wq)
-```
-
----
-
-### 복구
-
-```bash
-# 백업 목록 확인
-ls -lh backups/
-
-# 복구할 백업 선택
-cp backups/economy_backup_YYYYMMDD_HHMMSS.db economy.db
-
-# Flask 서버 재시작
-pkill -9 -f "python.*admin_web"
-nohup python3 -m admin_web.app > flask_server.log 2>&1 &
-```
-
----
-
-## 자주 발생하는 문제
-
-### 문제 1: "No module named 'admin_web'"
-
-**원인**: Python 경로 문제
-
-**해결**:
-```bash
-# 프로젝트 루트 디렉토리에서 실행
-cd /home/user/commumanager
-
-# PYTHONPATH 설정
-export PYTHONPATH=/home/user/commumanager:$PYTHONPATH
-
-# Flask 서버 시작
-python3 -m admin_web.app
-```
-
----
-
-### 문제 2: "Address already in use"
-
-**원인**: 5000번 포트가 이미 사용 중
-
-**해결**:
-```bash
-# 포트 사용 프로세스 확인
-lsof -i :5000
-
-# 프로세스 종료
-kill -9 [PID]
-
-# Flask 서버 재시작
-```
-
----
-
-### 문제 3: "database is locked"
-
-**원인**: 다른 프로세스가 데이터베이스를 사용 중
-
-**해결**:
-```bash
-# 모든 Flask 프로세스 종료
-pkill -9 -f "python.*admin_web"
-
-# 잠시 대기 (5초)
-sleep 5
-
-# Flask 서버 재시작
-nohup python3 -m admin_web.app > flask_server.log 2>&1 &
-```
-
----
-
-### 문제 4: API 응답이 너무 느림
-
-**원인**: 데이터베이스 크기 또는 쿼리 성능
-
-**해결**:
-```bash
-# 데이터베이스 크기 확인
-ls -lh economy.db
-
-# 10MB 이상이면 최적화 필요
-sqlite3 economy.db "VACUUM;"
-
-# Flask 서버 재시작
-```
-
----
-
-### 문제 5: 웹 페이지에 데이터가 안 보임
-
-**원인**: 데이터베이스가 비어있음
-
-**해결**:
-```bash
-# 테스트 데이터 생성
-python3 scripts/seed_test_data.py
-
-# 웹 페이지 새로고침
-```
-
----
-
-## 최후의 수단
-
-### 상황: 위의 모든 방법으로도 해결 안 됨
-
-**단계별 조치**:
-
----
-
-### 1. 현재 상태 저장
-
-```bash
-# 로그 백업
-cp flask_server.log flask_server_error_$(date +%Y%m%d_%H%M%S).log
-
-# 데이터베이스 백업
-cp economy.db economy_error_$(date +%Y%m%d_%H%M%S).db
-
-# 설정 파일 백업
-cp -r admin_web admin_web_backup_$(date +%Y%m%d_%H%M%S)
-```
-
----
-
-### 2. 시스템 완전 초기화
-
-```bash
-# 프로젝트 디렉토리로 이동
-cd /home/user/commumanager
-
-# 모든 Flask 프로세스 종료
-pkill -9 -f "python.*admin_web"
-
-# 가상환경 재생성 (있는 경우)
-rm -rf venv
-python3 -m venv venv
-source venv/bin/activate
-
-# 패키지 재설치
-pip install --upgrade pip
-pip install -r requirements.txt
-
-# 데이터베이스 재생성
-mv economy.db economy_old.db
-python3 init_db.py economy.db
-
-# Flask 서버 시작
-nohup python3 -m admin_web.app > flask_server.log 2>&1 &
-```
-
----
-
-### 3. 코드 재배포
-
-```bash
-# Git에서 최신 코드 받기
-git pull origin claude/api-testing-server-work-018RNKmZgKp1VXDS8RHJ5w9u
-
-# 패키지 재설치
-pip install -r requirements.txt
-
-# 데이터베이스 초기화
-python3 init_db.py economy.db
-
-# Flask 서버 시작
-nohup python3 -m admin_web.app > flask_server.log 2>&1 &
-```
-
----
-
-### 4. 개발자에게 연락
-
-**연락 시 제공할 정보**:
-
-1. **에러 로그**:
-   ```bash
-   tail -n 200 flask_server.log > error_report.txt
-   ```
-
-2. **시스템 정보**:
-   ```bash
-   echo "=== Python 버전 ===" >> error_report.txt
-   python3 --version >> error_report.txt
-
-   echo "=== 설치된 패키지 ===" >> error_report.txt
-   pip list >> error_report.txt
-
-   echo "=== 데이터베이스 정보 ===" >> error_report.txt
-   ls -lh economy.db >> error_report.txt
-   ```
-
-3. **발생한 문제 설명**:
-   - 언제 문제가 발생했는지
-   - 어떤 작업을 하던 중이었는지
-   - 에러 메시지가 있었는지
-
-**error_report.txt 파일을 개발자에게 전달**
-
----
-
-## 🆘 긴급 연락 절차
-
-1. **즉시 연락**: 개발자에게 전화 또는 문자
-2. **상황 공지**: 커뮤니티에 시스템 점검 공지
-3. **로그 수집**: `error_report.txt` 생성
-4. **대기**: 개발자의 지시 대기
-
----
-
-## ✅ 복구 후 확인 사항
-
-서버 재시작 후 반드시 확인:
-
-1. **웹 페이지 접속**:
-   - [ ] http://서버주소:5000/dashboard
-   - [ ] http://서버주소:5000/logs
-
-2. **API 테스트**:
-   ```bash
-   curl http://localhost:5000/api/v1/dashboard/stats
-   ```
-
-3. **데이터 확인**:
-   - [ ] 유저 목록 조회
-   - [ ] 경고 목록 조회
-   - [ ] 관리자 로그 조회
-
-4. **기능 테스트**:
-   - [ ] 유저 검색
-   - [ ] 재화 조정
-   - [ ] 경고 발송
-
----
-
-## 📞 추가 리소스
-
-- **일반 관리자 가이드**: `docs/ADMIN_GUIDE.md`
-- **API 문서**: `docs/postman_collection.json`
-- **Postman Collection 사용법**: Postman 설치 후 Import
-
----
-
-**문서 버전**: 1.0
-**최종 업데이트**: 2025-01-18
-**작성자**: [개발자 이름]
-
----
-
-## 🔖 빠른 참조
-
-### 서버 재시작 (한 줄 명령어)
+### 2.1 한 줄 명령어 (가장 빠름)
 
 ```bash
 pkill -9 -f "python.*admin_web" && cd /home/user/commumanager && nohup python3 -m admin_web.app > flask_server.log 2>&1 &
 ```
 
-### 로그 확인
+**설명:**
+1. 기존 Flask 프로세스 강제 종료
+2. 프로젝트 디렉토리로 이동
+3. 백그라운드로 Flask 서버 시작
+4. 로그를 `flask_server.log`에 저장
 
+### 2.2 단계별 재시작
+
+#### Step 1: 기존 서버 종료
+
+```bash
+# 프로세스 ID 확인
+ps aux | grep "python.*admin_web"
+
+# PID가 12345라면
+kill -9 12345
+```
+
+또는 전체 종료:
+
+```bash
+pkill -9 -f "python.*admin_web"
+```
+
+#### Step 2: 프로젝트 디렉토리 이동
+
+```bash
+cd /home/user/commumanager
+```
+
+#### Step 3: 서버 시작
+
+**백그라운드 실행 (권장):**
+```bash
+nohup python3 -m admin_web.app > flask_server.log 2>&1 &
+```
+
+**포그라운드 실행 (테스트용):**
+```bash
+python3 -m admin_web.app
+```
+
+#### Step 4: 서버 시작 확인
+
+```bash
+# 3초 대기 후 로그 확인
+sleep 3 && tail -30 flask_server.log
+```
+
+**정상 시작 시 로그 예시:**
+```
+==================================================
+마녀봇 관리자 웹 서버 시작
+==================================================
+환경: development
+DB: /home/user/commumanager/economy.db
+API: /api/v1
+아키텍처: Model-Repository-Service-Controller-Route
+==================================================
+ * Running on http://0.0.0.0:5000
+```
+
+**에러 발생 시:**
+- 로그에서 에러 메시지 확인
+- 아래 "5. 자주 발생하는 문제" 참조
+
+### 2.3 재시작 확인
+
+```bash
+# 웹 페이지 접속 테스트
+curl http://localhost:5000/api/v1/dashboard/stats
+
+# 또는 브라우저에서
+# http://localhost:5000/
+```
+
+---
+
+## 3. 데이터베이스 문제
+
+### 3.1 데이터베이스 파일 확인
+
+```bash
+ls -lh /home/user/commumanager/economy.db
+```
+
+**정상일 때:**
+```
+-rw-r--r-- 1 root root 2.5M Nov 18 14:30 economy.db
+```
+
+**문제:**
+- 파일이 없다 → 백업에서 복구 필요
+- 크기가 0 → 손상됨, 백업 복구 필요
+
+### 3.2 데이터베이스 락 문제
+
+**증상:**
+- 서버가 느려짐
+- "database is locked" 에러
+
+**해결:**
+
+```bash
+# 데이터베이스 사용 중인 프로세스 확인
+lsof /home/user/commumanager/economy.db
+
+# 모든 관련 프로세스 종료
+pkill -9 -f "python.*admin_web"
+pkill -9 -f "python.*bot"
+
+# WAL 파일 삭제 (주의: 서버 종료 후에만!)
+rm -f /home/user/commumanager/economy.db-wal
+rm -f /home/user/commumanager/economy.db-shm
+
+# 서버 재시작
+nohup python3 -m admin_web.app > flask_server.log 2>&1 &
+```
+
+### 3.3 데이터베이스 백업
+
+**백업 생성:**
+```bash
+# 날짜 포함 백업 파일명
+cp economy.db economy_backup_$(date +%Y%m%d_%H%M%S).db
+
+# 또는 간단히
+cp economy.db economy.db.backup
+```
+
+**백업 복구:**
+```bash
+# 1. 서버 종료
+pkill -9 -f "python.*admin_web"
+
+# 2. 현재 DB 백업 (만약을 위해)
+mv economy.db economy_broken.db
+
+# 3. 백업 파일 복구
+cp economy_backup_YYYYMMDD_HHMMSS.db economy.db
+
+# 4. 서버 시작
+nohup python3 -m admin_web.app > flask_server.log 2>&1 &
+```
+
+### 3.4 데이터베이스 무결성 검사
+
+```bash
+# SQLite 직접 접근
+python3 -c "
+import sqlite3
+conn = sqlite3.connect('economy.db')
+cursor = conn.cursor()
+cursor.execute('PRAGMA integrity_check')
+result = cursor.fetchone()
+print('DB 상태:', result[0])
+conn.close()
+"
+```
+
+**정상:**
+```
+DB 상태: ok
+```
+
+**문제 발생:**
+```
+DB 상태: *** in database main ***
+```
+→ 백업에서 복구 필요
+
+---
+
+## 4. 로그 확인 방법
+
+### 4.1 Flask 서버 로그
+
+**로그 파일 위치:**
+```
+/home/user/commumanager/flask_server.log
+```
+
+**실시간 로그 보기:**
 ```bash
 tail -f flask_server.log
 ```
 
-### 데이터베이스 백업
-
+**최근 100줄 보기:**
 ```bash
-cp economy.db backups/economy_backup_$(date +%Y%m%d_%H%M%S).db
+tail -100 flask_server.log
 ```
 
-### API 테스트
+**에러만 필터링:**
+```bash
+grep -i error flask_server.log | tail -50
+```
+
+### 4.2 시스템 로그
 
 ```bash
+# 시스템 전체 로그 (Ubuntu/Debian)
+journalctl -xe
+
+# Python 관련 로그만
+journalctl | grep python
+
+# 최근 1시간 로그
+journalctl --since "1 hour ago"
+```
+
+### 4.3 디스크 사용량 확인
+
+```bash
+# 전체 디스크 사용량
+df -h
+
+# 프로젝트 디렉토리 크기
+du -sh /home/user/commumanager
+```
+
+**로그 파일이 너무 클 때:**
+```bash
+# 로그 파일 크기 확인
+ls -lh flask_server.log
+
+# 로그 파일 초기화 (주의: 기존 로그 삭제됨)
+> flask_server.log
+
+# 또는 백업 후 초기화
+mv flask_server.log flask_server.log.old
+touch flask_server.log
+```
+
+---
+
+## 5. 자주 발생하는 문제
+
+### 문제 1: ModuleNotFoundError: No module named 'flask'
+
+**증상:**
+```
+ModuleNotFoundError: No module named 'flask'
+```
+
+**원인:** Python 패키지 미설치
+
+**해결:**
+```bash
+pip3 install --break-system-packages flask requests python-dotenv psycopg2-binary
+```
+
+### 문제 2: 데이터베이스 파일 없음
+
+**증상:**
+```
+⚠️  데이터베이스가 없습니다: /home/user/commumanager/economy.db
+```
+
+**해결:**
+```bash
+# 백업 파일 확인
+ls -lh economy*.db
+
+# 백업이 있다면 복구
+cp economy_backup_YYYYMMDD.db economy.db
+
+# 백업이 없다면 초기화 (주의: 모든 데이터 손실!)
+python3 init_db.py economy.db
+```
+
+### 문제 3: 포트 5000이 이미 사용 중
+
+**증상:**
+```
+OSError: [Errno 98] Address already in use
+```
+
+**해결:**
+```bash
+# 포트 5000 사용 프로세스 확인
+lsof -i :5000
+
+# PID 확인 후 종료 (예: PID가 12345)
+kill -9 12345
+
+# 또는 전체 Flask 프로세스 종료
+pkill -9 -f "python.*admin_web"
+```
+
+### 문제 4: Permission Denied (권한 오류)
+
+**증상:**
+```
+PermissionError: [Errno 13] Permission denied: 'economy.db'
+```
+
+**해결:**
+```bash
+# 파일 소유자 및 권한 확인
+ls -l economy.db
+
+# 권한 수정
+chmod 666 economy.db
+
+# 또는 소유자 변경 (현재 사용자로)
+chown $USER:$USER economy.db
+```
+
+### 문제 5: 500 Internal Server Error
+
+**증상:** 웹 페이지에서 500 에러
+
+**해결:**
+
+1. **로그 확인:**
+```bash
+tail -50 flask_server.log
+```
+
+2. **일반적인 원인:**
+   - 데이터베이스 락
+   - 데이터베이스 손상
+   - 코드 오류
+
+3. **디버그 모드 활성화:**
+```bash
+# 환경 변수 설정 후 재시작
+export FLASK_ENV=development
+python3 -m admin_web.app
+```
+
+4. **에러 메시지에서 원인 파악 후 조치**
+
+### 문제 6: 웹 페이지는 뜨는데 통계가 0
+
+**원인:** 데이터베이스에 데이터 없음
+
+**해결:**
+```bash
+# 테스트 데이터 생성
+python3 scripts/seed_test_data.py
+
+# 데이터베이스 테이블 개수 확인
+python3 -c "
+import sqlite3
+conn = sqlite3.connect('economy.db')
+cursor = conn.cursor()
+cursor.execute('SELECT COUNT(*) FROM users')
+print('사용자 수:', cursor.fetchone()[0])
+conn.close()
+"
+```
+
+---
+
+## 6. 최후의 수단: 완전 초기화
+
+### ⚠️ 경고
+
+**이 작업은 모든 데이터를 삭제합니다!**
+- 사용자 정보
+- 거래 내역
+- 경고 기록
+- 휴가 신청
+- 이벤트
+- 아이템
+- 관리자 로그
+
+**백업을 먼저 만드세요!**
+
+### 6.1 백업 생성
+
+```bash
+cd /home/user/commumanager
+
+# 전체 백업
+tar -czf commumanager_backup_$(date +%Y%m%d_%H%M%S).tar.gz \
+  economy.db \
+  flask_server.log
+
+# 백업 확인
+ls -lh commumanager_backup_*.tar.gz
+```
+
+### 6.2 완전 초기화 절차
+
+```bash
+# 1. 모든 서버 프로세스 종료
+pkill -9 -f "python.*admin_web"
+pkill -9 -f "python.*bot"
+
+# 2. 데이터베이스 삭제
+rm -f economy.db economy.db-wal economy.db-shm
+
+# 3. 데이터베이스 재생성
+python3 init_db.py economy.db
+
+# 4. 테스트 데이터 생성 (선택)
+python3 scripts/seed_test_data.py
+
+# 5. 서버 시작
+nohup python3 -m admin_web.app > flask_server.log 2>&1 &
+
+# 6. 확인
+sleep 3
 curl http://localhost:5000/api/v1/dashboard/stats
 ```
+
+---
+
+## 📞 도움 요청
+
+### 위 방법으로 해결이 안 될 때
+
+1. **로그 파일 수집:**
+```bash
+# 로그 파일 복사
+cp flask_server.log ~/flask_error_$(date +%Y%m%d_%H%M%S).log
+```
+
+2. **상황 메모:**
+   - 무엇을 했을 때 문제가 발생했는지
+   - 에러 메시지 전문
+   - 시도한 해결 방법
+
+3. **개발자에게 연락:**
+   - 로그 파일 전송
+   - 상황 설명
+
+---
+
+## 🔧 유용한 명령어 모음
+
+### 빠른 참조
+
+```bash
+# 서버 상태 확인
+ps aux | grep "python.*admin_web"
+
+# 서버 재시작 (한 줄)
+pkill -9 -f "python.*admin_web" && cd /home/user/commumanager && nohup python3 -m admin_web.app > flask_server.log 2>&1 &
+
+# 로그 실시간 보기
+tail -f flask_server.log
+
+# 로그 에러만 보기
+grep -i error flask_server.log | tail -30
+
+# DB 백업
+cp economy.db economy_backup_$(date +%Y%m%d).db
+
+# 테스트 데이터 생성
+python3 scripts/seed_test_data.py
+
+# 웹 페이지 테스트
+curl http://localhost:5000/api/v1/dashboard/stats
+
+# 디스크 사용량
+df -h
+
+# 포트 사용 확인
+lsof -i :5000
+```
+
+---
+
+## 📝 체크리스트
+
+서버가 다운되었을 때:
+
+- [ ] 서버 프로세스가 실행 중인가?
+- [ ] 포트 5000이 사용 중인가?
+- [ ] 데이터베이스 파일이 존재하는가?
+- [ ] 로그 파일에 에러가 있는가?
+- [ ] 디스크 공간이 충분한가?
+- [ ] 백업 파일이 있는가?
+
+---
+
+**마지막 업데이트**: 2025-11-18
+**문서 버전**: 1.0
