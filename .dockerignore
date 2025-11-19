@@ -47,15 +47,8 @@ logs/
 htmlcov/
 .tox/
 
-# Documentation
+# Documentation (build artifacts only)
 docs/_build/
-*.md
-!README.md
-
-# Docker
-Dockerfile
-docker-compose*.yml
-.dockerignore
 
 # Temporary files
 tmp/
