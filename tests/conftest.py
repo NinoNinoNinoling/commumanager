@@ -48,7 +48,10 @@ def app(test_db_path):
     """Flask 앱 fixture"""
     from admin_web.app import create_app
 
-    app = create_app({
+    app = create_app('testing')
+
+    # 테스트용 설정 오버라이드
+    app.config.update({
         'TESTING': True,
         'DATABASE_PATH': test_db_path,
         'SECRET_KEY': 'test-secret-key',
