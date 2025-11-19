@@ -1,0 +1,329 @@
+"""Web page routes (HTML)"""
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from admin_web.services.admin_log_service import AdminLogService
+from admin_web.services.dashboard_service import DashboardService
+from admin_web.services.user_service import UserService
+from admin_web.services.warning_service import WarningService
+from admin_web.services.vacation_service import VacationService
+from admin_web.services.calendar_service import CalendarService
+from admin_web.services.item_service import ItemService
+from admin_web.services.setting_service import SettingService
+from admin_web.utils.decorators import login_required, admin_required
+
+web_bp = Blueprint('web', __name__)
+
+# Services
+log_service = AdminLogService()
+dashboard_service = DashboardService()
+user_service = UserService()
+warning_service = WarningService()
+vacation_service = VacationService()
+calendar_service = CalendarService()
+item_service = ItemService()
+setting_service = SettingService()
+
+
+@web_bp.route('/')
+def index():
+    """메인 페이지 - 로그인 페이지로 리다이렉트"""
+    if 'user_id' in session:
+        return redirect(url_for('web.dashboard'))
+    return redirect(url_for('auth.login'))
+
+
+@web_bp.route('/dashboard')
+@login_required
+def dashboard():
+    """대시보드 페이지"""
+    try:
+        stats = dashboard_service.get_stats()
+        return render_template('dashboard.html', stats=stats)
+    except Exception as e:
+        return render_template('errors/500.html', error=str(e)), 500
+
+
+@web_bp.route('/logs')
+@login_required
+def logs():
+    """로그 뷰어 페이지"""
+    try:
+        # 쿼리 파라미터
+        page = int(request.args.get('page', 1))
+        limit = int(request.args.get('limit', 100))
+        admin_name = request.args.get('admin_name', '')
+        actions_str = request.args.get('actions', '')
+
+        # 선택된 액션들
+        selected_actions = [a.strip() for a in actions_str.split(',') if a.strip()]
+
+        # 로그 조회
+        result = log_service.get_logs(
+            page=page,
+            limit=limit,
+            admin_name=admin_name if admin_name else None,
+            action=None  # 액션 필터는 클라이언트 사이드에서 처리
+        )
+
+        logs_data = result['logs']
+        pagination = result['pagination']
+
+        # 고유 관리자 및 액션 추출
+        unique_admins = sorted(set(log['admin_name'] for log in logs_data if log['admin_name']))
+        unique_actions = sorted(set(log['action'] for log in logs_data if log['action']))
+
+        # 액션 타입별 색상
+        action_colors = {
+            'create_warning': '#f48771',
+            'create_vacation': '#4fc1ff',
+            'delete_vacation': '#f48771',
+            'create_event': '#b5cea8',
+            'update_event': '#dcdcaa',
+            'delete_event': '#f48771',
+            'create_item': '#b5cea8',
+            'update_item': '#dcdcaa',
+            'delete_item': '#f48771',
+            'update_setting': '#c586c0',
+            'adjust_balance': '#4ec9b0',
+            'change_role': '#569cd6',
+        }
+
+        return render_template(
+            'logs.html',
+            logs=logs_data,
+            pagination=pagination,
+            unique_admins=unique_admins,
+            unique_actions=unique_actions,
+            selected_admin=admin_name,
+            selected_actions=selected_actions,
+            action_colors=action_colors
+        )
+    except Exception as e:
+        return render_template('errors/500.html', error=str(e)), 500
+
+
+# ============================================================================
+# 사용자 관리
+# ============================================================================
+
+@web_bp.route('/users')
+@login_required
+def users():
+    """사용자 목록 페이지"""
+    try:
+        page = int(request.args.get('page', 1))
+        search = request.args.get('search', '')
+
+        users_data = user_service.get_users(page=page, search=search)
+        return render_template('users.html', users=users_data['users'], pagination=users_data.get('pagination'))
+    except Exception as e:
+        return render_template('error.html', error_title="오류", error_message=str(e)), 500
+
+
+@web_bp.route('/users/<mastodon_id>')
+@login_required
+def user_detail(mastodon_id):
+    """사용자 상세 페이지"""
+    try:
+        user = user_service.get_user(mastodon_id)
+        if not user:
+            return render_template('error.html', error_title="사용자 없음", error_message="사용자를 찾을 수 없습니다."), 404
+
+        transactions_data = user_service.get_user_transactions(mastodon_id, limit=20)
+        warnings_data = warning_service.get_warnings(page=1, limit=100, user_id=mastodon_id)
+        vacations_data = vacation_service.get_vacations(page=1, limit=100, user_id=mastodon_id)
+
+        return render_template(
+            'user_detail.html',
+            user=user,
+            transactions=transactions_data.get('transactions', []),
+            warnings=warnings_data.get('warnings', []),
+            vacations=vacations_data.get('vacations', [])
+        )
+    except Exception as e:
+        return render_template('error.html', error_title="오류", error_message=str(e)), 500
+
+
+# ============================================================================
+# 경고 관리
+# ============================================================================
+
+@web_bp.route('/warnings')
+@login_required
+def warnings():
+    """경고 목록 페이지"""
+    try:
+        page = int(request.args.get('page', 1))
+        user_id = request.args.get('user_id', '')
+        date_from = request.args.get('date_from', '')
+        date_to = request.args.get('date_to', '')
+
+        warnings_data = warning_service.get_warnings(
+            page=page,
+            limit=50,
+            user_id=user_id if user_id else None
+        )
+
+        # 통계 계산
+        stats = {
+            'this_week': 0,  # TODO: 주간 통계
+            'today': 0  # TODO: 오늘 통계
+        }
+
+        return render_template(
+            'warnings.html',
+            warnings=warnings_data.get('warnings', []),
+            pagination=warnings_data.get('pagination', {}),
+            stats=stats,
+            user_id=user_id,
+            date_from=date_from,
+            date_to=date_to
+        )
+    except Exception as e:
+        return render_template('error.html', error_title="오류", error_message=str(e)), 500
+
+
+# ============================================================================
+# 휴가 관리
+# ============================================================================
+
+@web_bp.route('/vacations')
+@login_required
+def vacations():
+    """휴가 목록 페이지"""
+    try:
+        page = int(request.args.get('page', 1))
+        user_id = request.args.get('user_id', '')
+        status = request.args.get('status', '')
+        month = request.args.get('month', '')
+
+        vacations_data = vacation_service.get_vacations(
+            page=page,
+            limit=50,
+            user_id=user_id if user_id else None
+        )
+
+        # 통계 계산
+        stats = {
+            'active': 0,  # TODO: 현재 휴가 중
+            'this_month': 0  # TODO: 이번 달 휴가
+        }
+
+        return render_template(
+            'vacations.html',
+            vacations=vacations_data.get('vacations', []),
+            pagination=vacations_data.get('pagination', {}),
+            stats=stats,
+            user_id=user_id,
+            status=status,
+            month=month
+        )
+    except Exception as e:
+        return render_template('error.html', error_title="오류", error_message=str(e)), 500
+
+
+# ============================================================================
+# 이벤트/일정 관리
+# ============================================================================
+
+@web_bp.route('/events')
+@login_required
+def events():
+    """이벤트 목록 페이지"""
+    try:
+        page = int(request.args.get('page', 1))
+        search = request.args.get('search', '')
+        event_type = request.args.get('event_type', '')
+        status = request.args.get('status', '')
+
+        events_data = calendar_service.get_events(
+            page=page,
+            limit=50,
+            event_type=event_type if event_type else None
+        )
+
+        # 통계 계산
+        stats = {
+            'active': 0,  # TODO: 진행 중 이벤트
+            'upcoming': 0,  # TODO: 예정 이벤트
+            'completed': 0  # TODO: 종료된 이벤트
+        }
+
+        return render_template(
+            'events.html',
+            events=events_data.get('events', []),
+            pagination=events_data.get('pagination', {}),
+            stats=stats,
+            search=search,
+            event_type=event_type,
+            status=status
+        )
+    except Exception as e:
+        return render_template('error.html', error_title="오류", error_message=str(e)), 500
+
+
+# ============================================================================
+# 아이템/상점 관리
+# ============================================================================
+
+@web_bp.route('/items')
+@login_required
+def items():
+    """아이템 목록 페이지"""
+    try:
+        page = int(request.args.get('page', 1))
+        search = request.args.get('search', '')
+        is_active_str = request.args.get('is_active', '')
+        is_active = None
+        if is_active_str:
+            is_active = is_active_str.lower() == 'true'
+
+        items_data = item_service.get_items(
+            page=page,
+            limit=50,
+            is_active=is_active
+        )
+
+        # 통계 계산
+        stats = {
+            'active': 0,  # TODO: 활성 아이템
+            'inactive': 0  # TODO: 비활성 아이템
+        }
+
+        return render_template(
+            'items.html',
+            items=items_data.get('items', []),
+            pagination=items_data.get('pagination', {}),
+            stats=stats,
+            search=search,
+            is_active=is_active_str
+        )
+    except Exception as e:
+        return render_template('error.html', error_title="오류", error_message=str(e)), 500
+
+
+# ============================================================================
+# 시스템 설정
+# ============================================================================
+
+@web_bp.route('/settings')
+@login_required
+def settings():
+    """시스템 설정 페이지"""
+    try:
+        page = int(request.args.get('page', 1))
+        search = request.args.get('search', '')
+
+        settings_data = setting_service.get_settings(
+            page=page,
+            limit=100,
+            search=search if search else None
+        )
+
+        return render_template(
+            'settings.html',
+            settings=settings_data.get('settings', []),
+            pagination=settings_data.get('pagination', {}),
+            search=search
+        )
+    except Exception as e:
+        return render_template('error.html', error_title="오류", error_message=str(e)), 500
