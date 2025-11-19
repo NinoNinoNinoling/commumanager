@@ -35,7 +35,7 @@ class TestUserRepository:
 
             users, total = UserRepository.find_all()
             assert total >= 1
-            assert any(u['username'] == 'testuser' for u in users)
+            assert any(u.username == 'testuser' for u in users)
 
     def test_find_user_by_id(self, app):
         """ID로 유저 조회"""
@@ -51,8 +51,8 @@ class TestUserRepository:
 
             found_user = UserRepository.find_by_id('test_find_by_id_user')
             assert found_user is not None
-            assert found_user['username'] == 'findbyid'
-            assert found_user['balance'] == 0
+            assert found_user.username == 'findbyid'
+            assert found_user.balance == 0
 
     def test_create_user(self, app):
         """유저 생성"""
@@ -66,9 +66,9 @@ class TestUserRepository:
 
             user = UserRepository.create(new_user)
 
-            assert user['mastodon_id'] == 'new_user_123'
-            assert user['username'] == 'newuser'
-            assert user['balance'] == 0
+            assert user.mastodon_id == 'new_user_123'
+            assert user.username == 'newuser'
+            assert user.balance == 0
 
     def test_update_user_balance(self, app):
         """유저 잔액 업데이트"""
@@ -88,7 +88,7 @@ class TestUserRepository:
 
             # 확인
             updated_user = UserRepository.find_by_id('balance_update_user')
-            assert updated_user['balance'] == 2000
+            assert updated_user.balance == 2000
 
 
 class TestTransactionRepository:
@@ -108,13 +108,14 @@ class TestTransactionRepository:
 
             # 거래 생성
             transaction = Transaction(
+                id=None,
                 user_id='transaction_user',
                 transaction_type='reply',
                 amount=100,
                 description='테스트 거래'
             )
-            transaction_id = TransactionRepository.create(transaction)
-            assert transaction_id > 0
+            created_transaction = TransactionRepository.create(transaction)
+            assert created_transaction.id > 0
 
     def test_find_by_user(self, app):
         """유저별 거래 내역 조회"""
@@ -130,6 +131,7 @@ class TestTransactionRepository:
 
             # 거래 생성
             transaction = Transaction(
+                id=None,
                 user_id='trans_find_user',
                 transaction_type='reply',
                 amount=100,
@@ -140,7 +142,7 @@ class TestTransactionRepository:
             # 조회
             transactions, total = TransactionRepository.find_by_user('trans_find_user')
             assert total >= 1
-            assert transactions[0]['transaction_type'] == 'reply'
+            assert transactions[0].transaction_type == 'reply'
 
 
 class TestItemRepository:
@@ -151,6 +153,7 @@ class TestItemRepository:
         with app.app_context():
             # 아이템 생성
             item = Item(
+                id=None,
                 name='테스트 아이템',
                 description='찾기 테스트용',
                 price=500,
@@ -166,6 +169,7 @@ class TestItemRepository:
         """아이템 생성"""
         with app.app_context():
             item = Item(
+                id=None,
                 name='새 아이템',
                 description='생성 테스트용',
                 price=300,
@@ -181,6 +185,7 @@ class TestItemRepository:
         with app.app_context():
             # 생성
             item = Item(
+                id=None,
                 name='업데이트 아이템',
                 description='업데이트 테스트용',
                 price=500,
@@ -202,6 +207,7 @@ class TestItemRepository:
         with app.app_context():
             # 생성
             item = Item(
+                id=None,
                 name='삭제 아이템',
                 description='삭제 테스트용',
                 price=500,
@@ -235,6 +241,7 @@ class TestVacationRepository:
 
             # 휴가 생성
             vacation = Vacation(
+                id=None,
                 user_id='vacation_user',
                 start_date='2024-01-01',
                 end_date='2024-01-07',
@@ -258,6 +265,7 @@ class TestVacationRepository:
 
             # 휴가 생성
             vacation = Vacation(
+                id=None,
                 user_id='vacation_find_user',
                 start_date='2024-01-01',
                 end_date='2024-01-07',
@@ -316,14 +324,14 @@ class TestWarningRepository:
 
             # 경고 생성
             warning = Warning(
+                id=None,
                 user_id='warning_user',
                 warning_type='activity',
-                message='활동량 부족',
-                dm_sent=False
+                message='활동량 부족'
             )
 
-            warning_id = WarningRepository.create(warning)
-            assert warning_id > 0
+            created_warning = WarningRepository.create(warning)
+            assert created_warning.id > 0
 
     def test_find_by_user(self, app):
         """유저별 경고 조회"""
@@ -339,17 +347,17 @@ class TestWarningRepository:
 
             # 경고 생성
             warning = Warning(
+                id=None,
                 user_id='warning_find_user',
                 warning_type='activity',
-                message='활동량 부족',
-                dm_sent=False
+                message='활동량 부족'
             )
             WarningRepository.create(warning)
 
             # 조회
-            warnings = WarningRepository.find_by_user('warning_find_user')
-            assert len(warnings) >= 1
-            assert warnings[0]['warning_type'] == 'activity'
+            warnings, total = WarningRepository.find_by_user('warning_find_user')
+            assert total >= 1
+            assert warnings[0].warning_type == 'activity'
 
 
 class TestRepositoryIntegration:
@@ -366,24 +374,25 @@ class TestRepositoryIntegration:
                 role='user'
             )
             created_user = UserRepository.create(user)
-            assert created_user['balance'] == 0
+            assert created_user.balance == 0
 
             # 2. 거래 생성 (수입)
             transaction = Transaction(
+                id=None,
                 user_id='flow_test_user',
                 transaction_type='reply',
                 amount=100,
                 description='테스트 거래'
             )
-            transaction_id = TransactionRepository.create(transaction)
-            assert transaction_id > 0
+            created_transaction = TransactionRepository.create(transaction)
+            assert created_transaction.id > 0
 
             # 3. 잔액 업데이트 (실제로는 bot/database.py의 add_transaction이 자동으로 함)
             UserRepository.update_balance('flow_test_user', 100)
 
             # 4. 확인
             user = UserRepository.find_by_id('flow_test_user')
-            assert user['balance'] == 100
+            assert user.balance == 100
 
             transactions, total = TransactionRepository.find_by_user('flow_test_user')
             assert total >= 1
@@ -405,6 +414,7 @@ class TestRepositoryIntegration:
 
             # 3. 아이템 생성
             item = Item(
+                id=None,
                 name='테스트 아이템',
                 description='구매 테스트용',
                 price=500,
@@ -418,6 +428,7 @@ class TestRepositoryIntegration:
 
             # 5. 구매 거래 생성 (지출)
             transaction = Transaction(
+                id=None,
                 user_id='purchase_test_user',
                 transaction_type='purchase',
                 amount=-500,
@@ -427,11 +438,11 @@ class TestRepositoryIntegration:
             TransactionRepository.create(transaction)
 
             # 6. 잔액 차감
-            UserRepository.update_balance('purchase_test_user', 500)
+            UserRepository.update_balance('purchase_test_user', -500)
 
             # 7. 확인
             user = UserRepository.find_by_id('purchase_test_user')
-            assert user['balance'] == 500
+            assert user.balance == 500
 
     def test_user_vacation_warning_flow(self, app):
         """유저 휴가 및 경고 흐름"""
@@ -447,6 +458,7 @@ class TestRepositoryIntegration:
 
             # 2. 휴가 신청
             vacation = Vacation(
+                id=None,
                 user_id='vacation_test_user',
                 start_date=(date.today() + timedelta(days=1)).isoformat(),
                 end_date=(date.today() + timedelta(days=7)).isoformat(),
@@ -456,10 +468,10 @@ class TestRepositoryIntegration:
 
             # 3. 경고 생성
             warning = Warning(
+                id=None,
                 user_id='vacation_test_user',
                 warning_type='activity',
-                message='활동량 부족 경고',
-                dm_sent=False
+                message='활동량 부족 경고'
             )
             WarningRepository.create(warning)
 

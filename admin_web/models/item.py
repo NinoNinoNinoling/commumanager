@@ -11,6 +11,8 @@ class Item:
     name: str
     description: Optional[str] = None
     price: int = 0
+    category: Optional[str] = None
+    image_url: Optional[str] = None
     is_active: bool = True
     created_at: Optional[datetime] = None
 
@@ -21,6 +23,8 @@ class Item:
             'name': self.name,
             'description': self.description,
             'price': self.price,
+            'category': self.category,
+            'image_url': self.image_url,
             'is_active': self.is_active,
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }

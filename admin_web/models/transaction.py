@@ -7,7 +7,7 @@ from typing import Optional
 @dataclass
 class Transaction:
     """거래 내역 모델"""
-    id: int
+    id: Optional[int]
     user_id: str
     transaction_type: str  # earn_reply, earn_attendance, spend_item, admin_adjust
     amount: int
