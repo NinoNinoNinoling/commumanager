@@ -72,7 +72,37 @@ HTTP Request → Route → Controller → Service → Repository → Database
 
 ## 설치 및 실행
 
-### 1. 가상환경 생성 및 활성화
+### 🐳 Docker 사용 (권장)
+
+**빠른 시작:**
+```bash
+# 1. 환경 변수 설정
+cp .env.docker .env
+nano .env  # 실제 값 입력
+
+# 2. 실행
+./scripts/docker/start.sh
+```
+
+**관리:**
+```bash
+# 로그 확인
+./scripts/docker/logs.sh
+
+# 중지
+./scripts/docker/stop.sh
+
+# 재시작
+./scripts/docker/restart.sh
+```
+
+**자세한 내용:** [Docker 가이드](docs/DOCKER_GUIDE.md)
+
+---
+
+### 💻 로컬 개발 환경
+
+#### 1. 가상환경 생성 및 활성화
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # Linux/Mac
@@ -80,26 +110,55 @@ source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate     # Windows
 ```
 
-### 2. 의존성 설치
+#### 2. 의존성 설치
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. 환경 변수 설정
+#### 3. 환경 변수 설정
 ```bash
 cp .env.example .env
 # .env 파일을 편집하여 실제 값 입력
 ```
 
-### 4. 데이터베이스 초기화
+#### 4. 데이터베이스 초기화
 ```bash
 python init_db.py economy.db
 ```
 
-### 5. Flask 개발 서버 실행
+#### 5. Redis 실행
+```bash
+# macOS (Homebrew)
+brew install redis
+brew services start redis
+
+# Ubuntu/Debian
+sudo apt-get install redis-server
+sudo systemctl start redis
+
+# Docker
+docker run -d -p 6379:6379 redis:7-alpine
+```
+
+#### 6. Flask 개발 서버 실행
 ```bash
 cd admin_web
 python app.py
+```
+
+#### 7. 봇 실행
+```bash
+# 새 터미널에서
+python -m bot.reward_bot
+```
+
+#### 8. Celery 실행
+```bash
+# 새 터미널에서 Worker 실행
+celery -A bot.tasks worker --loglevel=info
+
+# 새 터미널에서 Beat 실행 (스케줄러)
+celery -A bot.tasks beat --loglevel=info
 ```
 
 ## 문서
@@ -114,9 +173,26 @@ python app.py
 - [데이터베이스 설계](docs/database.md)
 - [관리자 OAuth](docs/admin_oauth.md)
 - [서버 구축](docs/server_setup.md)
+- **[Docker 가이드](docs/DOCKER_GUIDE.md)** ⭐
 
-### 개발
+### 운영
+- **[유지보수 시스템](docs/MAINTENANCE.md)** 🔧
 - [개발 로드맵](docs/로드맵.md)
+
+## 테스트
+
+```bash
+# pytest 실행
+pytest
+
+# 커버리지와 함께 실행
+pytest --cov=admin_web --cov=bot
+
+# 특정 테스트만 실행
+pytest tests/test_repositories.py
+pytest tests/test_services.py
+pytest tests/test_api.py
+```
 
 ## 디렉토리 구조
 
