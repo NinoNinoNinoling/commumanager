@@ -26,5 +26,5 @@ class Item:
             'category': self.category,
             'image_url': self.image_url,
             'is_active': self.is_active,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'created_at': self.created_at.isoformat() if (self.created_at and isinstance(self.created_at, datetime)) else self.created_at,
         }

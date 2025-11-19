@@ -30,5 +30,5 @@ class Vacation:
             'reason': self.reason,
             'approved': self.approved,
             'registered_by': self.registered_by,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'created_at': self.created_at.isoformat() if (self.created_at and isinstance(self.created_at, datetime)) else self.created_at,
         }

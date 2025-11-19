@@ -28,5 +28,5 @@ class Transaction:
             'item_id': self.item_id,
             'description': self.description,
             'admin_name': self.admin_name,
-            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'timestamp': self.timestamp.isoformat() if (self.timestamp and isinstance(self.timestamp, datetime)) else self.timestamp,
         }

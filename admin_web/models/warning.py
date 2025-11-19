@@ -30,5 +30,5 @@ class Warning:
             'message': self.message,
             'dm_sent': self.dm_sent,
             'admin_name': self.admin_name,
-            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'timestamp': self.timestamp.isoformat() if (self.timestamp and isinstance(self.timestamp, datetime)) else self.timestamp,
         }
