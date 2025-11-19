@@ -9,6 +9,7 @@ from admin_web.services.calendar_service import CalendarService
 from admin_web.services.item_service import ItemService
 from admin_web.services.setting_service import SettingService
 from admin_web.utils.decorators import login_required, admin_required
+from admin_web.repositories.database import get_economy_db
 
 web_bp = Blueprint('web', __name__)
 
@@ -61,7 +62,7 @@ def logs():
             page=page,
             limit=limit,
             admin_name=admin_name if admin_name else None,
-            action=None  # 액션 필터는 클라이언트 사이드에서 처리
+            action_type=None  # 액션 필터는 클라이언트 사이드에서 처리
         )
 
         logs_data = result['logs']
@@ -69,7 +70,7 @@ def logs():
 
         # 고유 관리자 및 액션 추출
         unique_admins = sorted(set(log['admin_name'] for log in logs_data if log['admin_name']))
-        unique_actions = sorted(set(log['action'] for log in logs_data if log['action']))
+        unique_actions = sorted(set(log['action_type'] for log in logs_data if log['action_type']))
 
         # 액션 타입별 색상
         action_colors = {
@@ -164,9 +165,26 @@ def warnings():
         )
 
         # 통계 계산
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+
+            # 이번 주 경고 수
+            cursor.execute("""
+                SELECT COUNT(*) FROM warnings
+                WHERE timestamp > datetime('now', '-7 days')
+            """)
+            this_week = cursor.fetchone()[0]
+
+            # 오늘 경고 수
+            cursor.execute("""
+                SELECT COUNT(*) FROM warnings
+                WHERE date(timestamp) = date('now')
+            """)
+            today = cursor.fetchone()[0]
+
         stats = {
-            'this_week': 0,  # TODO: 주간 통계
-            'today': 0  # TODO: 오늘 통계
+            'this_week': this_week,
+            'today': today
         }
 
         return render_template(
@@ -203,9 +221,26 @@ def vacations():
         )
 
         # 통계 계산
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+
+            # 현재 휴가 중인 사용자 수
+            cursor.execute("""
+                SELECT COUNT(*) FROM vacation
+                WHERE date('now') BETWEEN start_date AND end_date
+            """)
+            active = cursor.fetchone()[0]
+
+            # 이번 달 휴가 신청 수
+            cursor.execute("""
+                SELECT COUNT(*) FROM vacation
+                WHERE strftime('%Y-%m', start_date) = strftime('%Y-%m', 'now')
+            """)
+            this_month = cursor.fetchone()[0]
+
         stats = {
-            'active': 0,  # TODO: 현재 휴가 중
-            'this_month': 0  # TODO: 이번 달 휴가
+            'active': active,
+            'this_month': this_month
         }
 
         return render_template(
@@ -242,10 +277,34 @@ def events():
         )
 
         # 통계 계산
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+
+            # 진행 중 이벤트 (오늘이 start_date와 end_date 사이)
+            cursor.execute("""
+                SELECT COUNT(*) FROM calendar_events
+                WHERE date('now') BETWEEN date(start_date) AND date(end_date)
+            """)
+            active = cursor.fetchone()[0]
+
+            # 예정 이벤트 (start_date가 오늘 이후)
+            cursor.execute("""
+                SELECT COUNT(*) FROM calendar_events
+                WHERE date(start_date) > date('now')
+            """)
+            upcoming = cursor.fetchone()[0]
+
+            # 종료된 이벤트 (end_date가 오늘 이전)
+            cursor.execute("""
+                SELECT COUNT(*) FROM calendar_events
+                WHERE date(end_date) < date('now')
+            """)
+            completed = cursor.fetchone()[0]
+
         stats = {
-            'active': 0,  # TODO: 진행 중 이벤트
-            'upcoming': 0,  # TODO: 예정 이벤트
-            'completed': 0  # TODO: 종료된 이벤트
+            'active': active,
+            'upcoming': upcoming,
+            'completed': completed
         }
 
         return render_template(
@@ -284,9 +343,26 @@ def items():
         )
 
         # 통계 계산
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+
+            # 활성 아이템 수
+            cursor.execute("""
+                SELECT COUNT(*) FROM items
+                WHERE is_active = 1
+            """)
+            active = cursor.fetchone()[0]
+
+            # 비활성 아이템 수
+            cursor.execute("""
+                SELECT COUNT(*) FROM items
+                WHERE is_active = 0
+            """)
+            inactive = cursor.fetchone()[0]
+
         stats = {
-            'active': 0,  # TODO: 활성 아이템
-            'inactive': 0  # TODO: 비활성 아이템
+            'active': active,
+            'inactive': inactive
         }
 
         return render_template(
