@@ -43,26 +43,32 @@ class WarningService:
             }
         }
 
-    def create_warning(self, user_id: str, reason: str, count: int, admin_name: str) -> Warning:
+    def create_warning(self, warning_data: dict) -> Warning:
         """경고 생성"""
         # 1. 경고 생성
         warning = Warning(
             id=None,
-            user_id=user_id,
-            reason=reason,
-            count=count,
-            admin_name=admin_name,
+            user_id=warning_data['user_id'],
+            warning_type=warning_data.get('warning_type', 'manual'),
+            check_period_hours=warning_data.get('check_period_hours'),
+            required_replies=warning_data.get('required_replies'),
+            actual_replies=warning_data.get('actual_replies'),
+            message=warning_data.get('message'),
+            dm_sent=warning_data.get('dm_sent', False),
+            admin_name=warning_data.get('admin_name'),
         )
         created_warning = self.warning_repo.create(warning)
 
         # 2. 관리자 로그 생성
-        log = AdminLog(
-            id=None,
-            admin_name=admin_name,
-            action='create_warning',
-            target_user=user_id,
-            details=f"경고 {count}회 - {reason}",
-        )
-        self.admin_log_repo.create(log)
+        admin_name = warning_data.get('admin_name')
+        if admin_name:
+            log = AdminLog(
+                id=None,
+                admin_name=admin_name,
+                action_type='create_warning',
+                target_user=warning_data['user_id'],
+                details=f"{warning_data.get('warning_type', 'manual')} - {warning_data.get('message', '')}",
+            )
+            self.admin_log_repo.create(log)
 
         return created_warning

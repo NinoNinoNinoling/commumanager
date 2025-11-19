@@ -9,7 +9,7 @@ class AdminLogRepository:
 
     @staticmethod
     def find_all(page: int = 1, limit: int = 50, admin_name: str = None,
-                 action: str = None) -> tuple[List[AdminLog], int]:
+                 action_type: str = None) -> tuple[List[AdminLog], int]:
         """로그 목록 조회"""
         with get_economy_db() as conn:
             cursor = conn.cursor()
@@ -22,9 +22,9 @@ class AdminLogRepository:
                 conditions.append("admin_name = ?")
                 params.append(admin_name)
 
-            if action:
-                conditions.append("action = ?")
-                params.append(action)
+            if action_type:
+                conditions.append("action_type = ?")
+                params.append(action_type)
 
             where_clause = " AND ".join(conditions) if conditions else "1=1"
 
@@ -50,9 +50,9 @@ class AdminLogRepository:
         with get_economy_db() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO admin_logs (admin_name, action, target_user, details)
+                INSERT INTO admin_logs (admin_name, action_type, target_user, details)
                 VALUES (?, ?, ?, ?)
-            """, (log.admin_name, log.action, log.target_user, log.details))
+            """, (log.admin_name, log.action_type, log.target_user, log.details))
             conn.commit()
 
             # 생성된 ID로 조회

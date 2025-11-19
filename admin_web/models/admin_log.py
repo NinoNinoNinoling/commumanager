@@ -9,7 +9,7 @@ class AdminLog:
     """관리자 로그 모델"""
     id: Optional[int]
     admin_name: str
-    action: str
+    action_type: str
     target_user: Optional[str] = None
     details: Optional[str] = None
     timestamp: Optional[datetime] = None
@@ -19,8 +19,8 @@ class AdminLog:
         return {
             'id': self.id,
             'admin_name': self.admin_name,
-            'action': self.action,
+            'action_type': self.action_type,
             'target_user': self.target_user,
             'details': self.details,
-            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'timestamp': self.timestamp.isoformat() if (self.timestamp and isinstance(self.timestamp, datetime)) else self.timestamp,
         }

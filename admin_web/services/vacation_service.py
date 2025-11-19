@@ -33,30 +33,29 @@ class VacationService:
         vacations = self.vacation_repo.find_by_user(user_id)
         return [v.to_dict() for v in vacations]
 
-    def create_vacation(self, user_id: str, start_date: str, end_date: str,
-                        start_time: str = None, end_time: str = None,
-                        reason: str = None, admin_name: str = None) -> Vacation:
+    def create_vacation(self, vacation_data: dict) -> Vacation:
         """휴가 생성"""
         # 1. 휴가 생성
         vacation = Vacation(
             id=None,
-            user_id=user_id,
-            start_date=start_date,
-            end_date=end_date,
-            start_time=start_time,
-            end_time=end_time,
-            reason=reason,
+            user_id=vacation_data['user_id'],
+            start_date=vacation_data['start_date'],
+            end_date=vacation_data['end_date'],
+            start_time=vacation_data.get('start_time'),
+            end_time=vacation_data.get('end_time'),
+            reason=vacation_data.get('reason'),
         )
         created_vacation = self.vacation_repo.create(vacation)
 
         # 2. 관리자 로그 생성 (관리자가 생성한 경우)
+        admin_name = vacation_data.get('admin_name')
         if admin_name:
             log = AdminLog(
                 id=None,
                 admin_name=admin_name,
-                action='create_vacation',
-                target_user=user_id,
-                details=f"{start_date} ~ {end_date}",
+                action_type='create_vacation',
+                target_user=vacation_data['user_id'],
+                details=f"{vacation_data['start_date']} ~ {vacation_data['end_date']}",
             )
             self.admin_log_repo.create(log)
 
@@ -71,7 +70,7 @@ class VacationService:
             log = AdminLog(
                 id=None,
                 admin_name=admin_name,
-                action='delete_vacation',
+                action_type='delete_vacation',
                 details=f"vacation_id: {vacation_id}",
             )
             self.admin_log_repo.create(log)

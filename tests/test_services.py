@@ -102,9 +102,9 @@ class TestDashboardService:
             service = DashboardService()
             stats = service.get_stats()
 
-            assert 'total_users' in stats
-            assert 'total_balance' in stats
-            assert stats['total_users'] >= 1
+            assert 'users' in stats
+            assert 'currency' in stats
+            assert stats['users']['total'] >= 1
 
 
 class TestItemService:
@@ -392,7 +392,7 @@ class TestServiceIntegration:
             dashboard_service = DashboardService()
             stats = dashboard_service.get_stats()
 
-            assert stats['total_users'] >= 3
+            assert stats['users']['total'] >= 3
 
     def test_vacation_warning_flow(self, app):
         """휴가 신청 및 경고 발생 흐름"""

@@ -31,7 +31,7 @@ class SettingService:
             log = AdminLog(
                 id=None,
                 admin_name=admin_name,
-                action='update_setting',
+                action_type='update_setting',
                 details=f"{key} = {value}",
             )
             self.admin_log_repo.create(log)
