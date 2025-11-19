@@ -47,14 +47,16 @@ commumanager/
 │   └── utils.py           # 봇 유틸리티
 │
 ├── docs/                  # 프로젝트 문서
-│   ├── project_overview.md
-│   ├── bot_architecture.md
-│   ├── features.md
-│   ├── use_cases.md
-│   ├── database.md
-│   ├── admin_oauth.md
-│   ├── server_setup.md
-│   └── 로드맵.md
+│   ├── ADMIN_GUIDE.md      # 관리자 웹 가이드
+│   ├── ARCHITECTURE.md     # 시스템 아키텍처
+│   ├── features.md         # 기능 목록 및 유즈케이스
+│   ├── database.md         # 데이터베이스 설계
+│   ├── api_design.md       # API 설계
+│   ├── server_setup.md     # 서버 구축 가이드
+│   ├── DOCKER_GUIDE.md     # Docker 배포 가이드
+│   ├── MAINTENANCE.md      # 유지보수 시스템
+│   ├── EMERGENCY.md        # 긴급 대응 절차
+│   └── 로드맵.md            # 개발 로드맵
 │
 ├── .env.example           # 환경 변수 예시
 ├── .gitignore             # Git 제외 파일 목록
@@ -163,21 +165,23 @@ celery -A bot.tasks beat --loglevel=info
 
 ## 문서
 
-### 개요
-- [프로젝트 개요](docs/project_overview.md)
-- [봇 구조](docs/bot_architecture.md) - 4개 계정 구조
-- [기능 목록](docs/features.md)
-- [유즈케이스](docs/use_cases.md)
+### 🚀 시작하기
+- **[Docker 가이드](docs/DOCKER_GUIDE.md)** ⭐ - 프로덕션 배포
+- [서버 구축](docs/server_setup.md) - 수동 설치 가이드
 
-### 기술
-- [데이터베이스 설계](docs/database.md)
-- [관리자 OAuth](docs/admin_oauth.md)
-- [서버 구축](docs/server_setup.md)
-- **[Docker 가이드](docs/DOCKER_GUIDE.md)** ⭐
+### 📖 시스템 이해
+- **[시스템 아키텍처](docs/ARCHITECTURE.md)** - 전체 시스템 구조 및 기술 스택
+- [기능 목록](docs/features.md) - 모든 기능 및 유즈케이스
+- [데이터베이스 설계](docs/database.md) - DB 스키마 및 설계
+- [API 설계](docs/api_design.md) - API 엔드포인트
 
-### 운영
-- **[유지보수 시스템](docs/MAINTENANCE.md)** 🔧
-- [개발 로드맵](docs/로드맵.md)
+### 👨‍💼 관리자용
+- **[관리자 가이드](docs/ADMIN_GUIDE.md)** - 웹 인터페이스 사용법
+- **[유지보수 시스템](docs/MAINTENANCE.md)** 🔧 - 자동 유지보수
+- **[긴급 대응](docs/EMERGENCY.md)** 🚨 - 트러블슈팅
+
+### 📅 개발 계획
+- [개발 로드맵](docs/로드맵.md) - 향후 개발 계획
 
 ## 테스트
 
