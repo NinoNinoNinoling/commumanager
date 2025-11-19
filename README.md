@@ -175,7 +175,8 @@ celery -A bot.tasks beat --loglevel=info
 - [서버 구축](docs/server_setup.md)
 - **[Docker 가이드](docs/DOCKER_GUIDE.md)** ⭐
 
-### 개발
+### 운영
+- **[유지보수 시스템](docs/MAINTENANCE.md)** 🔧
 - [개발 로드맵](docs/로드맵.md)
 
 ## 테스트

@@ -211,39 +211,117 @@
 | Phase 5: API 엔드포인트 | ✅ 완료 | 100% |
 | Phase 6: 웹 인터페이스 | ✅ 완료 | 100% |
 | Phase 7: 문서화 | ✅ 완료 | 100% |
-| Phase 8: 테스트 및 검증 | 🔄 예정 | 0% |
-| Phase 9: 배포 준비 | 🔄 예정 | 0% |
-| Phase 10: 프로덕션 배포 | 📅 계획 | 0% |
-| Phase 11: 개선 및 유지보수 | 📅 계획 | 0% |
+| Phase 8: 봇 시스템 | ✅ 완료 | 100% |
+| Phase 9: 테스트 코드 | ✅ 완료 | 100% |
+| Phase 10: Docker 배포 | ✅ 완료 | 100% |
+| Phase 11: 유지보수 시스템 | 🔄 진행 중 | 50% |
+| Phase 12: 프로덕션 배포 | 📅 예정 | 0% |
 
-**전체 진행률: 약 65%** (핵심 코드 구현 완료)
+**전체 진행률: 약 85%** (배포 준비 완료)
+
+---
+
+## ✅ Phase 8: 봇 시스템 구현 (완료)
+
+### 구현 완료
+- [x] bot/database.py - DB 유틸리티 (SQLite + PostgreSQL)
+- [x] bot/utils.py - Redis 캐싱, Mastodon 클라이언트
+- [x] bot/command_handler.py - 9가지 명령어 처리
+- [x] bot/activity_checker.py - 활동량 체크 & 소셜 분석
+- [x] bot/reward_bot.py - 메인 봇 (Streaming API)
+- [x] bot/tasks.py - Celery 스케줄링
+- [x] bot/celeryconfig.py - Celery 설정
+
+### 핵심 기능
+- 재화 지급 (4시/16시 자동 정산)
+- 출석 체크 (매일 10시 트윗 발행)
+- 명령어 처리 (@봇 내재화, 상점, 구매 등)
+- 활동량 모니터링 (PostgreSQL 연동)
+- 소셜 분석 (대화 상대, 편중, 고립 감지)
+
+---
+
+## ✅ Phase 9: 테스트 코드 (완료)
+
+### 구현 완료
+- [x] tests/conftest.py - pytest 설정 및 fixture
+- [x] tests/test_repositories.py - Repository 레이어 테스트
+- [x] tests/test_services.py - Service 레이어 테스트
+- [x] tests/test_api.py - API 엔드포인트 테스트
+
+### 테스트 커버리지
+- Repository 레이어 (User, Transaction, Item, Vacation, Warning)
+- Service 레이어 (비즈니스 로직)
+- API 엔드포인트 (인증, 에러 처리)
+- 통합 테스트 (유저-거래, 구매 흐름)
+
+---
+
+## ✅ Phase 10: Docker 배포 환경 (완료)
+
+### 구현 완료
+- [x] Dockerfile - 멀티 스테이지 빌드
+- [x] docker-compose.yml - 5개 서비스 오케스트레이션
+- [x] .dockerignore - 빌드 최적화
+- [x] .env.docker - 환경 변수 템플릿
+- [x] scripts/docker/ - 실행 스크립트 (start, stop, logs, restart, shell)
+- [x] docs/DOCKER_GUIDE.md - 완전한 사용 가이드
+
+### 서비스 구조
+- web: Flask 관리자 웹 (5000 포트)
+- bot: Streaming API 봇
+- celery-worker: 백그라운드 작업
+- celery-beat: 크론 스케줄러
+- redis: 캐싱 & Celery 브로커
+
+---
+
+## 🔄 Phase 11: 유지보수 시스템 (진행 중)
+
+### 완료
+- [x] 기본 크론 작업 (4시/10시/16시)
+- [x] 재화 정산 자동화
+- [x] 소셜 분석 자동화
+
+### 진행 중 (새벽 유지보수 작업)
+- [ ] DB 백업 자동화 (2시)
+- [ ] DB 최적화 (3시) - VACUUM, ANALYZE
+- [ ] 로그 정리 (5시)
+- [ ] 헬스체크 & 알림 (5시 30분)
+
+### 계획
+- [ ] 메트릭 수집 및 모니터링
+- [ ] 에러 추적 및 알림
+- [ ] 성능 모니터링
 
 ---
 
 ## 🎯 다음 단계
 
 ### 즉시 착수 가능
-1. **데이터베이스 초기화 스크립트 작성**
-   - 테이블 생성 SQL
-   - 샘플 데이터 삽입
+1. **유지보수 작업 구현** (Phase 11 완료)
+   - DB 백업 자동화
+   - DB 최적화 스크립트
+   - 헬스체크 시스템
 
-2. **Docker 구성**
-   - Dockerfile 작성
-   - docker-compose.yml 설정
+2. **봇 파일 인코딩 수정**
+   - UTF-8 인코딩 확인
+   - 한글 주석/docstring 정리
 
-3. **수동 테스트**
-   - 로컬 환경에서 실행 테스트
-   - 각 기능별 동작 확인
+3. **실전 테스트 준비**
+   - 마스토돈 OAuth 앱 등록
+   - 봇 계정 생성
+   - 환경 변수 설정
 
 ### 중기 목표 (1-2주)
-- Unit test 작성 및 실행
-- 실제 마스토돈 서버 연동 테스트
-- 배포 스크립트 작성
+- 서버 배포 및 실전 테스트
+- 실제 마스토돈 서버 연동
+- 유저 피드백 수집
 
 ### 장기 목표 (1개월+)
-- 프로덕션 환경 배포
+- 프로덕션 안정화
 - 모니터링 시스템 구축
-- 사용자 피드백 반영 및 개선
+- 추가 기능 개발 (스토리 봇, 유저 웹 등)
 
 ---
 
