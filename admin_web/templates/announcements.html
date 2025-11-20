@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}공지 예약 관리 - 마녀봇 관리자{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="h2">
+                <i class="bi bi-megaphone"></i> 공지 예약 관리
+            </h1>
+            <p class="text-muted">공지를 예약하고 관리합니다</p>
+        </div>
+    </div>
+
+    <!-- 통계 카드 -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">대기 중</h6>
+                    <h2 class="mb-0">{{ stats.pending or 0 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">발행됨</h6>
+                    <h2 class="mb-0">{{ stats.published or 0 }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 공지 목록 -->
+    <div class="card">
+        <div class="card-header">
+            <div class="row">
+                <div class="col">
+                    <h5 class="mb-0">공지 예약 목록</h5>
+                </div>
+                <div class="col-auto">
+                    <a href="/api/v1/announcements" class="btn btn-sm btn-info" target="_blank">
+                        <i class="bi bi-code-square"></i> API 문서
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i>
+                <strong>API를 통해 관리:</strong> 현재 UI는 간략하게 구현되어 있습니다.
+                자세한 기능은 <code>/api/v1/announcements</code> API를 사용하세요.
+                <hr>
+                <small>
+                    <strong>주요 API:</strong>
+                    <ul class="mb-0">
+                        <li>GET /api/v1/announcements - 공지 목록</li>
+                        <li>POST /api/v1/announcements - 공지 생성</li>
+                        <li>PUT /api/v1/announcements/:id - 공지 수정</li>
+                        <li>DELETE /api/v1/announcements/:id - 공지 삭제</li>
+                    </ul>
+                </small>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>유형</th>
+                            <th>내용</th>
+                            <th>예약 시간</th>
+                            <th>상태</th>
+                            <th>생성일</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for announcement in announcements %}
+                        <tr>
+                            <td>{{ announcement.id }}</td>
+                            <td>{{ announcement.post_type }}</td>
+                            <td>{{ announcement.content[:50] }}{% if announcement.content|length > 50 %}...{% endif %}</td>
+                            <td>{{ announcement.scheduled_at }}</td>
+                            <td>
+                                {% if announcement.status == 'pending' %}
+                                    <span class="badge bg-warning">대기 중</span>
+                                {% elif announcement.status == 'published' %}
+                                    <span class="badge bg-success">발행됨</span>
+                                {% elif announcement.status == 'failed' %}
+                                    <span class="badge bg-danger">실패</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ announcement.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ announcement.created_at }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">공지가 없습니다</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

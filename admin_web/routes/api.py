@@ -8,6 +8,8 @@ from admin_web.controllers.calendar_controller import CalendarController
 from admin_web.controllers.item_controller import ItemController
 from admin_web.controllers.setting_controller import SettingController
 from admin_web.controllers.admin_log_controller import AdminLogController
+from admin_web.controllers.story_event_controller import StoryEventController
+from admin_web.controllers.scheduled_announcement_controller import ScheduledAnnouncementController
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 
@@ -50,6 +52,16 @@ def get_setting_controller():
 def get_admin_log_controller():
     """관리자 로그 컨트롤러 인스턴스 가져오기"""
     return AdminLogController()
+
+
+def get_story_controller():
+    """스토리 이벤트 컨트롤러 인스턴스 가져오기"""
+    return StoryEventController()
+
+
+def get_announcement_controller():
+    """공지 예약 컨트롤러 인스턴스 가져오기"""
+    return ScheduledAnnouncementController()
 
 
 # Dashboard
@@ -197,3 +209,89 @@ def update_setting(key):
 def get_admin_logs():
     """관리자 로그"""
     return get_admin_log_controller().get_logs()
+
+
+# Story Events
+@api_bp.route('/story-events', methods=['GET'])
+def get_story_events():
+    """스토리 이벤트 목록"""
+    return get_story_controller().get_events()
+
+
+@api_bp.route('/story-events/<int:event_id>', methods=['GET'])
+def get_story_event(event_id):
+    """스토리 이벤트 상세"""
+    return get_story_controller().get_event(event_id)
+
+
+@api_bp.route('/story-events', methods=['POST'])
+def create_story_event():
+    """스토리 이벤트 생성"""
+    return get_story_controller().create_event()
+
+
+@api_bp.route('/story-events/<int:event_id>', methods=['PUT'])
+def update_story_event(event_id):
+    """스토리 이벤트 수정"""
+    return get_story_controller().update_event(event_id)
+
+
+@api_bp.route('/story-events/<int:event_id>', methods=['DELETE'])
+def delete_story_event(event_id):
+    """스토리 이벤트 삭제"""
+    return get_story_controller().delete_event(event_id)
+
+
+@api_bp.route('/story-events/<int:event_id>/posts', methods=['POST'])
+def add_story_posts(event_id):
+    """스토리 포스트 추가"""
+    return get_story_controller().add_posts(event_id)
+
+
+@api_bp.route('/story-posts/<int:post_id>', methods=['PUT'])
+def update_story_post(post_id):
+    """스토리 포스트 수정"""
+    return get_story_controller().update_post(post_id)
+
+
+@api_bp.route('/story-posts/<int:post_id>', methods=['DELETE'])
+def delete_story_post(post_id):
+    """스토리 포스트 삭제"""
+    return get_story_controller().delete_post(post_id)
+
+
+@api_bp.route('/story-events/bulk-upload', methods=['POST'])
+def bulk_upload_story_events():
+    """스토리 이벤트 엑셀 일괄 업로드"""
+    return get_story_controller().bulk_upload_excel()
+
+
+# Scheduled Announcements
+@api_bp.route('/announcements', methods=['GET'])
+def get_announcements():
+    """공지 목록"""
+    return get_announcement_controller().get_announcements()
+
+
+@api_bp.route('/announcements/<int:announcement_id>', methods=['GET'])
+def get_announcement(announcement_id):
+    """공지 상세"""
+    return get_announcement_controller().get_announcement(announcement_id)
+
+
+@api_bp.route('/announcements', methods=['POST'])
+def create_announcement():
+    """공지 생성"""
+    return get_announcement_controller().create_announcement()
+
+
+@api_bp.route('/announcements/<int:announcement_id>', methods=['PUT'])
+def update_announcement(announcement_id):
+    """공지 수정"""
+    return get_announcement_controller().update_announcement(announcement_id)
+
+
+@api_bp.route('/announcements/<int:announcement_id>', methods=['DELETE'])
+def delete_announcement(announcement_id):
+    """공지 삭제"""
+    return get_announcement_controller().delete_announcement(announcement_id)

@@ -309,6 +309,44 @@ def init_database(db_path='economy.db'):
     cursor.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_archived_toots_unique ON archived_toots(user_id, toot_id)")
     print("✓ archived_toots")
 
+    # 17. story_events (스토리 이벤트)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS story_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            title TEXT NOT NULL,
+            description TEXT,
+            start_time TIMESTAMP NOT NULL,
+            interval_minutes INTEGER DEFAULT 5,
+            status TEXT DEFAULT 'pending',
+            created_by TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            published_at TIMESTAMP
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_story_events_start ON story_events(start_time)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_story_events_status ON story_events(status)")
+    print("✓ story_events")
+
+    # 18. story_posts (스토리 개별 포스트)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS story_posts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_id INTEGER NOT NULL,
+            sequence INTEGER NOT NULL,
+            content TEXT NOT NULL,
+            media_urls TEXT,
+            status TEXT DEFAULT 'pending',
+            mastodon_post_id TEXT,
+            scheduled_at TIMESTAMP,
+            published_at TIMESTAMP,
+            error_message TEXT,
+            FOREIGN KEY(event_id) REFERENCES story_events(id) ON DELETE CASCADE
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_story_posts_event ON story_posts(event_id, sequence)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_story_posts_status ON story_posts(status)")
+    print("✓ story_posts")
+
     print("=" * 60)
     print("📝 초기 데이터 삽입 중...")
 
@@ -367,7 +405,7 @@ def init_database(db_path='economy.db'):
     print("=" * 60)
     print("✅ 데이터베이스 초기화 완료!")
     print(f"📍 경로: {db_path}")
-    print(f"📊 테이블: 16개")
+    print(f"📊 테이블: 18개")
     print(f"⚙️  설정: {len(settings_data)}개")
     print(f"📋 템플릿: {len(templates_data)}개")
 
