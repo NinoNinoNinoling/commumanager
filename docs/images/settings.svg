@@ -57,7 +57,7 @@
   <rect x="240" y="260" width="940" height="140" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
   <text x="260" y="290" font-family="Arial" font-size="16" fill="#333" font-weight="bold">💰 재화 지급 설정</text>
 
-  <text x="280" y="330" font-family="Arial" font-size="13" fill="#495057" font-weight="600">답글 1개당 지급액</text>
+  <text x="280" y="330" font-family="Arial" font-size="13" fill="#495057" font-weight="600">답글 100개당 지급액</text>
   <rect x="280" y="340" width="150" height="35" rx="4" fill="white" stroke="#0d6efd" stroke-width="2"/>
   <text x="355" y="363" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">10갈레온</text>
 
