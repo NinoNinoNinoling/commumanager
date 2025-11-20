@@ -47,17 +47,14 @@ commumanager/
 │   └── celeryconfig.py        # Celery 설정
 │
 ├── docs/                  # 프로젝트 문서
-│   ├── ADMIN_GUIDE.md         # 관리자 웹 가이드
-│   ├── SCREEN_EXAMPLES.md     # UI 목업 및 디자인 가이드
+│   ├── ADMIN_GUIDE.md         # 관리자 웹 가이드 (유지보수 포함)
+│   ├── DEPLOYMENT.md          # 배포 가이드 (서버 설정 + Docker)
 │   ├── ARCHITECTURE.md        # 시스템 아키텍처
 │   ├── features.md            # 기능 목록 및 유즈케이스
 │   ├── database.md            # 데이터베이스 설계
 │   ├── api_design.md          # API 설계
-│   ├── server_setup.md        # 서버 구축 가이드
-│   ├── DOCKER_GUIDE.md        # Docker 배포 가이드
-│   ├── MAINTENANCE.md         # 유지보수 시스템
 │   ├── EMERGENCY.md           # 긴급 대응 절차
-│   └── 로드맵.md               # 개발 로드맵
+│   └── images/                # UI 목업 (SVG)
 │
 ├── .env.example           # 환경 변수 예시
 ├── .gitignore             # Git 제외 파일 목록
@@ -80,7 +77,7 @@ HTTP Request → Route → Controller → Service → Repository → Database
 **빠른 시작:**
 ```bash
 # 1. 환경 변수 설정
-cp .env.docker .env
+cp .env.example .env
 nano .env  # 실제 값 입력
 
 # 2. 실행
@@ -99,7 +96,7 @@ nano .env  # 실제 값 입력
 ./scripts/docker/restart.sh
 ```
 
-**자세한 내용:** [Docker 가이드](docs/DOCKER_GUIDE.md)
+**자세한 내용:** [배포 가이드](docs/DEPLOYMENT.md)
 
 ---
 
@@ -167,8 +164,7 @@ celery -A bot.tasks beat --loglevel=info
 ## 문서
 
 ### 🚀 시작하기
-- **[Docker 가이드](docs/DOCKER_GUIDE.md)** ⭐ - 프로덕션 배포
-- [서버 구축](docs/server_setup.md) - 수동 설치 가이드
+- **[배포 가이드](docs/DEPLOYMENT.md)** ⭐ - Docker 및 서버 설정 완벽 가이드
 
 ### 📖 시스템 이해
 - **[시스템 아키텍처](docs/ARCHITECTURE.md)** - 전체 시스템 구조 및 기술 스택
@@ -177,13 +173,12 @@ celery -A bot.tasks beat --loglevel=info
 - [API 설계](docs/api_design.md) - API 엔드포인트
 
 ### 👨‍💼 관리자용
-- **[관리자 가이드](docs/ADMIN_GUIDE.md)** - 웹 인터페이스 사용법
-- **[화면 예시 및 디자인 가이드](docs/SCREEN_EXAMPLES.md)** - UI 목업 및 디자인 시스템
-- **[유지보수 시스템](docs/MAINTENANCE.md)** 🔧 - 자동 유지보수
+- **[관리자 가이드](docs/ADMIN_GUIDE.md)** - 웹 인터페이스 사용법 및 시스템 유지보수
 - **[긴급 대응](docs/EMERGENCY.md)** 🚨 - 트러블슈팅
+- [UI 목업](docs/images/) - SVG 디자인 가이드
 
 ### 📅 개발 계획
-- [개발 로드맵](docs/로드맵.md) - 향후 개발 계획
+- **[개발 로드맵](ROADMAP.md)** - 향후 개발 계획 및 버전 히스토리
 
 ## 테스트
 
