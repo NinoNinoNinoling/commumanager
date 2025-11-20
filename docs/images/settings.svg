@@ -54,7 +54,7 @@
 
   <text x="700" y="170" font-family="Arial" font-size="13" fill="#495057" font-weight="600">최소 답글 기준 (48시간)</text>
   <rect x="700" y="180" width="150" height="35" rx="4" fill="white" stroke="#0d6efd" stroke-width="2"/>
-  <text x="775" y="203" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">20개</text>
+  <text x="775" y="203" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">5개</text>
 
   <!-- 재화 지급 설정 -->
   <rect x="240" y="260" width="940" height="140" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>

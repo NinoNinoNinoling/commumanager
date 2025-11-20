@@ -192,7 +192,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[오전 5시 크론 실행] --> B[설정 로드 SQLite settings<br/>check_period_hours=48<br/>min_replies_48h=20]
+    A[오전 5시 크론 실행] --> B[설정 로드 SQLite settings<br/>check_period_hours=48<br/>min_replies_48h=5]
     B --> C[PostgreSQL 벌크 쿼리<br/>48시간 내 답글 수 조회]
     C --> D[SQLite users와 매칭<br/>role, vacation 확인]
     D --> E{유저별 판정 루프}
@@ -200,7 +200,7 @@ flowchart TD
     F -->|YES| E1[체크 제외]
     F -->|NO| G{휴식 중?}
     G -->|YES| E1
-    G -->|NO| H{답글 수 < 20?}
+    G -->|NO| H{답글 수 < 5?}
     H -->|NO| E1
     H -->|YES| I[경고 생성]
     I --> I1[warnings 테이블에 기록]

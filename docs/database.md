@@ -233,7 +233,7 @@ CREATE TABLE settings (
 INSERT INTO settings (key, value, description) VALUES
 ('timezone', 'Asia/Seoul', '타임존'),
 ('check_period_hours', '48', '조회 기간 (시간)'),
-('min_replies_48h', '20', '최소 답글 수 기준'),
+('min_replies_48h', '5', '최소 답글 수 기준'),
 ('reward_reply_count', '100', '재화 지급 기준 답글 수'),
 ('reward_per_replies', '10', 'N개당 지급 재화'),
 ('last_reward_settlement_time', '2025-01-01 00:00:00', '마지막 정산 시각'),
@@ -417,7 +417,7 @@ CREATE INDEX idx_calendar_events_vacation ON calendar_events(is_global_vacation)
 **시간**:
 - `start_time`, `end_time`: NULL이면 전일 (00:00~23:59)
 - 예: 2025-12-25 19:00 ~ 2025-12-25 22:00 (연말 파티)
-**전역 휴식기간**: `is_global_vacation=1` (출석 트윗 비활성화)
+**리뉴얼 기간**: `is_global_vacation=1` (출석 트윗 비활성화)
 
 ### user_stats
 ```sql
@@ -444,6 +444,7 @@ CREATE INDEX idx_user_stats_biased ON user_stats(is_biased);
 ```
 
 **분석 기준**:
+- 답글 미달: 48시간 내 5개 미만
 - 고립: 대화 상대 < 7명 (48h)
 - 비활동: 접속률 < 50% (7d)
 - 편중: 특정 1명과 > 30%

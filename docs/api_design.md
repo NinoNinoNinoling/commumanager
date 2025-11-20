@@ -240,7 +240,7 @@ OAuth 콜백 처리
 
 **Query Params**:
 - `period_hours`: int (default: 48)
-- `min_replies`: int (default: 20)
+- `min_replies`: int (default: 5)
 
 **Response**:
 ```json
