@@ -15,19 +15,16 @@
   <text x="30" y="145" font-family="Arial" font-size="13" fill="white" font-weight="600">👥 유저 관리</text>
 
   <rect x="10" y="170" width="180" height="40" rx="6" fill="transparent"/>
-  <text x="30" y="195" font-family="Arial" font-size="13" fill="#a0aec0">💰 재화</text>
+  <text x="30" y="195" font-family="Arial" font-size="13" fill="#a0aec0">📅 콘텐츠</text>
 
   <rect x="10" y="220" width="180" height="40" rx="6" fill="transparent"/>
-  <text x="30" y="245" font-family="Arial" font-size="13" fill="#a0aec0">📅 콘텐츠</text>
+  <text x="30" y="245" font-family="Arial" font-size="13" fill="#a0aec0">🛒 상점</text>
 
   <rect x="10" y="270" width="180" height="40" rx="6" fill="transparent"/>
-  <text x="30" y="295" font-family="Arial" font-size="13" fill="#a0aec0">🛒 상점</text>
+  <text x="30" y="295" font-family="Arial" font-size="13" fill="#a0aec0">📋 로그</text>
 
   <rect x="10" y="320" width="180" height="40" rx="6" fill="transparent"/>
-  <text x="30" y="345" font-family="Arial" font-size="13" fill="#a0aec0">📋 로그</text>
-
-  <rect x="10" y="370" width="180" height="40" rx="6" fill="transparent"/>
-  <text x="30" y="395" font-family="Arial" font-size="13" fill="#a0aec0">⚙️ 설정</text>
+  <text x="30" y="345" font-family="Arial" font-size="13" fill="#a0aec0">⚙️ 설정</text>
 
   <!-- 메인 콘텐츠 영역 -->
   <text x="240" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">유저 관리</text>
