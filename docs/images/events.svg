@@ -36,11 +36,11 @@
 
   <!-- 이벤트 카드 1 -->
   <rect x="40" y="280" width="460" height="160" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="60" y="310" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🎉 신년 맞이 특별 이벤트</text>
-  <text x="60" y="335" font-family="Arial" font-size="13" fill="#6c757d">새해를 맞이하여 전체 회원에게 특별 보상 지급</text>
+  <text x="60" y="310" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🏰 호그스미드 방문 주간</text>
+  <text x="60" y="335" font-family="Arial" font-size="13" fill="#6c757d">마법 마을 호그스미드 자유 방문 기간, 특별 상점 할인</text>
 
-  <rect x="60" y="350" width="60" height="22" rx="4" fill="#dc3545"/>
-  <text x="90" y="365" font-family="Arial" font-size="11" fill="white" text-anchor="middle">특별</text>
+  <rect x="60" y="350" width="60" height="22" rx="4" fill="#6f42c1"/>
+  <text x="90" y="365" font-family="Arial" font-size="11" fill="white" text-anchor="middle">외출</text>
 
   <rect x="130" y="350" width="70" height="22" rx="4" fill="#198754"/>
   <text x="165" y="365" font-family="Arial" font-size="11" fill="white" text-anchor="middle">진행 중</text>
@@ -50,19 +50,19 @@
   <text x="230" y="365" font-family="Arial" font-size="11" fill="#6c757d">공개</text>
 
   <text x="60" y="395" font-family="Arial" font-size="12" fill="#495057" font-weight="600">시작:</text>
-  <text x="100" y="395" font-family="Arial" font-size="12" fill="#6c757d">2025-01-01 00:00</text>
+  <text x="100" y="395" font-family="Arial" font-size="12" fill="#6c757d">2025-11-15 10:00</text>
   <text x="250" y="395" font-family="Arial" font-size="12" fill="#495057" font-weight="600">종료:</text>
-  <text x="290" y="395" font-family="Arial" font-size="12" fill="#6c757d">2025-01-07 23:59</text>
+  <text x="290" y="395" font-family="Arial" font-size="12" fill="#6c757d">2025-11-21 23:59</text>
 
-  <text x="60" y="415" font-family="Arial" font-size="11" fill="#adb5bd">생성일: 2024-12-20 | 관리자: 마녀봇</text>
+  <text x="60" y="415" font-family="Arial" font-size="11" fill="#adb5bd">생성일: 2025-11-01 | 관리자: 총괄관리자</text>
 
   <!-- 이벤트 카드 2 -->
   <rect x="520" y="280" width="460" height="160" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="540" y="310" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🎂 회원 생일 축하 이벤트</text>
-  <text x="540" y="335" font-family="Arial" font-size="13" fill="#6c757d">생일 맞은 회원에게 특별 선물 증정</text>
+  <text x="540" y="310" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🎄 크리스마스 대연회</text>
+  <text x="540" y="335" font-family="Arial" font-size="13" fill="#6c757d">대강당에서 펼쳐지는 연말 축제, 특별 보상 및 이벤트</text>
 
-  <rect x="540" y="350" width="60" height="22" rx="4" fill="#0dcaf0"/>
-  <text x="570" y="365" font-family="Arial" font-size="11" fill="#212529" text-anchor="middle">생일</text>
+  <rect x="540" y="350" width="60" height="22" rx="4" fill="#dc3545"/>
+  <text x="570" y="365" font-family="Arial" font-size="11" fill="white" text-anchor="middle">특별</text>
 
   <rect x="610" y="350" width="70" height="22" rx="4" fill="#ffc107"/>
   <text x="645" y="365" font-family="Arial" font-size="11" fill="#212529" text-anchor="middle">예정</text>
@@ -72,9 +72,9 @@
   <text x="710" y="365" font-family="Arial" font-size="11" fill="#6c757d">공개</text>
 
   <text x="540" y="395" font-family="Arial" font-size="12" fill="#495057" font-weight="600">시작:</text>
-  <text x="580" y="395" font-family="Arial" font-size="12" fill="#6c757d">2025-02-01 00:00</text>
+  <text x="580" y="395" font-family="Arial" font-size="12" fill="#6c757d">2025-12-24 18:00</text>
   <text x="730" y="395" font-family="Arial" font-size="12" fill="#495057" font-weight="600">종료:</text>
-  <text x="770" y="395" font-family="Arial" font-size="12" fill="#6c757d">2025-02-28 23:59</text>
+  <text x="770" y="395" font-family="Arial" font-size="12" fill="#6c757d">2025-12-26 23:59</text>
 
-  <text x="540" y="415" font-family="Arial" font-size="11" fill="#adb5bd">생성일: 2025-01-15 | 관리자: 운영진A</text>
+  <text x="540" y="415" font-family="Arial" font-size="11" fill="#adb5bd">생성일: 2025-12-01 | 관리자: 마녀봇</text>
 </svg>
