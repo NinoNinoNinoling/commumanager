@@ -41,7 +41,7 @@ nano .env
 
 **필수 설정 항목:**
 ```bash
-# Mastodon 인스턴스
+# Mastodon 인스턴스 (예: https://testmast.duckdns.org)
 MASTODON_INSTANCE_URL=https://your-instance.social
 MASTODON_CLIENT_ID=your-client-id
 MASTODON_CLIENT_SECRET=your-client-secret
@@ -49,7 +49,8 @@ MASTODON_CLIENT_SECRET=your-client-secret
 # 봇 액세스 토큰
 BOT_ACCESS_TOKEN=your-bot-token
 
-# PostgreSQL (마스토돈 서버)
+# PostgreSQL (마스토돈 서버 DB 접속 정보)
+# DuckDNS 사용 시: testmast.duckdns.org 또는 서버 IP
 POSTGRES_HOST=your-mastodon-server-ip
 POSTGRES_PORT=5432
 POSTGRES_DB=mastodon_production
@@ -414,17 +415,57 @@ cp -r data data.backup
    - 5000 포트 외부 접근 제한 (Nginx/Traefik 사용)
    - Redis 포트(6379) 외부 접근 차단
 
+### DuckDNS 도메인 설정
+
+DuckDNS를 사용하는 경우:
+
+**1. DuckDNS 도메인 등록**
+- https://www.duckdns.org 접속 후 도메인 생성
+- 예: `testmast`, `testadmin`
+
+**2. DuckDNS 업데이트 설정**
+```bash
+# Crontab에 추가 (5분마다 IP 업데이트)
+*/5 * * * * curl "https://www.duckdns.org/update?domains=testmast,testadmin&token=YOUR_TOKEN&ip="
+```
+
+**3. 도메인 확인**
+```bash
+# nslookup으로 도메인 확인
+nslookup testmast.duckdns.org
+nslookup testadmin.duckdns.org
+```
+
 ### Nginx 리버스 프록시 예시
 
+**관리자 웹 (testadmin.duckdns.org)**
 ```nginx
 server {
     listen 80;
-    server_name admin.your-domain.com;
+    server_name testadmin.duckdns.org;
 
     location / {
         proxy_pass http://localhost:5000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+**마스토돈 서버 (testmast.duckdns.org)**
+```nginx
+server {
+    listen 80;
+    server_name testmast.duckdns.org;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```
@@ -435,8 +476,12 @@ server {
 # Certbot 설치
 sudo apt-get install certbot python3-certbot-nginx
 
-# SSL 인증서 발급
-sudo certbot --nginx -d admin.your-domain.com
+# SSL 인증서 발급 (DuckDNS 도메인)
+sudo certbot --nginx -d testadmin.duckdns.org
+sudo certbot --nginx -d testmast.duckdns.org
+
+# 자동 갱신 확인
+sudo certbot renew --dry-run
 ```
 
 ---
