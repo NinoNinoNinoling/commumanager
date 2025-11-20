@@ -1,0 +1,111 @@
+<svg width="1200" height="920" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 (흐릿하게) -->
+  <rect width="1200" height="920" fill="#f8f9fa"/>
+
+  <!-- 왼쪽 사이드바 (흐릿하게) -->
+  <g opacity="0.3">
+    <rect width="200" height="920" fill="#2d3748"/>
+    <text x="20" y="35" font-family="Arial" font-size="16" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
+  </g>
+
+  <!-- 메인 콘텐츠 배경 (흐릿하게) -->
+  <g opacity="0.3">
+    <text x="340" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">상점 관리</text>
+    <text x="340" y="75" font-family="Arial" font-size="13" fill="#6c757d">아이템 및 구매 내역 관리</text>
+  </g>
+
+  <!-- 모달 오버레이 -->
+  <rect x="0" y="0" width="1200" height="920" fill="#000000" opacity="0.5"/>
+
+  <!-- 모달 창 -->
+  <rect x="300" y="50" width="600" height="820" rx="12" fill="white" filter="drop-shadow(0px 8px 24px rgba(0,0,0,0.3))"/>
+
+  <!-- 모달 헤더 -->
+  <rect x="300" y="50" width="600" height="60" rx="12" fill="#ffc107"/>
+  <text x="330" y="88" font-family="Arial" font-size="20" fill="#212529" font-weight="bold">✏️ 상품 정보 수정</text>
+
+  <!-- 닫기 버튼 -->
+  <circle cx="870" cy="80" r="18" fill="rgba(0,0,0,0.1)"/>
+  <text x="865" y="87" font-family="Arial" font-size="20" fill="#212529" font-weight="bold">×</text>
+
+  <!-- 모달 본문 -->
+  <!-- 상품 정보 -->
+  <rect x="330" y="130" width="540" height="80" rx="6" fill="#f8f9fa"/>
+  <text x="350" y="155" font-family="Arial" font-size="14" fill="#495057" font-weight="600">상품 정보</text>
+  <text x="350" y="180" font-family="Arial" font-size="13" fill="#6c757d">상품 ID: #2847 | 등록일: 2025-11-01</text>
+  <text x="350" y="200" font-family="Arial" font-size="13" fill="#6c757d">누적 판매: 23개 | 총 매출: 115,000갈레온</text>
+
+  <!-- 현재 상태 표시 -->
+  <rect x="745" y="135" width="110" height="26" rx="13" fill="#198754"/>
+  <text x="800" y="153" font-family="Arial" font-size="12" fill="white" text-anchor="middle" font-weight="600">✅ 판매 중</text>
+
+  <!-- 상품명 -->
+  <text x="330" y="245" font-family="Arial" font-size="14" fill="#495057" font-weight="600">상품명 <text fill="#dc3545">*</text></text>
+  <rect x="330" y="255" width="540" height="40" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="280" font-family="Arial" font-size="13" fill="#495057">마법 지팡이 스킨</text>
+
+  <!-- 상품 설명 -->
+  <text x="330" y="330" font-family="Arial" font-size="14" fill="#495057" font-weight="600">상품 설명 <text fill="#dc3545">*</text></text>
+  <rect x="330" y="340" width="540" height="80" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="365" font-family="Arial" font-size="12" fill="#495057">특별한 디자인의 마법 지팡이 스킨입니다.</text>
+  <text x="350" y="385" font-family="Arial" font-size="12" fill="#495057">프로필에 표시되는 특수 아이콘이 변경됩니다.</text>
+
+  <!-- 가격 및 재고 -->
+  <text x="330" y="455" font-family="Arial" font-size="14" fill="#495057" font-weight="600">가격 <text fill="#dc3545">*</text></text>
+  <rect x="330" y="465" width="250" height="40" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="490" font-family="Arial" font-size="16" fill="#495057" font-weight="600">5,000</text>
+  <text x="550" y="490" font-family="Arial" font-size="14" fill="#6c757d">갈레온</text>
+
+  <text x="620" y="455" font-family="Arial" font-size="14" fill="#495057" font-weight="600">재고 수량</text>
+  <rect x="620" y="465" width="250" height="40" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="640" y="490" font-family="Arial" font-size="16" fill="#495057">27</text>
+  <text x="850" y="490" font-family="Arial" font-size="13" fill="#6c757d">개</text>
+
+  <!-- 재고 현황 -->
+  <rect x="620" y="515" width="250" height="30" rx="6" fill="#fff3cd"/>
+  <text x="640" y="535" font-family="Arial" font-size="11" fill="#856404">⚠️ 초기 재고: 50개 | 판매: 23개</text>
+
+  <!-- 카테고리 -->
+  <text x="330" y="580" font-family="Arial" font-size="14" fill="#495057" font-weight="600">카테고리 <text fill="#dc3545">*</text></text>
+  <rect x="330" y="590" width="540" height="40" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="615" font-family="Arial" font-size="13" fill="#495057">[스킨/커스터마이징]</text>
+  <text x="840" y="615" font-family="Arial" font-size="14" fill="#6c757d">▼</text>
+
+  <!-- 구매 제한 -->
+  <text x="330" y="665" font-family="Arial" font-size="14" fill="#495057" font-weight="600">구매 제한</text>
+
+  <rect x="330" y="680" width="250" height="40" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="705" font-family="Arial" font-size="13" fill="#495057">1인당 최대 구매 수량</text>
+
+  <rect x="620" y="680" width="130" height="40" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="640" y="705" font-family="Arial" font-size="16" fill="#495057">1</text>
+  <text x="730" y="705" font-family="Arial" font-size="13" fill="#6c757d">개</text>
+
+  <!-- 판매 상태 -->
+  <text x="330" y="755" font-family="Arial" font-size="14" fill="#495057" font-weight="600">판매 상태</text>
+
+  <!-- 판매 중 옵션 (선택됨) -->
+  <rect x="330" y="770" width="250" height="60" rx="6" fill="white" stroke="#198754" stroke-width="3"/>
+  <circle cx="345" cy="790" r="8" fill="white" stroke="#198754" stroke-width="2"/>
+  <circle cx="345" cy="790" r="5" fill="#198754"/>
+  <text x="365" y="795" font-family="Arial" font-size="14" fill="#198754" font-weight="600">✅ 판매 중</text>
+  <text x="365" y="815" font-family="Arial" font-size="11" fill="#6c757d">상점에 노출됩니다</text>
+
+  <!-- 판매 중지 옵션 -->
+  <rect x="600" y="770" width="270" height="60" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <circle cx="615" cy="790" r="8" fill="white" stroke="#6c757d" stroke-width="2"/>
+  <text x="635" y="795" font-family="Arial" font-size="14" fill="#495057">🚫 판매 중지</text>
+  <text x="635" y="815" font-family="Arial" font-size="11" fill="#6c757d">노출되지 않습니다</text>
+
+  <!-- 푸터 버튼 -->
+  <line x1="300" y1="800" x2="900" y2="800" stroke="#dee2e6" stroke-width="1"/>
+
+  <rect x="330" y="820" width="120" height="40" rx="6" fill="#dc3545"/>
+  <text x="390" y="845" font-family="Arial" font-size="13" fill="white" text-anchor="middle" font-weight="600">🗑️ 삭제</text>
+
+  <rect x="465" y="820" width="125" height="40" rx="6" fill="white" stroke="#6c757d" stroke-width="2"/>
+  <text x="527" y="845" font-family="Arial" font-size="14" fill="#6c757d" text-anchor="middle" font-weight="600">취소</text>
+
+  <rect x="605" y="820" width="265" height="40" rx="6" fill="#ffc107"/>
+  <text x="737" y="845" font-family="Arial" font-size="14" fill="#212529" text-anchor="middle" font-weight="600">✏️ 수정 완료</text>
+</svg>

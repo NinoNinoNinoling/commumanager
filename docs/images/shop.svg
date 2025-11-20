@@ -14,20 +14,17 @@
   <text x="30" y="145" font-family="Arial" font-size="13" fill="#a0aec0">👥 유저 관리</text>
 
   <rect x="10" y="170" width="180" height="40" rx="6" fill="transparent"/>
-  <text x="30" y="195" font-family="Arial" font-size="13" fill="#a0aec0">💰 재화</text>
-
-  <rect x="10" y="220" width="180" height="40" rx="6" fill="transparent"/>
-  <text x="30" y="245" font-family="Arial" font-size="13" fill="#a0aec0">📅 콘텐츠</text>
+  <text x="30" y="195" font-family="Arial" font-size="13" fill="#a0aec0">📅 콘텐츠</text>
 
   <!-- 상점 (활성) -->
-  <rect x="10" y="270" width="180" height="40" rx="6" fill="#4299e1"/>
-  <text x="30" y="295" font-family="Arial" font-size="13" fill="white" font-weight="600">🛒 상점</text>
+  <rect x="10" y="220" width="180" height="40" rx="6" fill="#4299e1"/>
+  <text x="30" y="245" font-family="Arial" font-size="13" fill="white" font-weight="600">🛒 상점</text>
+
+  <rect x="10" y="270" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="295" font-family="Arial" font-size="13" fill="#a0aec0">📋 로그</text>
 
   <rect x="10" y="320" width="180" height="40" rx="6" fill="transparent"/>
-  <text x="30" y="345" font-family="Arial" font-size="13" fill="#a0aec0">📋 로그</text>
-
-  <rect x="10" y="370" width="180" height="40" rx="6" fill="transparent"/>
-  <text x="30" y="395" font-family="Arial" font-size="13" fill="#a0aec0">⚙️ 설정</text>
+  <text x="30" y="345" font-family="Arial" font-size="13" fill="#a0aec0">⚙️ 설정</text>
 
   <!-- 메인 콘텐츠 영역 -->
   <text x="240" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">상점 관리</text>
@@ -73,7 +70,7 @@
 
   <rect x="260" y="370" width="120" height="50" rx="6" fill="#f8f9fa"/>
   <text x="320" y="390" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
-  <text x="320" y="410" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">5,000원</text>
+  <text x="320" y="410" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">5,000갈레온</text>
 
   <rect x="390" y="370" width="120" height="50" rx="6" fill="#f8f9fa"/>
   <text x="450" y="390" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">ID</text>
@@ -99,7 +96,7 @@
 
   <rect x="580" y="370" width="120" height="50" rx="6" fill="#f8f9fa"/>
   <text x="640" y="390" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
-  <text x="640" y="410" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">3,000원</text>
+  <text x="640" y="410" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">3,000갈레온</text>
 
   <rect x="710" y="370" width="120" height="50" rx="6" fill="#f8f9fa"/>
   <text x="770" y="390" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">ID</text>
@@ -125,7 +122,7 @@
 
   <rect x="900" y="370" width="120" height="50" rx="6" fill="#f8f9fa"/>
   <text x="960" y="390" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
-  <text x="960" y="410" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">7,500원</text>
+  <text x="960" y="410" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">7,500갈레온</text>
 
   <rect x="1030" y="370" width="120" height="50" rx="6" fill="#f8f9fa"/>
   <text x="1090" y="390" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">ID</text>
@@ -139,69 +136,4 @@
 
   <rect x="1010" y="465" width="100" height="28" rx="4" fill="white" stroke="#198754" stroke-width="1"/>
   <text x="1060" y="485" font-family="Arial" font-size="12" fill="#198754" text-anchor="middle">활성화</text>
-
-  <!-- 모달 배경 (반투명) -->
-  <rect x="0" y="0" width="1200" height="950" fill="black" opacity="0.5"/>
-
-  <!-- 모달창 -->
-  <rect x="350" y="100" width="500" height="750" rx="8" fill="white" filter="drop-shadow(0px 4px 12px rgba(0,0,0,0.3))"/>
-
-  <!-- 모달 헤더 -->
-  <rect x="350" y="100" width="500" height="50" rx="8" fill="#f8f9fa"/>
-  <text x="370" y="132" font-family="Arial" font-size="18" fill="#333" font-weight="bold">아이템 추가</text>
-  <text x="820" y="130" font-family="Arial" font-size="24" fill="#6c757d" cursor="pointer">×</text>
-
-  <!-- 모달 내용 -->
-  <text x="370" y="180" font-family="Arial" font-size="13" fill="#495057" font-weight="600">아이템 이름 <text fill="#dc3545">*</text></text>
-  <rect x="370" y="188" width="440" height="40" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
-  <text x="380" y="213" font-family="Arial" font-size="13" fill="#adb5bd">예: 황금 스니치</text>
-
-  <text x="370" y="260" font-family="Arial" font-size="13" fill="#495057" font-weight="600">설명</text>
-  <rect x="370" y="268" width="440" height="80" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
-  <text x="380" y="293" font-family="Arial" font-size="13" fill="#adb5bd">예: 퀴디치 경기에서 사용되는 황금색 공입니다</text>
-
-  <text x="370" y="380" font-family="Arial" font-size="13" fill="#495057" font-weight="600">가격 (갈레온) <text fill="#dc3545">*</text></text>
-  <rect x="370" y="388" width="200" height="40" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
-  <text x="380" y="413" font-family="Arial" font-size="13" fill="#adb5bd">10</text>
-
-  <text x="370" y="460" font-family="Arial" font-size="13" fill="#495057" font-weight="600">카테고리 <text fill="#dc3545">*</text></text>
-  <rect x="370" y="468" width="200" height="40" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
-  <text x="380" y="493" font-family="Arial" font-size="13" fill="#495057">마법 도구</text>
-  <text x="545" y="493" font-family="Arial" font-size="13" fill="#adb5bd">▼</text>
-
-  <!-- 카테고리 옵션 드롭다운 (펼쳐진 상태) -->
-  <rect x="370" y="510" width="200" height="120" rx="4" fill="white" stroke="#0d6efd" stroke-width="2" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <rect x="370" y="510" width="200" height="30" rx="4" fill="#e7f5ff"/>
-  <text x="380" y="530" font-family="Arial" font-size="12" fill="#0d6efd" font-weight="600">마법 도구</text>
-
-  <rect x="370" y="540" width="200" height="30" rx="4" fill="white"/>
-  <text x="380" y="560" font-family="Arial" font-size="12" fill="#495057">식음료</text>
-
-  <rect x="370" y="570" width="200" height="30" rx="4" fill="white"/>
-  <text x="380" y="590" font-family="Arial" font-size="12" fill="#495057">마법 재료</text>
-
-  <rect x="370" y="600" width="200" height="30" rx="4" fill="white"/>
-  <text x="380" y="620" font-family="Arial" font-size="12" fill="#495057">의류/액세서리</text>
-
-  <!-- 이미지 URL (선택사항) -->
-  <text x="370" y="660" font-family="Arial" font-size="13" fill="#495057" font-weight="600">이미지 URL (선택)</text>
-  <rect x="370" y="668" width="440" height="40" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
-  <text x="380" y="693" font-family="Arial" font-size="13" fill="#adb5bd">https://example.com/image.jpg</text>
-
-  <!-- 판매 상태 -->
-  <text x="370" y="740" font-family="Arial" font-size="13" fill="#495057" font-weight="600">판매 상태</text>
-  <rect x="370" y="748" width="100" height="35" rx="4" fill="#198754"/>
-  <text x="420" y="770" font-family="Arial" font-size="13" fill="white" text-anchor="middle" font-weight="600">판매 중</text>
-
-  <rect x="480" y="748" width="100" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
-  <text x="530" y="770" font-family="Arial" font-size="13" fill="#495057" text-anchor="middle">판매 중단</text>
-
-  <!-- 모달 푸터 -->
-  <line x1="350" y1="805" x2="850" y2="805" stroke="#dee2e6" stroke-width="1"/>
-
-  <rect x="610" y="810" width="90" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
-  <text x="655" y="833" font-family="Arial" font-size="13" fill="#495057" text-anchor="middle">취소</text>
-
-  <rect x="710" y="810" width="90" height="35" rx="4" fill="#0d6efd"/>
-  <text x="755" y="833" font-family="Arial" font-size="13" fill="white" text-anchor="middle" font-weight="600">저장</text>
 </svg>

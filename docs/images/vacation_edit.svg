@@ -1,0 +1,89 @@
+<svg width="1200" height="770" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 (흐릿하게) -->
+  <rect width="1200" height="770" fill="#f8f9fa"/>
+
+  <!-- 왼쪽 사이드바 (흐릿하게) -->
+  <g opacity="0.3">
+    <rect width="200" height="770" fill="#2d3748"/>
+    <text x="20" y="35" font-family="Arial" font-size="16" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
+  </g>
+
+  <!-- 메인 콘텐츠 배경 (흐릿하게) -->
+  <g opacity="0.3">
+    <text x="340" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">유저 관리</text>
+    <text x="340" y="75" font-family="Arial" font-size="13" fill="#6c757d">활동량 모니터링, 휴식 현황, 재화 관리</text>
+  </g>
+
+  <!-- 모달 오버레이 -->
+  <rect x="0" y="0" width="1200" height="770" fill="#000000" opacity="0.5"/>
+
+  <!-- 모달 창 -->
+  <rect x="300" y="80" width="600" height="610" rx="12" fill="white" filter="drop-shadow(0px 8px 24px rgba(0,0,0,0.3))"/>
+
+  <!-- 모달 헤더 -->
+  <rect x="300" y="80" width="600" height="60" rx="12" fill="#ffc107"/>
+  <text x="330" y="118" font-family="Arial" font-size="20" fill="#212529" font-weight="bold">✏️ 휴식 정보 수정</text>
+
+  <!-- 닫기 버튼 -->
+  <circle cx="870" cy="110" r="18" fill="rgba(0,0,0,0.1)"/>
+  <text x="865" y="117" font-family="Arial" font-size="20" fill="#212529" font-weight="bold">×</text>
+
+  <!-- 모달 본문 -->
+  <!-- 휴식 ID 및 정보 -->
+  <rect x="330" y="160" width="540" height="80" rx="6" fill="#f8f9fa"/>
+  <text x="350" y="185" font-family="Arial" font-size="14" fill="#495057" font-weight="600">휴식 정보</text>
+  <text x="350" y="210" font-family="Arial" font-size="13" fill="#6c757d">휴식 ID: #145 | 등록일: 2025-11-18</text>
+  <text x="350" y="230" font-family="Arial" font-size="13" fill="#0d6efd">@user123 (김민준)</text>
+
+  <!-- 현재 상태 표시 -->
+  <rect x="745" y="165" width="110" height="26" rx="13" fill="#0dcaf0"/>
+  <text x="800" y="183" font-family="Arial" font-size="12" fill="white" text-anchor="middle" font-weight="600">🏖️ 휴식 중</text>
+
+  <!-- 휴식 시작일 -->
+  <text x="330" y="275" font-family="Arial" font-size="14" fill="#495057" font-weight="600">휴식 시작일 <text fill="#dc3545">*</text></text>
+  <rect x="330" y="285" width="250" height="40" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="310" font-family="Arial" font-size="13" fill="#495057">2025-11-20</text>
+  <text x="550" y="310" font-family="Arial" font-size="14" fill="#6c757d">📅</text>
+
+  <!-- 휴식 종료일 -->
+  <text x="620" y="275" font-family="Arial" font-size="14" fill="#495057" font-weight="600">휴식 종료일 <text fill="#dc3545">*</text></text>
+  <rect x="620" y="285" width="250" height="40" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="640" y="310" font-family="Arial" font-size="13" fill="#495057">2025-11-27</text>
+  <text x="840" y="310" font-family="Arial" font-size="14" fill="#6c757d">📅</text>
+
+  <!-- 휴식 기간 요약 -->
+  <rect x="330" y="340" width="540" height="35" rx="6" fill="#e7f5ff"/>
+  <text x="350" y="363" font-family="Arial" font-size="13" fill="#1971c2">📊 휴식 기간: 7일 (2025-11-20 ~ 2025-11-27)</text>
+
+  <!-- 휴식 사유 -->
+  <text x="330" y="410" font-family="Arial" font-size="14" fill="#495057" font-weight="600">휴식 사유 <text fill="#dc3545">*</text></text>
+  <rect x="330" y="420" width="540" height="40" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="445" font-family="Arial" font-size="13" fill="#495057">개인 사정으로 인한 휴식</text>
+
+  <!-- 상세 설명 -->
+  <text x="330" y="495" font-family="Arial" font-size="14" fill="#495057" font-weight="600">상세 설명</text>
+  <rect x="330" y="505" width="540" height="80" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="530" font-family="Arial" font-size="12" fill="#495057">가족 행사 참석으로 일주일간 휴식합니다.</text>
+  <text x="350" y="550" font-family="Arial" font-size="12" fill="#495057">복귀 후 활동 재개 예정입니다.</text>
+
+  <!-- 안내 메시지 -->
+  <rect x="330" y="605" width="540" height="40" rx="6" fill="#fff3cd"/>
+  <text x="350" y="630" font-family="Arial" font-size="11" fill="#856404">⚠️ 휴식 기간 수정 시 활동량 모니터링 제외 기간도 함께 변경됩니다.</text>
+
+  <!-- 빠른 액션 -->
+  <text x="330" y="675" font-family="Arial" font-size="14" fill="#495057" font-weight="600">빠른 액션</text>
+  <rect x="330" y="685" width="130" height="32" rx="6" fill="#dc3545"/>
+  <text x="395" y="706" font-family="Arial" font-size="12" fill="white" text-anchor="middle" font-weight="600">🚫 즉시 종료</text>
+
+  <rect x="475" y="685" width="150" height="32" rx="6" fill="#198754"/>
+  <text x="550" y="706" font-family="Arial" font-size="12" fill="white" text-anchor="middle" font-weight="600">➕ 7일 연장</text>
+
+  <!-- 푸터 버튼 -->
+  <line x1="300" y1="655" x2="900" y2="655" stroke="#dee2e6" stroke-width="1"/>
+
+  <rect x="330" y="665" width="240" height="40" rx="6" fill="white" stroke="#6c757d" stroke-width="2"/>
+  <text x="450" y="690" font-family="Arial" font-size="14" fill="#6c757d" text-anchor="middle" font-weight="600">취소</text>
+
+  <rect x="590" y="665" width="280" height="40" rx="6" fill="#ffc107"/>
+  <text x="730" y="690" font-family="Arial" font-size="14" fill="#212529" text-anchor="middle" font-weight="600">✏️ 수정 완료</text>
+</svg>

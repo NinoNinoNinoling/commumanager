@@ -192,7 +192,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[오전 5시 크론 실행] --> B[설정 로드 SQLite settings<br/>check_period_hours=48<br/>min_replies_48h=20]
+    A[오전 5시 크론 실행] --> B[설정 로드 SQLite settings<br/>check_period_hours=48<br/>min_replies_48h=5]
     B --> C[PostgreSQL 벌크 쿼리<br/>48시간 내 답글 수 조회]
     C --> D[SQLite users와 매칭<br/>role, vacation 확인]
     D --> E{유저별 판정 루프}
@@ -200,7 +200,7 @@ flowchart TD
     F -->|YES| E1[체크 제외]
     F -->|NO| G{휴식 중?}
     G -->|YES| E1
-    G -->|NO| H{답글 수 < 20?}
+    G -->|NO| H{답글 수 < 5?}
     H -->|NO| E1
     H -->|YES| I[경고 생성]
     I --> I1[warnings 테이블에 기록]
@@ -233,7 +233,7 @@ flowchart TD
     D1 --> D2[inventory에 아이템 추가]
     D2 --> D3[transactions 기록]
     D3 --> D4[멘션에 별표⭐ 누름<br/>처리 완료 표시]
-    D4 --> D5[DM 발송<br/>✅ 빨강 염색약 구매 완료!<br/>-100원 💰 남은 재화: 1,150원]
+    D4 --> D5[DM 발송<br/>✅ 빨강 염색약 구매 완료!<br/>-100갈레온 💰 남은 재화: 1,150갈레온]
     D5 --> Z[완료]
 
     C3 -->|NO - 재화 부족/아이템 없음| E[구매 실패]

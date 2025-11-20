@@ -1,0 +1,76 @@
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 (흐릿하게) -->
+  <rect width="1200" height="800" fill="#f8f9fa"/>
+
+  <!-- 왼쪽 사이드바 (흐릿하게) -->
+  <g opacity="0.3">
+    <rect width="200" height="800" fill="#2d3748"/>
+    <text x="20" y="35" font-family="Arial" font-size="16" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
+  </g>
+
+  <!-- 메인 콘텐츠 배경 (흐릿하게) -->
+  <g opacity="0.3">
+    <text x="340" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">유저 관리</text>
+    <text x="340" y="75" font-family="Arial" font-size="13" fill="#6c757d">활동량 모니터링, 휴식 현황, 재화 관리</text>
+  </g>
+
+  <!-- 모달 오버레이 -->
+  <rect x="0" y="0" width="1200" height="800" fill="#000000" opacity="0.5"/>
+
+  <!-- 모달 창 -->
+  <rect x="300" y="80" width="600" height="640" rx="12" fill="white" filter="drop-shadow(0px 8px 24px rgba(0,0,0,0.3))"/>
+
+  <!-- 모달 헤더 -->
+  <rect x="300" y="80" width="600" height="60" rx="12" fill="#dc3545"/>
+  <text x="330" y="118" font-family="Arial" font-size="20" fill="white" font-weight="bold">⚠️ 활동량 경고 발송</text>
+
+  <!-- 닫기 버튼 -->
+  <circle cx="870" cy="110" r="18" fill="rgba(255,255,255,0.2)"/>
+  <text x="865" y="117" font-family="Arial" font-size="20" fill="white" font-weight="bold">×</text>
+
+  <!-- 모달 본문 -->
+  <!-- 대상 유저 정보 -->
+  <rect x="330" y="160" width="540" height="60" rx="6" fill="#f8f9fa"/>
+  <text x="350" y="185" font-family="Arial" font-size="14" fill="#495057" font-weight="600">대상 유저</text>
+  <text x="350" y="210" font-family="Arial" font-size="16" fill="#0d6efd" font-weight="bold">@user123 (김민준)</text>
+
+  <!-- 누적 경고 횟수 표시 -->
+  <rect x="680" y="175" width="180" height="40" rx="6" fill="#fff3cd"/>
+  <text x="695" y="195" font-family="Arial" font-size="12" fill="#856404" font-weight="600">⚠️ 누적 경고: 2회</text>
+  <text x="695" y="210" font-family="Arial" font-size="11" fill="#856404">(3회 시 아웃)</text>
+
+  <!-- 경고 메시지 템플릿 선택 -->
+  <text x="330" y="255" font-family="Arial" font-size="14" fill="#495057" font-weight="600">메시지 템플릿</text>
+  <rect x="330" y="265" width="540" height="40" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="290" font-family="Arial" font-size="13" fill="#495057">[활동 부족] 경고 안내</text>
+  <text x="840" y="290" font-family="Arial" font-size="14" fill="#6c757d">▼</text>
+
+  <!-- 경고 메시지 내용 -->
+  <text x="330" y="340" font-family="Arial" font-size="14" fill="#495057" font-weight="600">경고 메시지 <text fill="#dc3545">*</text></text>
+  <rect x="330" y="350" width="540" height="120" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="375" font-family="Arial" font-size="12" fill="#495057">안녕하세요, @user123님.</text>
+  <text x="350" y="395" font-family="Arial" font-size="12" fill="#495057">최근 48시간 활동량이 기준에 미치지 못하여 경고를 드립니다.</text>
+  <text x="350" y="415" font-family="Arial" font-size="12" fill="#495057">현재 활동: 답글 3개 (기준: 5개/48시간)</text>
+  <text x="350" y="445" font-family="Arial" font-size="12" fill="#495057">다음 체크까지 활동을 개선해주시길 부탁드립니다.</text>
+
+  <!-- 추가 메모 (선택사항) -->
+  <text x="330" y="505" font-family="Arial" font-size="14" fill="#495057" font-weight="600">추가 메모 (선택사항)</text>
+  <rect x="330" y="515" width="540" height="60" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="540" font-family="Arial" font-size="12" fill="#adb5bd">관리자 메모나 특이사항을 입력하세요 (유저에게 표시되지 않음)</text>
+
+  <!-- 안내 메시지 -->
+  <rect x="330" y="595" width="540" height="90" rx="6" fill="#fff3cd"/>
+  <text x="350" y="620" font-family="Arial" font-size="13" fill="#856404" font-weight="600">⚠️ 주의사항</text>
+  <text x="350" y="640" font-family="Arial" font-size="11" fill="#856404">• 경고는 항상 DM으로 발송됩니다</text>
+  <text x="350" y="656" font-family="Arial" font-size="11" fill="#856404">• 경고 발송 시 누적 경고 횟수가 자동으로 1회 증가합니다 (2회 → 3회)</text>
+  <text x="350" y="672" font-family="Arial" font-size="11" fill="#856404">• 3회 경고 시 해당 유저는 자동 아웃 처리됩니다</text>
+
+  <!-- 푸터 버튼 -->
+  <line x1="300" y1="650" x2="900" y2="650" stroke="#dee2e6" stroke-width="1"/>
+
+  <rect x="330" y="670" width="240" height="40" rx="6" fill="white" stroke="#6c757d" stroke-width="2"/>
+  <text x="450" y="695" font-family="Arial" font-size="14" fill="#6c757d" text-anchor="middle" font-weight="600">취소</text>
+
+  <rect x="590" y="670" width="280" height="40" rx="6" fill="#dc3545"/>
+  <text x="730" y="695" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">⚠️ 경고 발송 (3/3)</text>
+</svg>
