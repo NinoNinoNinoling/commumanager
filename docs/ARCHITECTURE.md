@@ -93,60 +93,72 @@ INSERT INTO settings (key, value, description) VALUES
 
 ## 2. 전체 시스템 구조
 
-```
-┌─────────────────────────────────────────────────────┐
-│        Whipping Edition Mastodon Server             │
-│                                                      │
-│  • 사용자 답글 작성                                   │
-│  • OAuth 인증 제공                                   │
-│  • 폐쇄형 운영 (외부 차단)                            │
-│  • PostgreSQL (마스토돈 데이터) ← 읽기 전용 참조     │
-└──────────────┬──────────────────────────────────────┘
-               │ Mastodon API (HTTP/WebSocket)
-               ↓
-┌─────────────────────────────────────────────────────┐
-│           Economy Bot (Python, systemd)             │
-│                                                      │
-│  [실시간 감시 모듈] - 24시간 구동                     │
-│   • stream_local()로 로컬 타임라인 감시              │
-│   • 답글 감지 → 즉시 재화 지급                       │
-│   • status_id로 중복 방지                            │
-│   • 멘션 명령어 처리 + 별표 확인                      │
-│                                                      │
-│  [활동량 체크 모듈] - 하루 2회 (벌크)                │
-│   • 오전 5시: 48시간 벌크 체크 (무거운 작업)         │
-│   • 오후 12시: 중간 체크 (가벼운 확인)               │
-│   • PostgreSQL에서 유저+답글 벌크 조회               │
-│   • 역할 필터링 (시스템/스토리 계정 제외)            │
-│   • 휴식계 유저 제외                                 │
-└──────────────┬──────────────────────────────────────┘
-               │ 공유 DB (SQLite)
-               ↓
-┌─────────────────────────────────────────────────────┐
-│              SQLite Database (economy.db)           │
-│                                                      │
-│  • users (유저별 재화, 역할, 기숙사)                 │
-│  • transactions (거래 기록)                          │
-│  • warnings (경고 로그)                              │
-│  • settings (시스템 설정)                            │
-│  • vacation (휴식 기간)                              │
-│  • items (상점 아이템)                               │
-│  • inventory (보유 아이템)                           │
-│  • admin_logs (관리자 작업 기록)                     │
-└──────────────┬──────────────────────────────────────┘
-               │ 읽기/쓰기
-               ↓
-┌─────────────────────────────────────────────────────┐
-│          Admin Web (Flask + Nginx)                  │
-│                                                      │
-│  [관리자 전용 - OAuth로 권한 체크]                    │
-│   • 홈: 대시보드 (활동 현황, 봇 상태)                │
-│   • 활동량 관리: 경고 내역 + 수동 경고 + 휴식 관리   │
-│   • 재화 관리: 유저 목록 + 재화 지급/차감            │
-│   • 상점 관리: 아이템 등록/수정/삭제                 │
-│   • 시스템 설정: 봇 기준 변경 (DB 직접 수정)        │
-│   • 관리 로그: 모든 관리 작업 기록                   │
-└─────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A[Whipping Edition Mastodon Server] -->|Mastodon API<br/>HTTP/WebSocket| B[Economy Bot]
+    B -->|공유 DB<br/>SQLite| C[SQLite Database]
+    C -->|읽기/쓰기| D[Admin Web]
+
+    A -.->|읽기 전용 참조| E[PostgreSQL<br/>마스토돈 데이터]
+
+    subgraph "Mastodon Server"
+        A
+        A1[사용자 답글 작성]
+        A2[OAuth 인증 제공]
+        A3[폐쇄형 운영]
+        A -.-> A1
+        A -.-> A2
+        A -.-> A3
+    end
+
+    subgraph "Economy Bot (Python, systemd)"
+        B
+        B1[실시간 감시 모듈<br/>- stream_local() 타임라인 감시<br/>- 답글 감지 → 즉시 재화 지급<br/>- status_id로 중복 방지<br/>- 멘션 명령어 처리 + 별표]
+        B2[활동량 체크 모듈<br/>- 오전 5시: 벌크 체크<br/>- 오후 12시: 중간 체크<br/>- PostgreSQL 벌크 조회<br/>- 역할/휴식 필터링]
+        B -.-> B1
+        B -.-> B2
+    end
+
+    subgraph "SQLite Database (economy.db)"
+        C
+        C1[users - 재화/역할/기숙사]
+        C2[transactions - 거래 기록]
+        C3[warnings - 경고 로그]
+        C4[settings - 시스템 설정]
+        C5[vacation - 휴식 기간]
+        C6[items - 상점 아이템]
+        C7[inventory - 보유 아이템]
+        C8[admin_logs - 관리 작업]
+        C -.-> C1
+        C -.-> C2
+        C -.-> C3
+        C -.-> C4
+        C -.-> C5
+        C -.-> C6
+        C -.-> C7
+        C -.-> C8
+    end
+
+    subgraph "Admin Web (Flask + Nginx)"
+        D
+        D1[대시보드 - 활동 현황/봇 상태]
+        D2[활동량 관리 - 경고/휴식]
+        D3[재화 관리 - 지급/차감]
+        D4[상점 관리 - 아이템 CRUD]
+        D5[시스템 설정 - 기준 변경]
+        D6[관리 로그 - 작업 기록]
+        D -.-> D1
+        D -.-> D2
+        D -.-> D3
+        D -.-> D4
+        D -.-> D5
+        D -.-> D6
+    end
+
+    style A fill:#e1f5ff
+    style B fill:#fff4e1
+    style C fill:#f0f0f0
+    style D fill:#e8f5e9
 ```
 
 ---
@@ -155,89 +167,84 @@ INSERT INTO settings (key, value, description) VALUES
 
 ### 3.1 재화 지급 흐름
 
-```
-1. 유저가 답글 작성
-   ↓
-2. 마스토돈 Streaming API 이벤트 발생 (WebSocket 실시간 푸시)
-   ↓
-3. Economy Bot 실시간 감지 (stream_local() 리스너)
-   ↓
-4. 답글 여부 확인 (if status['in_reply_to_id'] is not None)
-   ↓
-5. 중복 체크 (status_id가 이미 처리되었는가?)
-   ↓ NO (새 답글)
-6. 재화 지급 계산 (settings에서 replies_per_reward, reward_amount 조회)
-   ↓
-7. SQLite 업데이트
-   a. users.balance += amount
-   b. users.reply_count += 1
-   c. users.total_earned += amount
-   d. transactions 테이블에 기록
-   ↓
-8. 로그 출력 및 완료
+```mermaid
+flowchart TD
+    A[유저가 답글 작성] --> B[마스토돈 Streaming API 이벤트 발생<br/>WebSocket 실시간 푸시]
+    B --> C[Economy Bot 실시간 감지<br/>stream_local 리스너]
+    C --> D{답글 여부 확인<br/>in_reply_to_id?}
+    D -->|NO| Z[무시]
+    D -->|YES| E{중복 체크<br/>status_id 처리됨?}
+    E -->|YES| Z
+    E -->|NO - 새 답글| F[재화 지급 계산<br/>settings 조회]
+    F --> G[SQLite 업데이트]
+    G --> G1[users.balance += amount]
+    G1 --> G2[users.reply_count += 1]
+    G2 --> G3[users.total_earned += amount]
+    G3 --> G4[transactions 테이블에 기록]
+    G4 --> H[로그 출력 및 완료]
+
+    style A fill:#e3f2fd
+    style H fill:#c8e6c9
+    style Z fill:#ffccbc
 ```
 
 ### 3.2 활동량 체크 흐름 (벌크)
 
-```
-[오전 5시 크론 실행]
-   ↓
-1. 설정 로드 (SQLite settings)
-   - check_period_hours = 48
-   - min_replies_48h = 20
-   ↓
-2. PostgreSQL 벌크 쿼리 (한 번에)
-   SELECT u.id, u.username, COUNT(s.id) as replies
-   FROM accounts u
-   LEFT JOIN statuses s ON s.account_id = u.id
-       AND s.in_reply_to_id IS NOT NULL
-       AND s.created_at > NOW() - INTERVAL '48 hours'
-   WHERE u.suspended = false
-   GROUP BY u.id
-   ↓
-3. SQLite users와 매칭 (각 유저의 role, vacation 확인)
-   ↓
-4. 각 유저별 판정
-   for user in results:
-       if user.role in ['admin', 'system', 'story']:
-           continue  # 체크 제외
-       if is_on_vacation(user):
-           continue  # 휴식 중
-       if user.replies < 20:
-           create_warning(user)
-           send_admin_notification(user)
-   ↓
-5. 경고 처리
-   a. warnings 테이블에 기록
-   b. 관리자 봇으로 비공개 툿 발송
-   ↓
-6. SQLite 통계 업데이트
-   a. users.last_check = NOW()
-   b. settings.last_check = NOW()
+```mermaid
+flowchart TD
+    A[오전 5시 크론 실행] --> B[설정 로드 SQLite settings<br/>check_period_hours=48<br/>min_replies_48h=20]
+    B --> C[PostgreSQL 벌크 쿼리<br/>48시간 내 답글 수 조회]
+    C --> D[SQLite users와 매칭<br/>role, vacation 확인]
+    D --> E{유저별 판정 루프}
+    E --> F{role이 admin/<br/>system/story?}
+    F -->|YES| E1[체크 제외]
+    F -->|NO| G{휴식 중?}
+    G -->|YES| E1
+    G -->|NO| H{답글 수 < 20?}
+    H -->|NO| E1
+    H -->|YES| I[경고 생성]
+    I --> I1[warnings 테이블에 기록]
+    I1 --> I2[관리자 봇으로 비공개 툿 발송]
+    I2 --> E1
+    E1 --> J{다음 유저?}
+    J -->|YES| E
+    J -->|NO| K[SQLite 통계 업데이트]
+    K --> K1[users.last_check = NOW]
+    K1 --> K2[settings.last_check = NOW]
+    K2 --> L[완료]
+
+    style A fill:#e3f2fd
+    style L fill:#c8e6c9
+    style I fill:#fff9c4
 ```
 
 ### 3.3 상점 구매 흐름 (멘션 + 별표 확인)
 
-```
-1. 유저가 멘션으로 구매 요청 ("@봇 구매 빨강 염색약")
-   ↓
-2. Streaming API 감지 (notification_type = 'mention')
-   ↓
-3. 봇이 멘션 처리
-   a. 명령어 파싱: "구매 빨강 염색약"
-   b. SQLite에서 아이템 조회
-   c. 유저 재화 확인 (balance >= price?)
-   ↓ YES
-4. 구매 성공
-   a. users.balance -= price
-   b. inventory에 아이템 추가
-   c. transactions 기록
-   d. 해당 멘션에 별표(⭐) 누름 → "처리 완료" 표시
-   e. DM 발송: "✅ 빨강 염색약 구매 완료! (-100원) 💰 남은 재화: 1,150원"
-   ↓ NO (재화 부족 or 아이템 없음)
-5. 구매 실패
-   a. 멘션에 별표 누르지 않음
-   b. DM 발송: "❌ 재화가 부족합니다!"
+```mermaid
+flowchart TD
+    A[유저가 멘션으로 구매 요청<br/>@봇 구매 빨강 염색약] --> B[Streaming API 감지<br/>notification_type = mention]
+    B --> C[봇이 멘션 처리]
+    C --> C1[명령어 파싱: 구매 빨강 염색약]
+    C1 --> C2[SQLite에서 아이템 조회]
+    C2 --> C3{유저 재화 확인<br/>balance >= price?}
+
+    C3 -->|YES| D[구매 성공]
+    D --> D1[users.balance -= price]
+    D1 --> D2[inventory에 아이템 추가]
+    D2 --> D3[transactions 기록]
+    D3 --> D4[멘션에 별표⭐ 누름<br/>처리 완료 표시]
+    D4 --> D5[DM 발송<br/>✅ 빨강 염색약 구매 완료!<br/>-100원 💰 남은 재화: 1,150원]
+    D5 --> Z[완료]
+
+    C3 -->|NO - 재화 부족/아이템 없음| E[구매 실패]
+    E --> E1[멘션에 별표 누르지 않음]
+    E1 --> E2[DM 발송<br/>❌ 재화가 부족합니다!]
+    E2 --> Z
+
+    style A fill:#e3f2fd
+    style D fill:#c8e6c9
+    style E fill:#ffccbc
+    style Z fill:#f0f0f0
 ```
 
 ---
