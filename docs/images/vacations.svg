@@ -62,6 +62,10 @@
   <rect x="980" y="165" width="180" height="45" rx="6" fill="#198754"/>
   <text x="1070" y="193" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">🏖️ 휴식 등록</text>
 
+  <!-- 할당량 안내 -->
+  <rect x="240" y="230" width="920" height="35" rx="8" fill="#fff3cd"/>
+  <text x="260" y="252" font-family="Arial" font-size="13" fill="#856404">💡 휴식 할당량: <text font-weight="600">1개월당 3일</text> (설정에서 변경 가능)</text>
+
   <!-- 필터 영역 -->
   <rect x="240" y="285" width="920" height="60" rx="8" fill="#e9ecef"/>
   <text x="260" y="310" font-family="Arial" font-size="13" fill="#495057" font-weight="600">사용자 검색</text>
@@ -80,11 +84,12 @@
   <!-- 휴식 목록 테이블 -->
   <rect x="240" y="365" width="920" height="40" rx="8" fill="#f8f9fa"/>
   <text x="260" y="390" font-family="Arial" font-size="12" fill="#495057" font-weight="600">사용자</text>
-  <text x="380" y="390" font-family="Arial" font-size="12" fill="#495057" font-weight="600">시작일</text>
-  <text x="490" y="390" font-family="Arial" font-size="12" fill="#495057" font-weight="600">종료일</text>
-  <text x="600" y="390" font-family="Arial" font-size="12" fill="#495057" font-weight="600">기간</text>
-  <text x="670" y="390" font-family="Arial" font-size="12" fill="#495057" font-weight="600">사유</text>
-  <text x="1000" y="390" font-family="Arial" font-size="12" fill="#495057" font-weight="600">작업</text>
+  <text x="360" y="390" font-family="Arial" font-size="12" fill="#495057" font-weight="600">시작일</text>
+  <text x="460" y="390" font-family="Arial" font-size="12" fill="#495057" font-weight="600">종료일</text>
+  <text x="560" y="390" font-family="Arial" font-size="12" fill="#495057" font-weight="600">기간</text>
+  <text x="625" y="390" font-family="Arial" font-size="12" fill="#495057" font-weight="600">사유</text>
+  <text x="780" y="390" font-family="Arial" font-size="12" fill="#495057" font-weight="600">이번 달 사용</text>
+  <text x="920" y="390" font-family="Arial" font-size="12" fill="#495057" font-weight="600">작업</text>
 
   <!-- 휴식 목록 행 1 (진행 중) -->
   <line x1="240" y1="405" x2="1160" y2="405" stroke="#dee2e6" stroke-width="1"/>
@@ -93,6 +98,7 @@
   <text x="490" y="435" font-family="Arial" font-size="13" fill="#495057">2025-11-25</text>
   <text x="600" y="435" font-family="Arial" font-size="13" fill="#6c757d">7일</text>
   <text x="670" y="435" font-family="Arial" font-size="12" fill="#6c757d">개인 사정</text>
+  <text x="840" y="435" font-family="Arial" font-size="13" fill="#dc3545" font-weight="600">3/3일</text>
   <rect x="960" y="420" width="50" height="24" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
   <text x="985" y="437" font-family="Arial" font-size="11" fill="#0d6efd" text-anchor="middle">수정</text>
   <rect x="1020" y="420" width="80" height="24" rx="4" fill="#dc3545"/>
@@ -105,6 +111,7 @@
   <text x="490" y="485" font-family="Arial" font-size="13" fill="#495057">2025-11-24</text>
   <text x="600" y="485" font-family="Arial" font-size="13" fill="#6c757d">9일</text>
   <text x="670" y="485" font-family="Arial" font-size="12" fill="#6c757d">여행</text>
+  <text x="840" y="485" font-family="Arial" font-size="13" fill="#ffc107" font-weight="600">2/3일</text>
   <rect x="960" y="470" width="50" height="24" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
   <text x="985" y="487" font-family="Arial" font-size="11" fill="#0d6efd" text-anchor="middle">수정</text>
   <rect x="1020" y="470" width="80" height="24" rx="4" fill="#dc3545"/>
