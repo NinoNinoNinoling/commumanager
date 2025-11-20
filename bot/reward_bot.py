@@ -249,9 +249,9 @@ def settle_rewards():
 
             username = user['username']
 
-            # 휴가 중이면 정산 제외 (리워드 감소를 막기 위해)
+            # 휴식 중이면 정산 제외 (리워드 감소를 막기 위해)
             if is_on_vacation(account_id):
-                logger.debug(f'휴가 중 - 정산 제외: {username}')
+                logger.debug(f'휴식 중 - 정산 제외: {username}')
                 continue
 
             # 재화 계산
@@ -294,15 +294,15 @@ def post_attendance_tweet():
     """
     출석 트윗 발행 (매일 10시 자동 실행)
 
-    전체 휴가일이면 발행하지 않습니다.
+    리뉴얼 기간이면 발행하지 않습니다.
     """
     logger.info('='*60)
     logger.info('출석 트윗 발행 시작')
     logger.info('='*60)
 
-    # 전체 휴가일 확인
+    # 리뉴얼 기간 확인
     if is_global_vacation():
-        logger.info('전체 휴가일 - 출석 트윗 발행 안 함')
+        logger.info('리뉴얼 기간 - 출석 트윗 발행 안 함')
         return None
 
     mastodon = create_mastodon_client()

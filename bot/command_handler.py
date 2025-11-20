@@ -63,7 +63,7 @@ def handle_command(mastodon: Mastodon, notification: dict) -> None:
         elif command in ['내아이템', 'inventory', '인벤토리']:
             cmd_inventory(mastodon, user_id, username)
 
-        elif command in ['휴가', 'vacation']:
+        elif command in ['휴식', 'vacation']:
             cmd_vacation(mastodon, user_id, username, args)
 
         elif command in ['일정', 'schedule', 'calendar']:
@@ -247,14 +247,14 @@ def cmd_inventory(mastodon: Mastodon, user_id: str, username: str) -> None:
 
 
 def cmd_vacation(mastodon: Mastodon, user_id: str, username: str, args: list) -> None:
-    """휴가 - 휴가 신청/취소"""
+    """휴식 - 휴식 신청/취소"""
     if not args:
         send_dm(mastodon, username,
-               "휴가 기간을 입력해주세요.\n신청: 멘션 휴가 7\n취소: 멘션 휴가 취소")
+               "휴식 기간을 입력해주세요.\n신청: 멘션 휴식 7\n취소: 멘션 휴식 취소")
         return
 
     if args[0] in ['취소', 'cancel', 'off']:
-        # 휴가 취소
+        # 휴식 취소
         with get_economy_db() as conn:
             cursor = conn.cursor()
             cursor.execute("""
@@ -264,24 +264,24 @@ def cmd_vacation(mastodon: Mastodon, user_id: str, username: str, args: list) ->
             """, (user_id,))
 
             if cursor.rowcount > 0:
-                send_dm(mastodon, username, "휴가가 취소되었습니다.")
-                logger.info(f'휴가 취소: {username}')
+                send_dm(mastodon, username, "휴식이 취소되었습니다.")
+                logger.info(f'휴식 취소: {username}')
             else:
-                send_dm(mastodon, username, "진행 중인 휴가가 없습니다.")
+                send_dm(mastodon, username, "진행 중인 휴식이 없습니다.")
         return
 
-    # 휴가 신청
+    # 휴식 신청
     try:
         days = int(args[0])
         if days <= 0:
-            send_dm(mastodon, username, "휴가 기간은 1일 이상이어야 합니다.")
+            send_dm(mastodon, username, "휴식 기간은 1일 이상이어야 합니다.")
             return
 
-        # 최대 휴가 기간 확인
+        # 최대 휴식 기간 확인
         from .database import get_setting
         max_days = int(get_setting('max_vacation_days', '90'))
         if days > max_days:
-            send_dm(mastodon, username, f"최대 휴가 기간은 {max_days}일입니다.")
+            send_dm(mastodon, username, f"최대 휴식 기간은 {max_days}일입니다.")
             return
 
         start_date = datetime.now().date()
@@ -290,26 +290,26 @@ def cmd_vacation(mastodon: Mastodon, user_id: str, username: str, args: list) ->
         with get_economy_db() as conn:
             cursor = conn.cursor()
 
-            # 기존 휴가 삭제
+            # 기존 휴식 삭제
             cursor.execute("""
                 DELETE FROM vacation
                 WHERE user_id = ?
                 AND end_date >= DATE('now')
             """, (user_id,))
 
-            # 새 휴가 신청
+            # 새 휴식 신청
             cursor.execute("""
                 INSERT INTO vacation (user_id, start_date, end_date, reason, approved, registered_by)
                 VALUES (?, ?, ?, ?, 1, 'self')
-            """, (user_id, start_date, end_date, f'{days}일 휴가'))
+            """, (user_id, start_date, end_date, f'{days}일 휴식'))
 
             send_dm(mastodon, username,
-                   f"휴가 신청 완료\n\n기간: {start_date.strftime('%m/%d')} ~ {end_date.strftime('%m/%d')} ({days}일)")
+                   f"휴식 신청 완료\n\n기간: {start_date.strftime('%m/%d')} ~ {end_date.strftime('%m/%d')} ({days}일)")
 
-            logger.info(f'휴가 신청: {username} - {days}일')
+            logger.info(f'휴식 신청: {username} - {days}일')
 
     except ValueError:
-        send_dm(mastodon, username, "숫자로 일수를 입력해주세요.\n예: 멘션 휴가 7")
+        send_dm(mastodon, username, "숫자로 일수를 입력해주세요.\n예: 멘션 휴식 7")
 
 
 def cmd_schedule(mastodon: Mastodon, user_id: str, username: str, args: list) -> None:

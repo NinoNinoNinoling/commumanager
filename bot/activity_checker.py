@@ -58,7 +58,7 @@ def check_all_users_activity() -> List[Dict]:
     """
     전체 사용자 활동량 체크 (4시/16시 자동 실행)
 
-    휴가 상태인 유저는 제외하고, 기준 미달인 유저를 추출합니다.
+    휴식 상태인 유저는 제외하고, 기준 미달인 유저를 추출합니다.
     분석 결과를 economy DB에 기록하고 경고를 발송합니다.
 
     Returns:
@@ -86,9 +86,9 @@ def check_all_users_activity() -> List[Dict]:
             user_id = user['mastodon_id']
             username = user['username']
 
-            # 휴가 중이면 건너뜀
+            # 휴식 중이면 건너뜀
             if is_on_vacation(user_id):
-                logger.debug(f'휴가 중 - 건너뜀: {username}')
+                logger.debug(f'휴식 중 - 건너뜀: {username}')
                 continue
 
             # 활동량 조회

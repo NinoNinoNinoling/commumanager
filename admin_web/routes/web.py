@@ -201,13 +201,13 @@ def warnings():
 
 
 # ============================================================================
-# 휴가 관리
+# 휴식 관리
 # ============================================================================
 
 @web_bp.route('/vacations')
 @login_required
 def vacations():
-    """휴가 목록 페이지"""
+    """휴식 목록 페이지"""
     try:
         page = int(request.args.get('page', 1))
         user_id = request.args.get('user_id', '')
@@ -224,14 +224,14 @@ def vacations():
         with get_economy_db() as conn:
             cursor = conn.cursor()
 
-            # 현재 휴가 중인 사용자 수
+            # 현재 휴식 중인 사용자 수
             cursor.execute("""
                 SELECT COUNT(*) FROM vacation
                 WHERE date('now') BETWEEN start_date AND end_date
             """)
             active = cursor.fetchone()[0]
 
-            # 이번 달 휴가 신청 수
+            # 이번 달 휴식 신청 수
             cursor.execute("""
                 SELECT COUNT(*) FROM vacation
                 WHERE strftime('%Y-%m', start_date) = strftime('%Y-%m', 'now')
