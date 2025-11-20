@@ -1,0 +1,88 @@
+<svg width="1200" height="900" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 (흐릿하게) -->
+  <rect width="1200" height="900" fill="#f8f9fa"/>
+
+  <!-- 왼쪽 사이드바 (흐릿하게) -->
+  <g opacity="0.3">
+    <rect width="200" height="900" fill="#2d3748"/>
+    <text x="20" y="35" font-family="Arial" font-size="16" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
+  </g>
+
+  <!-- 메인 콘텐츠 배경 (흐릿하게) -->
+  <g opacity="0.3">
+    <text x="340" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">유저 상세</text>
+    <text x="340" y="75" font-family="Arial" font-size="13" fill="#6c757d">재화 거래 내역 및 잔액 조정</text>
+  </g>
+
+  <!-- 모달 오버레이 -->
+  <rect x="0" y="0" width="1200" height="900" fill="#000000" opacity="0.5"/>
+
+  <!-- 모달 창 -->
+  <rect x="300" y="80" width="600" height="740" rx="12" fill="white" filter="drop-shadow(0px 8px 24px rgba(0,0,0,0.3))"/>
+
+  <!-- 모달 헤더 -->
+  <rect x="300" y="80" width="600" height="60" rx="12" fill="#ffc107"/>
+  <text x="330" y="118" font-family="Arial" font-size="20" fill="#212529" font-weight="bold">✏️ 거래 내역 수정</text>
+
+  <!-- 닫기 버튼 -->
+  <circle cx="870" cy="110" r="18" fill="rgba(0,0,0,0.1)"/>
+  <text x="865" y="117" font-family="Arial" font-size="20" fill="#212529" font-weight="bold">×</text>
+
+  <!-- 모달 본문 -->
+  <!-- 거래 ID 및 정보 -->
+  <rect x="330" y="160" width="540" height="80" rx="6" fill="#f8f9fa"/>
+  <text x="350" y="185" font-family="Arial" font-size="14" fill="#495057" font-weight="600">거래 정보</text>
+  <text x="350" y="210" font-family="Arial" font-size="13" fill="#6c757d">거래 ID: #1523 | 2025-11-18 14:30</text>
+  <text x="350" y="230" font-family="Arial" font-size="13" fill="#0d6efd">@user123 (김민준)</text>
+
+  <!-- 거래 유형 선택 -->
+  <text x="330" y="275" font-family="Arial" font-size="14" fill="#495057" font-weight="600">거래 유형 <text fill="#dc3545">*</text></text>
+
+  <!-- 입금 옵션 (선택됨) -->
+  <rect x="330" y="290" width="250" height="80" rx="6" fill="white" stroke="#198754" stroke-width="3"/>
+  <circle cx="345" cy="315" r="8" fill="white" stroke="#198754" stroke-width="2"/>
+  <circle cx="345" cy="315" r="5" fill="#198754"/>
+  <text x="365" y="320" font-family="Arial" font-size="15" fill="#198754" font-weight="600">➕ 입금 (지급)</text>
+  <text x="365" y="345" font-family="Arial" font-size="12" fill="#6c757d">유저에게 재화를 지급합니다</text>
+
+  <!-- 출금 옵션 -->
+  <rect x="600" y="290" width="270" height="80" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <circle cx="615" cy="315" r="8" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <text x="635" y="320" font-family="Arial" font-size="15" fill="#495057">➖ 출금 (차감)</text>
+  <text x="635" y="345" font-family="Arial" font-size="12" fill="#6c757d">유저의 재화를 차감합니다</text>
+
+  <!-- 금액 입력 (기존 값 채워짐) -->
+  <text x="330" y="405" font-family="Arial" font-size="14" fill="#495057" font-weight="600">금액 <text fill="#dc3545">*</text></text>
+  <rect x="330" y="415" width="540" height="50" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="447" font-family="Arial" font-size="20" fill="#495057" font-weight="600">1,000</text>
+  <text x="820" y="447" font-family="Arial" font-size="16" fill="#6c757d">원</text>
+
+  <!-- 적요 (사유) -->
+  <text x="330" y="500" font-family="Arial" font-size="14" fill="#495057" font-weight="600">적요 (사유) <text fill="#dc3545">*</text></text>
+  <rect x="330" y="510" width="540" height="40" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="535" font-family="Arial" font-size="13" fill="#495057">출석 이벤트 참여</text>
+
+  <!-- 카테고리 선택 -->
+  <text x="330" y="585" font-family="Arial" font-size="14" fill="#495057" font-weight="600">카테고리</text>
+  <rect x="330" y="595" width="540" height="40" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="620" font-family="Arial" font-size="13" fill="#495057">[이벤트 보상]</text>
+  <text x="840" y="620" font-family="Arial" font-size="14" fill="#6c757d">▼</text>
+
+  <!-- 세부 설명 -->
+  <text x="330" y="670" font-family="Arial" font-size="14" fill="#495057" font-weight="600">세부 설명</text>
+  <rect x="330" y="680" width="540" height="60" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="350" y="705" font-family="Arial" font-size="12" fill="#495057">출석 이벤트 1주 연속 참여 보너스 지급</text>
+
+  <!-- 안내 메시지 -->
+  <rect x="330" y="760" width="540" height="40" rx="6" fill="#fff3cd"/>
+  <text x="350" y="785" font-family="Arial" font-size="11" fill="#856404">⚠️ 거래 내역 수정 시 잔액이 재계산됩니다. 신중하게 수정하세요.</text>
+
+  <!-- 푸터 버튼 -->
+  <line x1="300" y1="750" x2="900" y2="750" stroke="#dee2e6" stroke-width="1"/>
+
+  <rect x="330" y="770" width="240" height="40" rx="6" fill="white" stroke="#6c757d" stroke-width="2"/>
+  <text x="450" y="795" font-family="Arial" font-size="14" fill="#6c757d" text-anchor="middle" font-weight="600">취소</text>
+
+  <rect x="590" y="770" width="280" height="40" rx="6" fill="#ffc107"/>
+  <text x="730" y="795" font-family="Arial" font-size="14" fill="#212529" text-anchor="middle" font-weight="600">✏️ 수정 완료</text>
+</svg>
