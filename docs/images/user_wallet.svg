@@ -1,0 +1,218 @@
+<svg width="1200" height="900" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
+  <rect width="1200" height="900" fill="#f8f9fa"/>
+
+  <!-- 왼쪽 사이드바 -->
+  <rect width="200" height="900" fill="#2d3748"/>
+  <text x="20" y="35" font-family="Arial" font-size="16" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
+  <line x1="20" y1="50" x2="180" y2="50" stroke="#4a5568" stroke-width="1"/>
+
+  <!-- 메뉴 -->
+  <rect x="10" y="70" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="95" font-family="Arial" font-size="13" fill="#a0aec0">📊 대시보드</text>
+
+  <rect x="10" y="120" width="180" height="40" rx="6" fill="#4299e1"/>
+  <text x="30" y="145" font-family="Arial" font-size="13" fill="white" font-weight="600">💰 재화</text>
+
+  <rect x="10" y="170" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="195" font-family="Arial" font-size="13" fill="#a0aec0">👥 유저 관리</text>
+
+  <!-- 메인 콘텐츠 영역 -->
+  <!-- 뒤로가기 버튼 -->
+  <rect x="240" y="30" width="80" height="32" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="280" y="50" font-family="Arial" font-size="13" fill="#495057" text-anchor="middle">← 목록</text>
+
+  <text x="340" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">유저 지갑</text>
+  <text x="340" y="75" font-family="Arial" font-size="13" fill="#6c757d">재화 거래 내역 및 잔액 조정</text>
+
+  <!-- 유저 정보 카드 -->
+  <rect x="240" y="95" width="940" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+
+  <!-- 프로필 영역 -->
+  <circle cx="280" cy="135" r="30" fill="#e9ecef"/>
+  <text x="280" y="145" font-family="Arial" font-size="24" fill="#495057" text-anchor="middle">👤</text>
+
+  <text x="330" y="130" font-family="Arial" font-size="18" fill="#333" font-weight="bold">@user123</text>
+  <text x="330" y="150" font-family="Arial" font-size="13" fill="#6c757d">김민준 (user123)</text>
+  <rect x="330" y="160" width="60" height="20" rx="4" fill="#6c757d"/>
+  <text x="360" y="174" font-family="Arial" font-size="11" fill="white" text-anchor="middle">사용자</text>
+
+  <!-- 재화 정보 -->
+  <line x1="520" y1="110" x2="520" y2="190" stroke="#dee2e6" stroke-width="1"/>
+
+  <text x="550" y="130" font-family="Arial" font-size="13" fill="#6c757d">현재 잔액</text>
+  <text x="550" y="160" font-family="Arial" font-size="28" fill="#0d6efd" font-weight="bold">15,420갈레온</text>
+
+  <text x="740" y="130" font-family="Arial" font-size="13" fill="#6c757d">누적 획득</text>
+  <text x="740" y="160" font-family="Arial" font-size="18" fill="#198754" font-weight="600">+42,800갈레온</text>
+
+  <text x="920" y="130" font-family="Arial" font-size="13" fill="#6c757d">누적 사용</text>
+  <text x="920" y="160" font-family="Arial" font-size="18" fill="#dc3545" font-weight="600">-27,380갈레온</text>
+
+  <text x="550" y="195" font-family="Arial" font-size="11" fill="#adb5bd">최종 활동: 2025-11-18 14:30 | 가입일: 2024-01-15</text>
+
+  <!-- 재화 조정 폼 -->
+  <rect x="240" y="235" width="460" height="330" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="260" font-family="Arial" font-size="16" fill="#333" font-weight="bold">재화 조정</text>
+
+  <!-- 조정 유형 -->
+  <text x="260" y="290" font-family="Arial" font-size="13" fill="#495057" font-weight="600">조정 유형</text>
+  <rect x="260" y="298" width="100" height="35" rx="4" fill="#198754"/>
+  <text x="310" y="320" font-family="Arial" font-size="13" fill="white" text-anchor="middle" font-weight="600">+ 지급</text>
+  <rect x="370" y="298" width="100" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="420" y="320" font-family="Arial" font-size="13" fill="#495057" text-anchor="middle">- 차감</text>
+
+  <!-- 금액 입력 -->
+  <text x="260" y="360" font-family="Arial" font-size="13" fill="#495057" font-weight="600">금액 (갈레온)</text>
+  <rect x="260" y="368" width="200" height="40" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="270" y="393" font-family="Arial" font-size="14" fill="#495057">1,000</text>
+
+  <!-- 사유 입력 -->
+  <text x="260" y="435" font-family="Arial" font-size="13" fill="#495057" font-weight="600">사유 <text fill="#dc3545">*</text></text>
+  <rect x="260" y="443" width="420" height="60" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="270" y="465" font-family="Arial" font-size="13" fill="#adb5bd">이벤트 보상 지급</text>
+
+  <!-- 미리보기 -->
+  <rect x="260" y="520" width="420" height="20" rx="4" fill="#e7f5ff"/>
+  <text x="270" y="535" font-family="Arial" font-size="12" fill="#1971c2">미리보기: 15,420갈레온 + 1,000갈레온 = 16,420갈레온</text>
+
+  <!-- 버튼 -->
+  <rect x="590" y="528" width="80" height="32" rx="4" fill="#0d6efd"/>
+  <text x="630" y="548" font-family="Arial" font-size="13" fill="white" text-anchor="middle" font-weight="600">적용</text>
+
+  <!-- 안내 메시지 -->
+  <rect x="720" y="235" width="460" height="100" rx="8" fill="#fff3cd" stroke="#ffc107" stroke-width="1"/>
+  <text x="740" y="260" font-family="Arial" font-size="13" fill="#856404" font-weight="600">⚠️ 주의사항</text>
+  <text x="740" y="280" font-family="Arial" font-size="12" fill="#856404">• 모든 재화 조정은 관리 로그에 영구 기록됩니다</text>
+  <text x="740" y="300" font-family="Arial" font-size="12" fill="#856404">• 사유는 반드시 입력해야 하며, 오류 수정 시 디버깅에 사용됩니다</text>
+  <text x="740" y="320" font-family="Arial" font-size="12" fill="#856404">• 적용 후 취소할 수 없으니 신중하게 확인하세요</text>
+
+  <!-- 빠른 액션 버튼 -->
+  <rect x="720" y="355" width="460" height="210" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="740" y="380" font-family="Arial" font-size="14" fill="#333" font-weight="bold">빠른 액션</text>
+
+  <rect x="740" y="395" width="140" height="35" rx="4" fill="white" stroke="#198754" stroke-width="1"/>
+  <text x="810" y="418" font-family="Arial" font-size="12" fill="#198754" text-anchor="middle">+1,000갈레온</text>
+
+  <rect x="900" y="395" width="140" height="35" rx="4" fill="white" stroke="#198754" stroke-width="1"/>
+  <text x="970" y="418" font-family="Arial" font-size="12" fill="#198754" text-anchor="middle">+5,000갈레온</text>
+
+  <rect x="1060" y="395" width="100" height="35" rx="4" fill="white" stroke="#198754" stroke-width="1"/>
+  <text x="1110" y="418" font-family="Arial" font-size="12" fill="#198754" text-anchor="middle">+직접입력</text>
+
+  <rect x="740" y="445" width="140" height="35" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="810" y="468" font-family="Arial" font-size="12" fill="#dc3545" text-anchor="middle">-1,000갈레온</text>
+
+  <rect x="900" y="445" width="140" height="35" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="970" y="468" font-family="Arial" font-size="12" fill="#dc3545" text-anchor="middle">-5,000갈레온</text>
+
+  <rect x="1060" y="445" width="100" height="35" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="1110" y="468" font-family="Arial" font-size="12" fill="#dc3545" text-anchor="middle">-직접입력</text>
+
+  <text x="740" y="510" font-family="Arial" font-size="11" fill="#6c757d">일반적인 조정 금액을 빠르게 선택하거나 직접 입력할 수 있습니다</text>
+
+  <text x="740" y="540" font-family="Arial" font-size="13" fill="#495057" font-weight="600">사유 템플릿</text>
+  <rect x="740" y="545" width="140" height="25" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="750" y="563" font-family="Arial" font-size="11" fill="#495057">이벤트 보상</text>
+  <text x="870" y="563" font-family="Arial" font-size="11" fill="#adb5bd">▼</text>
+
+  <!-- 거래 내역 -->
+  <text x="240" y="605" font-family="Arial" font-size="16" fill="#333" font-weight="bold">거래 내역</text>
+
+  <!-- 필터 -->
+  <rect x="860" y="585" width="150" height="30" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="870" y="605" font-family="Arial" font-size="12" fill="#495057">전체 유형</text>
+  <text x="995" y="605" font-family="Arial" font-size="12" fill="#adb5bd">▼</text>
+
+  <rect x="1030" y="585" width="150" height="30" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="1040" y="605" font-family="Arial" font-size="12" fill="#495057">최근 30일</text>
+  <text x="1165" y="605" font-family="Arial" font-size="12" fill="#adb5bd">▼</text>
+
+  <!-- 거래 내역 테이블 -->
+  <rect x="240" y="625" width="940" height="255" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+
+  <!-- 테이블 헤더 -->
+  <rect x="240" y="625" width="940" height="35" rx="8" fill="#f8f9fa"/>
+  <text x="260" y="648" font-family="Arial" font-size="11" fill="#495057" font-weight="600">ID</text>
+  <text x="310" y="648" font-family="Arial" font-size="11" fill="#495057" font-weight="600">일시</text>
+  <text x="470" y="648" font-family="Arial" font-size="11" fill="#495057" font-weight="600">유형</text>
+  <text x="600" y="648" font-family="Arial" font-size="11" fill="#495057" font-weight="600">금액</text>
+  <text x="720" y="648" font-family="Arial" font-size="11" fill="#495057" font-weight="600">잔액</text>
+  <text x="830" y="648" font-family="Arial" font-size="11" fill="#495057" font-weight="600">사유</text>
+  <text x="1050" y="648" font-family="Arial" font-size="11" fill="#495057" font-weight="600">담당자</text>
+
+  <!-- 거래 내역 행 1 -->
+  <line x1="240" y1="660" x2="1180" y2="660" stroke="#dee2e6" stroke-width="1"/>
+  <text x="260" y="683" font-family="Arial" font-size="11" fill="#6c757d">#1523</text>
+  <text x="310" y="683" font-family="Arial" font-size="11" fill="#495057">2025-11-18 14:30</text>
+  <rect x="470" y="670" width="100" height="20" rx="4" fill="#198754"/>
+  <text x="520" y="683" font-family="Arial" font-size="10" fill="white" text-anchor="middle" font-weight="600">이벤트 보상</text>
+  <text x="600" y="683" font-family="Arial" font-size="12" fill="#198754" font-weight="600">+1,000</text>
+  <text x="720" y="683" font-family="Arial" font-size="12" fill="#495057">15,420</text>
+  <text x="830" y="683" font-family="Arial" font-size="11" fill="#495057">출석 이벤트 참여</text>
+  <text x="1050" y="683" font-family="Arial" font-size="11" fill="#6c757d">admin</text>
+
+  <!-- 거래 내역 행 2 -->
+  <line x1="240" y1="695" x2="1180" y2="695" stroke="#dee2e6" stroke-width="1"/>
+  <text x="260" y="718" font-family="Arial" font-size="11" fill="#6c757d">#1522</text>
+  <text x="310" y="718" font-family="Arial" font-size="11" fill="#495057">2025-11-17 22:15</text>
+  <rect x="470" y="705" width="100" height="20" rx="4" fill="#dc3545"/>
+  <text x="520" y="718" font-family="Arial" font-size="10" fill="white" text-anchor="middle" font-weight="600">상점 구매</text>
+  <text x="600" y="718" font-family="Arial" font-size="12" fill="#dc3545" font-weight="600">-2,500</text>
+  <text x="720" y="718" font-family="Arial" font-size="12" fill="#495057">14,420</text>
+  <text x="830" y="718" font-family="Arial" font-size="11" fill="#495057">마법 지팡이 구매</text>
+  <text x="1050" y="718" font-family="Arial" font-size="11" fill="#6c757d">system</text>
+
+  <!-- 거래 내역 행 3 -->
+  <line x1="240" y1="730" x2="1180" y2="730" stroke="#dee2e6" stroke-width="1"/>
+  <text x="260" y="753" font-family="Arial" font-size="11" fill="#6c757d">#1521</text>
+  <text x="310" y="753" font-family="Arial" font-size="11" fill="#495057">2025-11-17 16:00</text>
+  <rect x="470" y="740" width="100" height="20" rx="4" fill="#0dcaf0"/>
+  <text x="520" y="753" font-family="Arial" font-size="10" fill="white" text-anchor="middle" font-weight="600">활동량 정산</text>
+  <text x="600" y="753" font-family="Arial" font-size="12" fill="#198754" font-weight="600">+420</text>
+  <text x="720" y="753" font-family="Arial" font-size="12" fill="#495057">16,920</text>
+  <text x="830" y="753" font-family="Arial" font-size="11" fill="#495057">답글 42개 (10원/개)</text>
+  <text x="1050" y="753" font-family="Arial" font-size="11" fill="#6c757d">system</text>
+
+  <!-- 거래 내역 행 4 -->
+  <line x1="240" y1="765" x2="1180" y2="765" stroke="#dee2e6" stroke-width="1"/>
+  <text x="260" y="788" font-family="Arial" font-size="11" fill="#6c757d">#1520</text>
+  <text x="310" y="788" font-family="Arial" font-size="11" fill="#495057">2025-11-16 15:45</text>
+  <rect x="470" y="775" width="100" height="20" rx="4" fill="#ffc107"/>
+  <text x="520" y="788" font-family="Arial" font-size="10" fill="#212529" text-anchor="middle" font-weight="600">오류 수정</text>
+  <text x="600" y="788" font-family="Arial" font-size="12" fill="#dc3545" font-weight="600">-1,000</text>
+  <text x="720" y="788" font-family="Arial" font-size="12" fill="#495057">16,500</text>
+  <text x="830" y="788" font-family="Arial" font-size="11" fill="#495057">중복 지급 오류 수정 (#1518 취소)</text>
+  <text x="1050" y="788" font-family="Arial" font-size="11" fill="#6c757d">admin</text>
+
+  <!-- 거래 내역 행 5 -->
+  <line x1="240" y1="800" x2="1180" y2="800" stroke="#dee2e6" stroke-width="1"/>
+  <text x="260" y="823" font-family="Arial" font-size="11" fill="#6c757d">#1519</text>
+  <text x="310" y="823" font-family="Arial" font-size="11" fill="#495057">2025-11-16 10:20</text>
+  <rect x="470" y="810" width="100" height="20" rx="4" fill="#0dcaf0"/>
+  <text x="520" y="823" font-family="Arial" font-size="10" fill="white" text-anchor="middle" font-weight="600">활동량 정산</text>
+  <text x="600" y="823" font-family="Arial" font-size="12" fill="#198754" font-weight="600">+380</text>
+  <text x="720" y="823" font-family="Arial" font-size="12" fill="#495057">17,500</text>
+  <text x="830" y="823" font-family="Arial" font-size="11" fill="#495057">답글 38개 (10원/개)</text>
+  <text x="1050" y="823" font-family="Arial" font-size="11" fill="#6c757d">system</text>
+
+  <!-- 거래 내역 행 6 -->
+  <line x1="240" y1="835" x2="1180" y2="835" stroke="#dee2e6" stroke-width="1"/>
+  <text x="260" y="858" font-family="Arial" font-size="11" fill="#6c757d">#1518</text>
+  <text x="310" y="858" font-family="Arial" font-size="11" fill="#495057">2025-11-15 18:30</text>
+  <rect x="470" y="845" width="100" height="20" rx="4" fill="#198754"/>
+  <text x="520" y="858" font-family="Arial" font-size="10" fill="white" text-anchor="middle" font-weight="600">이벤트 보상</text>
+  <text x="600" y="858" font-family="Arial" font-size="12" fill="#198754" font-weight="600">+1,000</text>
+  <text x="720" y="858" font-family="Arial" font-size="12" fill="#495057">17,120</text>
+  <text x="830" y="858" font-family="Arial" font-size="11" fill="#495057">퀴즈 이벤트 정답</text>
+  <text x="1050" y="858" font-family="Arial" font-size="11" fill="#6c757d">admin</text>
+
+  <!-- 페이지네이션 -->
+  <text x="260" y="873" font-family="Arial" font-size="11" fill="#6c757d">총 152건 | 1-10</text>
+  <rect x="1080" y="860" width="30" height="25" rx="4" fill="#0d6efd"/>
+  <text x="1095" y="878" font-family="Arial" font-size="11" fill="white" text-anchor="middle">1</text>
+  <rect x="1115" y="860" width="30" height="25" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="1130" y="878" font-family="Arial" font-size="11" fill="#495057" text-anchor="middle">2</text>
+  <rect x="1150" y="860" width="30" height="25" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="1165" y="878" font-family="Arial" font-size="11" fill="#495057" text-anchor="middle">→</text>
+</svg>

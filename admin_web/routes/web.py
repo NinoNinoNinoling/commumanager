@@ -8,6 +8,8 @@ from admin_web.services.vacation_service import VacationService
 from admin_web.services.calendar_service import CalendarService
 from admin_web.services.item_service import ItemService
 from admin_web.services.setting_service import SettingService
+from admin_web.services.story_event_service import StoryEventService
+from admin_web.services.scheduled_announcement_service import ScheduledAnnouncementService
 from admin_web.utils.decorators import login_required, admin_required
 from admin_web.repositories.database import get_economy_db
 
@@ -22,6 +24,8 @@ vacation_service = VacationService()
 calendar_service = CalendarService()
 item_service = ItemService()
 setting_service = SettingService()
+story_event_service = StoryEventService()
+announcement_service = ScheduledAnnouncementService()
 
 
 @web_bp.route('/')
@@ -405,6 +409,105 @@ def settings():
             settings=settings_data.get('settings', []),
             pagination=settings_data.get('pagination', {}),
             search=search
+        )
+    except Exception as e:
+        return render_template('error.html', error_title="오류", error_message=str(e)), 500
+
+
+# ============================================================================
+# 스토리 이벤트 관리
+# ============================================================================
+
+@web_bp.route('/story-events')
+@login_required
+def story_events():
+    """스토리 이벤트 목록 페이지"""
+    try:
+        page = int(request.args.get('page', 1))
+        status = request.args.get('status', '')
+
+        events_data = story_event_service.get_events(
+            page=page,
+            limit=50,
+            status=status if status else None
+        )
+
+        # 통계 계산
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT COUNT(*) FROM story_events WHERE status = 'pending'")
+            pending = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(*) FROM story_events WHERE status = 'in_progress'")
+            in_progress = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(*) FROM story_events WHERE status = 'completed'")
+            completed = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(*) FROM story_events WHERE status = 'failed'")
+            failed = cursor.fetchone()[0]
+
+        stats = {
+            'pending': pending,
+            'in_progress': in_progress,
+            'completed': completed,
+            'failed': failed
+        }
+
+        return render_template(
+            'story_events.html',
+            events=events_data.get('events', []),
+            pagination=events_data.get('pagination', {}),
+            stats=stats,
+            status=status
+        )
+    except Exception as e:
+        return render_template('error.html', error_title="오류", error_message=str(e)), 500
+
+
+# ============================================================================
+# 공지 예약 관리
+# ============================================================================
+
+@web_bp.route('/announcements')
+@login_required
+def announcements():
+    """공지 예약 목록 페이지"""
+    try:
+        page = int(request.args.get('page', 1))
+        status = request.args.get('status', '')
+        post_type = request.args.get('type', '')
+
+        announcements_data = announcement_service.get_announcements(
+            page=page,
+            limit=50,
+            status=status if status else None,
+            post_type=post_type if post_type else None
+        )
+
+        # 통계 계산
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+
+            cursor.execute("SELECT COUNT(*) FROM scheduled_posts WHERE status = 'pending'")
+            pending = cursor.fetchone()[0]
+
+            cursor.execute("SELECT COUNT(*) FROM scheduled_posts WHERE status = 'published'")
+            published = cursor.fetchone()[0]
+
+        stats = {
+            'pending': pending,
+            'published': published
+        }
+
+        return render_template(
+            'announcements.html',
+            announcements=announcements_data.get('announcements', []),
+            pagination=announcements_data.get('pagination', {}),
+            stats=stats,
+            status=status,
+            post_type=post_type
         )
     except Exception as e:
         return render_template('error.html', error_title="오류", error_message=str(e)), 500

@@ -503,6 +503,204 @@ OAuth 콜백 처리
 }
 ```
 
+## 스토리 예약 (Story Events)
+
+### GET /api/v1/story-events
+스토리 이벤트 목록 조회
+
+**Query Params**:
+- `page`, `limit`, `status` (pending, in_progress, completed, failed)
+
+**Response**:
+```json
+{
+  "events": [
+    {
+      "id": 1,
+      "title": "새해 인사 시리즈",
+      "description": "2025년 새해 맞이 스토리",
+      "calendar_event_id": 5,
+      "start_time": "2025-01-01T00:00:00",
+      "interval_minutes": 10,
+      "status": "pending",
+      "post_count": 3,
+      "created_by": "admin",
+      "created_at": "2024-12-30T10:00:00"
+    }
+  ],
+  "pagination": {...}
+}
+```
+
+### GET /api/v1/story-events/:id
+스토리 이벤트 상세 조회 (포스트 포함)
+
+**Response**:
+```json
+{
+  "id": 1,
+  "title": "새해 인사 시리즈",
+  "start_time": "2025-01-01T00:00:00",
+  "interval_minutes": 10,
+  "status": "pending",
+  "posts": [
+    {
+      "id": 1,
+      "sequence": 1,
+      "content": "새해 복 많이 받으세요! 🎉",
+      "media_urls": ["https://example.com/img1.jpg"],
+      "status": "pending",
+      "scheduled_at": "2025-01-01T00:00:00"
+    },
+    {
+      "id": 2,
+      "sequence": 2,
+      "content": "2025년도 즐거운 한 해 되세요!",
+      "media_urls": null,
+      "status": "pending",
+      "scheduled_at": "2025-01-01T00:10:00"
+    }
+  ]
+}
+```
+
+### POST /api/v1/story-events
+스토리 이벤트 생성
+
+**Request**:
+```json
+{
+  "title": "새해 인사 시리즈",
+  "description": "2025년 새해 맞이 스토리",
+  "start_time": "2025-01-01T00:00:00",
+  "interval_minutes": 10,
+  "calendar_event_id": 5,
+  "admin_name": "admin"
+}
+```
+
+**Response**: 201 Created
+
+### POST /api/v1/story-events/:id/posts
+스토리 포스트 추가
+
+**Request**:
+```json
+{
+  "posts": [
+    {
+      "sequence": 1,
+      "content": "새해 복 많이 받으세요! 🎉",
+      "media_urls": ["https://example.com/img1.jpg"]
+    },
+    {
+      "sequence": 2,
+      "content": "2025년도 즐거운 한 해 되세요!",
+      "media_urls": null
+    }
+  ],
+  "admin_name": "admin"
+}
+```
+
+**Response**: 201 Created
+
+### POST /api/v1/story-events/bulk-upload
+스토리 이벤트 엑셀 일괄 업로드
+
+**Request**: multipart/form-data
+- `file`: Excel file (.xlsx)
+- `admin_name`: string
+
+**Response**:
+```json
+{
+  "created": [
+    {
+      "id": 1,
+      "title": "새해 이벤트",
+      "post_count": 2
+    }
+  ],
+  "failed": [],
+  "summary": {
+    "total_events": 1,
+    "success": 1,
+    "failed": 0
+  }
+}
+```
+
+### PUT /api/v1/story-events/:id
+스토리 이벤트 수정
+
+### DELETE /api/v1/story-events/:id
+스토리 이벤트 삭제 (포스트도 함께 삭제)
+
+### PUT /api/v1/story-posts/:id
+스토리 포스트 수정
+
+### DELETE /api/v1/story-posts/:id
+스토리 포스트 삭제
+
+---
+
+## 공지 예약 (Announcements)
+
+### GET /api/v1/announcements
+공지 목록 조회
+
+**Query Params**:
+- `page`, `limit`, `status` (pending, published, failed), `type` (announcement 등)
+
+**Response**:
+```json
+{
+  "announcements": [
+    {
+      "id": 1,
+      "post_type": "announcement",
+      "content": "내일 오전 10시부터 서버 점검이 있습니다.",
+      "scheduled_at": "2025-01-20T09:00:00",
+      "visibility": "public",
+      "is_public": true,
+      "status": "pending",
+      "created_by": "admin",
+      "created_at": "2025-01-19T15:00:00"
+    }
+  ],
+  "pagination": {...}
+}
+```
+
+### GET /api/v1/announcements/:id
+공지 상세 조회
+
+### POST /api/v1/announcements
+공지 생성
+
+**Request**:
+```json
+{
+  "post_type": "announcement",
+  "content": "내일 오전 10시부터 서버 점검이 있습니다.",
+  "scheduled_at": "2025-01-20T09:00:00",
+  "visibility": "public",
+  "is_public": true,
+  "admin_name": "admin"
+}
+```
+
+**Response**: 201 Created
+
+### PUT /api/v1/announcements/:id
+공지 수정
+
+### DELETE /api/v1/announcements/:id
+공지 삭제
+
+---
+
 ## 에러 응답
 
 ### 4xx 클라이언트 에러

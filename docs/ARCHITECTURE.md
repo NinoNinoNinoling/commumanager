@@ -113,8 +113,8 @@ flowchart TD
 
     subgraph "Economy Bot (Python, systemd)"
         B
-        B1[실시간 감시 모듈<br/>- stream_local() 타임라인 감시<br/>- 답글 감지 → 즉시 재화 지급<br/>- status_id로 중복 방지<br/>- 멘션 명령어 처리 + 별표]
-        B2[활동량 체크 모듈<br/>- 오전 5시: 벌크 체크<br/>- 오후 12시: 중간 체크<br/>- PostgreSQL 벌크 조회<br/>- 역할/휴식 필터링]
+        B1["실시간 감시 모듈<br/>stream_local 타임라인 감시<br/>답글 감지 및 즉시 재화 지급<br/>status_id로 중복 방지<br/>멘션 명령어 처리"]
+        B2["활동량 체크 모듈<br/>오전 5시: 벌크 체크<br/>오후 12시: 중간 체크<br/>PostgreSQL 벌크 조회<br/>역할 및 휴식 필터링"]
         B -.-> B1
         B -.-> B2
     end

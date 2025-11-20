@@ -41,8 +41,16 @@
   <text x="260" y="130" font-family="Arial" font-size="16" fill="#333" font-weight="bold">⏰ 활동량 체크 설정</text>
 
   <text x="280" y="170" font-family="Arial" font-size="13" fill="#495057" font-weight="600">체크 주기</text>
-  <rect x="280" y="180" width="300" height="35" rx="4" fill="#e9ecef" stroke="#ced4da" stroke-width="1"/>
-  <text x="290" y="203" font-family="Arial" font-size="13" fill="#495057">오전 4시, 오후 4시 (12시간 간격)</text>
+
+  <!-- 시간 선택기 1 -->
+  <rect x="280" y="180" width="140" height="35" rx="4" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <text x="300" y="203" font-family="Arial" font-size="14" fill="#495057">🕐 04:00</text>
+  <path d="M 405 192 L 410 197 L 405 202" stroke="#6c757d" stroke-width="2" fill="none"/>
+
+  <!-- 시간 선택기 2 -->
+  <rect x="440" y="180" width="140" height="35" rx="4" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <text x="460" y="203" font-family="Arial" font-size="14" fill="#495057">🕐 16:00</text>
+  <path d="M 565 192 L 570 197 L 565 202" stroke="#6c757d" stroke-width="2" fill="none"/>
 
   <text x="700" y="170" font-family="Arial" font-size="13" fill="#495057" font-weight="600">최소 답글 기준 (48시간)</text>
   <rect x="700" y="180" width="150" height="35" rx="4" fill="white" stroke="#0d6efd" stroke-width="2"/>
@@ -57,8 +65,16 @@
   <text x="355" y="363" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">10원</text>
 
   <text x="550" y="330" font-family="Arial" font-size="13" fill="#495057" font-weight="600">정산 주기</text>
-  <rect x="550" y="340" width="300" height="35" rx="4" fill="#e9ecef" stroke="#ced4da" stroke-width="1"/>
-  <text x="560" y="363" font-family="Arial" font-size="13" fill="#495057">오전 4시, 오후 4시 (12시간 간격)</text>
+
+  <!-- 시간 선택기 1 -->
+  <rect x="550" y="340" width="140" height="35" rx="4" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <text x="570" y="363" font-family="Arial" font-size="14" fill="#495057">🕐 04:00</text>
+  <path d="M 675 352 L 680 357 L 675 362" stroke="#6c757d" stroke-width="2" fill="none"/>
+
+  <!-- 시간 선택기 2 -->
+  <rect x="710" y="340" width="140" height="35" rx="4" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <text x="730" y="363" font-family="Arial" font-size="14" fill="#495057">🕐 16:00</text>
+  <path d="M 835 352 L 840 357 L 835 362" stroke="#6c757d" stroke-width="2" fill="none"/>
 
   <!-- 경고 시스템 설정 -->
   <rect x="240" y="420" width="940" height="140" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
@@ -69,13 +85,9 @@
   <circle cx="320" cy="515" r="12" fill="white"/>
   <text x="355" y="520" font-family="Arial" font-size="13" fill="#198754" font-weight="600">활성화됨</text>
 
-  <text x="550" y="490" font-family="Arial" font-size="13" fill="#495057" font-weight="600">경고 유지 기간</text>
-  <rect x="550" y="500" width="150" height="35" rx="4" fill="white" stroke="#0d6efd" stroke-width="2"/>
-  <text x="625" y="523" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">30일</text>
-
-  <text x="820" y="490" font-family="Arial" font-size="13" fill="#495057" font-weight="600">누적 경고 제한</text>
-  <rect x="820" y="500" width="150" height="35" rx="4" fill="white" stroke="#dc3545" stroke-width="2"/>
-  <text x="895" y="523" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">3회</text>
+  <text x="550" y="490" font-family="Arial" font-size="13" fill="#495057" font-weight="600">누적 경고 제한</text>
+  <rect x="550" y="500" width="150" height="35" rx="4" fill="white" stroke="#dc3545" stroke-width="2"/>
+  <text x="625" y="523" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">3회</text>
 
   <!-- 휴식 시스템 설정 -->
   <rect x="240" y="580" width="940" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
