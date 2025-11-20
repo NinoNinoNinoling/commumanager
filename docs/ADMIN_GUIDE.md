@@ -270,73 +270,45 @@ http://[서버주소]:5000/
     └── 포스트 3 (00:20 발송) - "올해는 더 많은 이벤트 준비했어요!"
 ```
 
-### 7.3 이벤트 생성 (API)
+### 7.3 이벤트 생성
 
 **현재는 API를 통해서만 관리 가능합니다.**
 
-#### 1단계: 이벤트 생성
+스토리 이벤트 생성은 두 단계로 진행됩니다:
 
-```bash
-curl -X POST http://localhost:5000/api/v1/story-events \
-  -H "Content-Type: application/json" \
-  -d '{
-    "title": "새해 인사 시리즈",
-    "description": "2025년 새해 맞이 스토리",
-    "start_time": "2025-01-01T00:00:00",
-    "interval_minutes": 10,
-    "calendar_event_id": 5,
-    "admin_name": "admin"
-  }'
-```
-
-**응답:**
-```json
-{
-  "id": 1,
-  "title": "새해 인사 시리즈",
-  "start_time": "2025-01-01T00:00:00",
-  "interval_minutes": 10,
-  "status": "pending"
-}
-```
+#### 1단계: 이벤트 기본 정보 등록
+- 제목, 설명 입력
+- 시작 시간 설정
+- 포스트 간격 설정 (분 단위)
+- 연결할 일정 선택 (선택사항)
 
 #### 2단계: 포스트 추가
+- 각 포스트의 내용 작성
+- 순서 지정 (1번, 2번, 3번...)
+- 이미지 첨부 (선택사항)
 
-```bash
-curl -X POST http://localhost:5000/api/v1/story-events/1/posts \
-  -H "Content-Type: application/json" \
-  -d '{
-    "posts": [
-      {
-        "sequence": 1,
-        "content": "새해 복 많이 받으세요! 🎉",
-        "media_urls": ["https://example.com/img1.jpg"]
-      },
-      {
-        "sequence": 2,
-        "content": "2025년도 즐거운 한 해 되세요!",
-        "media_urls": null
-      }
-    ],
-    "admin_name": "admin"
-  }'
-```
+💡 **개발자 문의**: 자세한 API 사용법은 개발 담당자에게 문의하세요.
 
 ### 7.4 엑셀 일괄 업로드
 
+여러 개의 스토리 이벤트와 포스트를 엑셀 파일로 한 번에 등록할 수 있습니다.
+
 **엑셀 파일 형식:**
 
-| event_title | start_time | interval_minutes | post_content | post_media_urls |
-|-------------|------------|------------------|--------------|-----------------|
-| 새해 이벤트 | 2025-01-01T00:00:00 | 10 | 새해 복 많이 받으세요! | https://example.com/img1.jpg |
-| 새해 이벤트 | 2025-01-01T00:00:00 | 10 | 즐거운 한 해 되세요! | |
+| 컬럼명 | 설명 | 예시 |
+|--------|------|------|
+| event_title | 이벤트 제목 | 새해 이벤트 |
+| start_time | 시작 시간 | 2025-01-01T00:00:00 |
+| interval_minutes | 간격 (분) | 10 |
+| post_content | 포스트 내용 | 새해 복 많이 받으세요! |
+| post_media_urls | 이미지 URL (선택) | https://example.com/img.jpg |
 
-**업로드:**
-```bash
-curl -X POST http://localhost:5000/api/v1/story-events/bulk-upload \
-  -F "file=@story_events.xlsx" \
-  -F "admin_name=admin"
-```
+**작성 요령:**
+- 같은 `event_title`을 가진 행들은 하나의 이벤트로 묶입니다
+- 각 행이 하나의 포스트가 됩니다
+- 시작 시간과 간격은 첫 행의 값이 사용됩니다
+
+💡 **개발자 문의**: 엑셀 업로드 기능 사용은 개발 담당자에게 문의하세요.
 
 ### 7.5 주의사항
 
@@ -363,33 +335,37 @@ curl -X POST http://localhost:5000/api/v1/story-events/bulk-upload \
 - 이벤트 시작 안내 (당일 자정)
 - 시스템 점검 사전 공지
 
-### 8.2 공지 생성 (API)
+### 8.2 공지 생성
 
-```bash
-curl -X POST http://localhost:5000/api/v1/announcements \
-  -H "Content-Type: application/json" \
-  -d '{
-    "post_type": "announcement",
-    "content": "내일 오전 10시부터 서버 점검이 있습니다.",
-    "scheduled_at": "2025-01-20T09:00:00",
-    "visibility": "public",
-    "is_public": true,
-    "admin_name": "admin"
-  }'
-```
+**현재는 API를 통해서만 관리 가능합니다.**
+
+공지 생성 시 필요한 정보:
+- **내용**: 공지할 메시지 (필수)
+- **예약 시간**: 발송될 날짜와 시간 (필수)
+- **공개 여부**: 유저가 `@봇 공지` 명령어로 조회 가능 여부
+- **게시 범위**: public (공개), unlisted (미등록), private (비공개) 등
+
+💡 **개발자 문의**: 자세한 API 사용법은 개발 담당자에게 문의하세요.
 
 ### 8.3 공개/비공개 설정
 
-- `is_public: true` - 유저 봇 명령어 `@봇 공지`에서 조회 가능
-- `is_public: false` - 관리자만 확인 가능
+**공개 공지**
+- 유저가 `@봇 공지` 명령어로 조회 가능
+- 일반적인 커뮤니티 공지사항에 사용
 
-### 8.4 API 엔드포인트
+**비공개 공지**
+- 관리자만 확인 가능
+- 내부 테스트나 임시 메모용
 
-**공지 관리:**
-- `GET /api/v1/announcements` - 공지 목록
-- `POST /api/v1/announcements` - 공지 생성
-- `PUT /api/v1/announcements/:id` - 공지 수정
-- `DELETE /api/v1/announcements/:id` - 공지 삭제
+### 8.4 관리 기능
+
+공지는 다음 작업을 수행할 수 있습니다:
+- **목록 조회**: 등록된 공지 목록 확인
+- **새 공지 작성**: 예약 공지 생성
+- **수정**: 기존 공지 내용이나 시간 변경
+- **삭제**: 발송 전 공지 취소
+
+💡 **웹 UI**: 현재 간략한 목록 화면만 제공됩니다. 자세한 관리는 개발자에게 문의하세요.
 
 ### 8.5 주의사항
 
