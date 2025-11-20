@@ -62,9 +62,9 @@
   <rect x="980" y="165" width="180" height="45" rx="6" fill="#198754"/>
   <text x="1070" y="193" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">🏖️ 휴식 등록</text>
 
-  <!-- 휴가 안내 -->
+  <!-- 할당량 안내 -->
   <rect x="240" y="230" width="920" height="35" rx="8" fill="#fff3cd"/>
-  <text x="260" y="252" font-family="Arial" font-size="13" fill="#856404">💡 휴가 제도: <text font-weight="600">1개월당 3일</text> 사용 가능 (설정에서 변경)</text>
+  <text x="260" y="252" font-family="Arial" font-size="13" fill="#856404">💡 휴식 할당량: <text font-weight="600">1개월당 3일</text> (설정에서 변경 가능)</text>
 
   <!-- 필터 영역 -->
   <rect x="240" y="285" width="920" height="60" rx="8" fill="#e9ecef"/>
