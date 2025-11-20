@@ -28,7 +28,7 @@
 
   <!-- 메인 콘텐츠 영역 -->
   <text x="240" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">유저 관리</text>
-  <text x="240" y="75" font-family="Arial" font-size="13" fill="#6c757d">활동량 모니터링 및 휴식 관리</text>
+  <text x="240" y="75" font-family="Arial" font-size="13" fill="#6c757d">활동량 모니터링, 휴식 현황, 재화 관리</text>
 
   <!-- 탭 메뉴 -->
   <rect x="240" y="95" width="940" height="50" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
@@ -38,8 +38,12 @@
   <text x="325" y="128" font-family="Arial" font-size="13" fill="white" font-weight="600" text-anchor="middle">⚠️ 활동량 모니터링</text>
 
   <!-- 탭 2: 휴식 현황 -->
-  <rect x="410" y="105" width="150" height="35" rx="6" fill="transparent"/>
-  <text x="485" y="128" font-family="Arial" font-size="13" fill="#6c757d" text-anchor="middle">🏖️ 휴식 현황</text>
+  <rect x="410" y="105" width="120" height="35" rx="6" fill="transparent"/>
+  <text x="470" y="128" font-family="Arial" font-size="13" fill="#6c757d" text-anchor="middle">🏖️ 휴식 현황</text>
+
+  <!-- 탭 3: 재화 관리 -->
+  <rect x="540" y="105" width="120" height="35" rx="6" fill="transparent"/>
+  <text x="600" y="128" font-family="Arial" font-size="13" fill="#6c757d" text-anchor="middle">💰 재화 관리</text>
 
   <!-- 활동량 모니터링 섹션 (활성 탭) -->
   <rect x="240" y="165" width="940" height="650" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
