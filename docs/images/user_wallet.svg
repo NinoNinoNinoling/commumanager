@@ -32,7 +32,7 @@
   <text x="280" y="50" font-family="Arial" font-size="13" fill="#495057" text-anchor="middle">← 목록</text>
 
   <text x="340" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">유저 상세</text>
-  <text x="340" y="75" font-family="Arial" font-size="13" fill="#6c757d">재화 거래 내역 및 잔액 조정</text>
+  <text x="340" y="75" font-family="Arial" font-size="13" fill="#6c757d">재화 내역 및 잔액 조정</text>
 
   <!-- 유저 정보 카드 -->
   <rect x="240" y="95" width="940" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
@@ -59,14 +59,14 @@
   <text x="920" y="130" font-family="Arial" font-size="13" fill="#6c757d">누적 사용</text>
   <text x="920" y="160" font-family="Arial" font-size="18" fill="#dc3545" font-weight="600">-27,380</text>
 
-  <text x="550" y="185" font-family="Arial" font-size="11" fill="#adb5bd">가입일: 2024-01-15 | 거래 152건</text>
+  <text x="550" y="185" font-family="Arial" font-size="11" fill="#adb5bd">가입일: 2024-01-15 | 내역 152건</text>
 
-  <!-- 거래 내역 테이블 -->
-  <text x="240" y="235" font-family="Arial" font-size="16" fill="#333" font-weight="bold">거래 내역</text>
+  <!-- 재화 내역 테이블 -->
+  <text x="240" y="235" font-family="Arial" font-size="16" fill="#333" font-weight="bold">재화 내역</text>
 
-  <!-- 신규 거래 버튼 -->
+  <!-- 재화 조정 버튼 -->
   <rect x="1050" y="215" width="130" height="35" rx="4" fill="#0d6efd"/>
-  <text x="1115" y="237" font-family="Arial" font-size="13" fill="white" text-anchor="middle" font-weight="600">+ 신규 거래</text>
+  <text x="1115" y="237" font-family="Arial" font-size="13" fill="white" text-anchor="middle" font-weight="600">+ 재화 조정</text>
 
   <!-- 필터 -->
   <rect x="860" y="215" width="100" height="30" rx="4" fill="white" stroke="#cbd5e1" stroke-width="1"/>
@@ -75,25 +75,23 @@
   <rect x="970" y="215" width="70" height="30" rx="4" fill="white" stroke="#cbd5e1" stroke-width="1"/>
   <text x="980" y="235" font-family="Arial" font-size="11" fill="#64748b">30일 ▼</text>
 
-  <!-- 거래 내역 테이블 -->
+  <!-- 재화 내역 테이블 -->
   <rect x="240" y="260" width="1100" height="620" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
 
   <!-- 테이블 헤더 -->
   <rect x="240" y="260" width="1100" height="40" rx="8" fill="#f1f5f9"/>
-  <text x="270" y="285" font-family="Arial" font-size="12" fill="#475569" font-weight="bold">거래일시</text>
-  <text x="410" y="285" font-family="Arial" font-size="12" fill="#475569" font-weight="bold">적요 (사유)</text>
-  <text x="700" y="285" font-family="Arial" font-size="12" fill="#475569" font-weight="bold" text-anchor="end">출금</text>
-  <text x="820" y="285" font-family="Arial" font-size="12" fill="#475569" font-weight="bold" text-anchor="end">입금</text>
+  <text x="270" y="285" font-family="Arial" font-size="12" fill="#475569" font-weight="bold">일시</text>
+  <text x="410" y="285" font-family="Arial" font-size="12" fill="#475569" font-weight="bold">내용</text>
+  <text x="700" y="285" font-family="Arial" font-size="12" fill="#475569" font-weight="bold" text-anchor="end">차감</text>
+  <text x="820" y="285" font-family="Arial" font-size="12" fill="#475569" font-weight="bold" text-anchor="end">지급</text>
   <text x="950" y="285" font-family="Arial" font-size="12" fill="#475569" font-weight="bold" text-anchor="end">잔액</text>
-  <text x="1010" y="285" font-family="Arial" font-size="12" fill="#475569" font-weight="bold">담당</text>
-  <text x="1180" y="285" font-family="Arial" font-size="12" fill="#475569" font-weight="bold">작업</text>
+  <text x="1080" y="285" font-family="Arial" font-size="12" fill="#475569" font-weight="bold">작업</text>
 
   <!-- 세로 구분선 -->
   <line x1="400" y1="300" x2="400" y2="870" stroke="#e2e8f0" stroke-width="1"/>
   <line x1="710" y1="300" x2="710" y2="870" stroke="#e2e8f0" stroke-width="1"/>
   <line x1="830" y1="300" x2="830" y2="870" stroke="#e2e8f0" stroke-width="1"/>
   <line x1="960" y1="300" x2="960" y2="870" stroke="#e2e8f0" stroke-width="1"/>
-  <line x1="1090" y1="300" x2="1090" y2="870" stroke="#e2e8f0" stroke-width="1"/>
 
   <!-- 거래 내역 행 1 -->
   <line x1="250" y1="300" x2="1330" y2="300" stroke="#e2e8f0" stroke-width="1"/>
@@ -106,13 +104,12 @@
   <text x="700" y="327" font-family="Arial" font-size="12" fill="#94a3b8" text-anchor="end">-</text>
   <text x="820" y="327" font-family="Arial" font-size="13" fill="#16a34a" text-anchor="end" font-weight="600">1,000</text>
   <text x="950" y="327" font-family="Arial" font-size="13" fill="#1e293b" text-anchor="end" font-weight="600">15,420</text>
-  <text x="970" y="327" font-family="Arial" font-size="10" fill="#64748b">admin</text>
 
   <!-- 작업 버튼 -->
-  <rect x="1100" y="312" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
-  <text x="1122" y="327" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
-  <rect x="1150" y="312" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
-  <text x="1172" y="327" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
+  <rect x="970" y="312" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="992" y="327" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
+  <rect x="1020" y="312" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="1042" y="327" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
 
   <!-- 거래 내역 행 2 -->
   <line x1="250" y1="350" x2="1330" y2="350" stroke="#e2e8f0" stroke-width="1"/>
@@ -125,30 +122,28 @@
   <text x="700" y="377" font-family="Arial" font-size="13" fill="#dc2626" text-anchor="end" font-weight="600">2,500</text>
   <text x="820" y="377" font-family="Arial" font-size="12" fill="#94a3b8" text-anchor="end">-</text>
   <text x="950" y="377" font-family="Arial" font-size="13" fill="#1e293b" text-anchor="end" font-weight="600">14,420</text>
-  <text x="970" y="377" font-family="Arial" font-size="10" fill="#64748b">system</text>
 
-  <rect x="1100" y="362" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
-  <text x="1122" y="377" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
-  <rect x="1150" y="362" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
-  <text x="1172" y="377" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
+  <rect x="970" y="362" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="992" y="377" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
+  <rect x="1020" y="362" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="1042" y="377" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
 
   <!-- 거래 내역 행 3 -->
   <line x1="250" y1="400" x2="1330" y2="400" stroke="#e2e8f0" stroke-width="1"/>
   <text x="270" y="420" font-family="Arial" font-size="11" fill="#1e293b" font-weight="600">2025-11-17</text>
   <text x="270" y="435" font-family="Arial" font-size="10" fill="#64748b">16:00</text>
 
-  <text x="410" y="420" font-family="Arial" font-size="11" fill="#1e293b">답글 42개 (10원/개)</text>
+  <text x="410" y="420" font-family="Arial" font-size="11" fill="#1e293b">답글 42개 (10갈레온/개)</text>
   <text x="410" y="435" font-family="Arial" font-size="10" fill="#64748b">[활동량 정산] #1521</text>
 
   <text x="700" y="427" font-family="Arial" font-size="12" fill="#94a3b8" text-anchor="end">-</text>
   <text x="820" y="427" font-family="Arial" font-size="13" fill="#16a34a" text-anchor="end" font-weight="600">420</text>
   <text x="950" y="427" font-family="Arial" font-size="13" fill="#1e293b" text-anchor="end" font-weight="600">16,920</text>
-  <text x="970" y="427" font-family="Arial" font-size="10" fill="#64748b">system</text>
 
-  <rect x="1100" y="412" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
-  <text x="1122" y="427" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
-  <rect x="1150" y="412" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
-  <text x="1172" y="427" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
+  <rect x="970" y="412" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="992" y="427" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
+  <rect x="1020" y="412" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="1042" y="427" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
 
   <!-- 거래 내역 행 4 -->
   <line x1="250" y1="450" x2="1330" y2="450" stroke="#e2e8f0" stroke-width="1"/>
@@ -161,30 +156,28 @@
   <text x="700" y="477" font-family="Arial" font-size="13" fill="#dc2626" text-anchor="end" font-weight="600">1,000</text>
   <text x="820" y="477" font-family="Arial" font-size="12" fill="#94a3b8" text-anchor="end">-</text>
   <text x="950" y="477" font-family="Arial" font-size="13" fill="#1e293b" text-anchor="end" font-weight="600">16,500</text>
-  <text x="970" y="477" font-family="Arial" font-size="10" fill="#64748b">admin</text>
 
-  <rect x="1100" y="462" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
-  <text x="1122" y="477" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
-  <rect x="1150" y="462" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
-  <text x="1172" y="477" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
+  <rect x="970" y="462" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="992" y="477" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
+  <rect x="1020" y="462" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="1042" y="477" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
 
   <!-- 거래 내역 행 5 -->
   <line x1="250" y1="500" x2="1330" y2="500" stroke="#e2e8f0" stroke-width="1"/>
   <text x="270" y="520" font-family="Arial" font-size="11" fill="#1e293b" font-weight="600">2025-11-16</text>
   <text x="270" y="535" font-family="Arial" font-size="10" fill="#64748b">10:20</text>
 
-  <text x="410" y="520" font-family="Arial" font-size="11" fill="#1e293b">답글 38개 (10원/개)</text>
+  <text x="410" y="520" font-family="Arial" font-size="11" fill="#1e293b">답글 38개 (10갈레온/개)</text>
   <text x="410" y="535" font-family="Arial" font-size="10" fill="#64748b">[활동량 정산] #1519</text>
 
   <text x="700" y="527" font-family="Arial" font-size="12" fill="#94a3b8" text-anchor="end">-</text>
   <text x="820" y="527" font-family="Arial" font-size="13" fill="#16a34a" text-anchor="end" font-weight="600">380</text>
   <text x="950" y="527" font-family="Arial" font-size="13" fill="#1e293b" text-anchor="end" font-weight="600">17,500</text>
-  <text x="970" y="527" font-family="Arial" font-size="10" fill="#64748b">system</text>
 
-  <rect x="1100" y="512" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
-  <text x="1122" y="527" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
-  <rect x="1150" y="512" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
-  <text x="1172" y="527" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
+  <rect x="970" y="512" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="992" y="527" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
+  <rect x="1020" y="512" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="1042" y="527" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
 
   <!-- 거래 내역 행 6 -->
   <line x1="250" y1="550" x2="1330" y2="550" stroke="#e2e8f0" stroke-width="1"/>
@@ -197,12 +190,11 @@
   <text x="700" y="577" font-family="Arial" font-size="12" fill="#94a3b8" text-anchor="end">-</text>
   <text x="820" y="577" font-family="Arial" font-size="13" fill="#16a34a" text-anchor="end" font-weight="600">1,000</text>
   <text x="950" y="577" font-family="Arial" font-size="13" fill="#1e293b" text-anchor="end" font-weight="600">17,120</text>
-  <text x="970" y="577" font-family="Arial" font-size="10" fill="#64748b">admin</text>
 
-  <rect x="1100" y="562" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
-  <text x="1122" y="577" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
-  <rect x="1150" y="562" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
-  <text x="1172" y="577" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
+  <rect x="970" y="562" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="992" y="577" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
+  <rect x="1020" y="562" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="1042" y="577" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
 
   <!-- 거래 내역 행 7 -->
   <line x1="250" y1="600" x2="1330" y2="600" stroke="#e2e8f0" stroke-width="1"/>
@@ -215,30 +207,28 @@
   <text x="700" y="627" font-family="Arial" font-size="13" fill="#dc2626" text-anchor="end" font-weight="600">3,200</text>
   <text x="820" y="627" font-family="Arial" font-size="12" fill="#94a3b8" text-anchor="end">-</text>
   <text x="950" y="627" font-family="Arial" font-size="13" fill="#1e293b" text-anchor="end" font-weight="600">16,120</text>
-  <text x="970" y="627" font-family="Arial" font-size="10" fill="#64748b">system</text>
 
-  <rect x="1100" y="612" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
-  <text x="1122" y="627" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
-  <rect x="1150" y="612" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
-  <text x="1172" y="627" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
+  <rect x="970" y="612" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="992" y="627" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
+  <rect x="1020" y="612" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="1042" y="627" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
 
   <!-- 거래 내역 행 8 -->
   <line x1="250" y1="650" x2="1330" y2="650" stroke="#e2e8f0" stroke-width="1"/>
   <text x="270" y="670" font-family="Arial" font-size="11" fill="#1e293b" font-weight="600">2025-11-14</text>
   <text x="270" y="685" font-family="Arial" font-size="10" fill="#64748b">15:30</text>
 
-  <text x="410" y="670" font-family="Arial" font-size="11" fill="#1e293b">답글 45개 (10원/개)</text>
+  <text x="410" y="670" font-family="Arial" font-size="11" fill="#1e293b">답글 45개 (10갈레온/개)</text>
   <text x="410" y="685" font-family="Arial" font-size="10" fill="#64748b">[활동량 정산] #1516</text>
 
   <text x="700" y="677" font-family="Arial" font-size="12" fill="#94a3b8" text-anchor="end">-</text>
   <text x="820" y="677" font-family="Arial" font-size="13" fill="#16a34a" text-anchor="end" font-weight="600">450</text>
   <text x="950" y="677" font-family="Arial" font-size="13" fill="#1e293b" text-anchor="end" font-weight="600">19,320</text>
-  <text x="970" y="677" font-family="Arial" font-size="10" fill="#64748b">system</text>
 
-  <rect x="1100" y="662" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
-  <text x="1122" y="677" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
-  <rect x="1150" y="662" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
-  <text x="1172" y="677" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
+  <rect x="970" y="662" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="992" y="677" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
+  <rect x="1020" y="662" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="1042" y="677" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
 
   <!-- 거래 내역 행 9 -->
   <line x1="250" y1="700" x2="1330" y2="700" stroke="#e2e8f0" stroke-width="1"/>
@@ -251,30 +241,28 @@
   <text x="700" y="727" font-family="Arial" font-size="12" fill="#94a3b8" text-anchor="end">-</text>
   <text x="820" y="727" font-family="Arial" font-size="13" fill="#16a34a" text-anchor="end" font-weight="600">5,000</text>
   <text x="950" y="727" font-family="Arial" font-size="13" fill="#1e293b" text-anchor="end" font-weight="600">18,870</text>
-  <text x="970" y="727" font-family="Arial" font-size="10" fill="#64748b">admin</text>
 
-  <rect x="1100" y="712" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
-  <text x="1122" y="727" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
-  <rect x="1150" y="712" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
-  <text x="1172" y="727" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
+  <rect x="970" y="712" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="992" y="727" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
+  <rect x="1020" y="712" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="1042" y="727" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
 
   <!-- 거래 내역 행 10 -->
   <line x1="250" y1="750" x2="1330" y2="750" stroke="#e2e8f0" stroke-width="1"/>
   <text x="270" y="770" font-family="Arial" font-size="11" fill="#1e293b" font-weight="600">2025-11-13</text>
   <text x="270" y="785" font-family="Arial" font-size="10" fill="#64748b">10:45</text>
 
-  <text x="410" y="770" font-family="Arial" font-size="11" fill="#1e293b">답글 37개 (10원/개)</text>
+  <text x="410" y="770" font-family="Arial" font-size="11" fill="#1e293b">답글 37개 (10갈레온/개)</text>
   <text x="410" y="785" font-family="Arial" font-size="10" fill="#64748b">[활동량 정산] #1514</text>
 
   <text x="700" y="777" font-family="Arial" font-size="12" fill="#94a3b8" text-anchor="end">-</text>
   <text x="820" y="777" font-family="Arial" font-size="13" fill="#16a34a" text-anchor="end" font-weight="600">370</text>
   <text x="950" y="777" font-family="Arial" font-size="13" fill="#1e293b" text-anchor="end" font-weight="600">13,870</text>
-  <text x="970" y="777" font-family="Arial" font-size="10" fill="#64748b">system</text>
 
-  <rect x="1100" y="762" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
-  <text x="1122" y="777" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
-  <rect x="1150" y="762" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
-  <text x="1172" y="777" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
+  <rect x="970" y="762" width="45" height="22" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="992" y="777" font-family="Arial" font-size="10" fill="#0d6efd" text-anchor="middle">수정</text>
+  <rect x="1020" y="762" width="45" height="22" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="1042" y="777" font-family="Arial" font-size="10" fill="#dc3545" text-anchor="middle">삭제</text>
 
   <!-- 하단 구분선 -->
   <line x1="240" y1="800" x2="1340" y2="800" stroke="#cbd5e1" stroke-width="2"/>

@@ -11,7 +11,7 @@
   <!-- 메인 콘텐츠 배경 (흐릿하게) -->
   <g opacity="0.3">
     <text x="340" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">유저 상세</text>
-    <text x="340" y="75" font-family="Arial" font-size="13" fill="#6c757d">재화 거래 내역 및 잔액 조정</text>
+    <text x="340" y="75" font-family="Arial" font-size="13" fill="#6c757d">재화 내역 및 잔액 조정</text>
   </g>
 
   <!-- 모달 오버레이 -->
@@ -22,7 +22,7 @@
 
   <!-- 모달 헤더 -->
   <rect x="300" y="80" width="600" height="60" rx="12" fill="#0d6efd"/>
-  <text x="330" y="118" font-family="Arial" font-size="20" fill="white" font-weight="bold">💰 신규 거래 추가</text>
+  <text x="330" y="118" font-family="Arial" font-size="20" fill="white" font-weight="bold">💰 재화 조정</text>
 
   <!-- 닫기 버튼 -->
   <circle cx="870" cy="110" r="18" fill="rgba(255,255,255,0.2)"/>
@@ -33,32 +33,32 @@
   <rect x="330" y="160" width="540" height="60" rx="6" fill="#f8f9fa"/>
   <text x="350" y="185" font-family="Arial" font-size="14" fill="#495057" font-weight="600">대상 유저</text>
   <text x="350" y="210" font-family="Arial" font-size="16" fill="#0d6efd" font-weight="bold">@user123 (김민준)</text>
-  <text x="720" y="210" font-family="Arial" font-size="13" fill="#6c757d">현재 잔액: 15,420원</text>
+  <text x="720" y="210" font-family="Arial" font-size="13" fill="#6c757d">현재 잔액: 15,420갈레온</text>
 
-  <!-- 거래 유형 선택 -->
-  <text x="330" y="255" font-family="Arial" font-size="14" fill="#495057" font-weight="600">거래 유형 <text fill="#dc3545">*</text></text>
+  <!-- 조정 유형 선택 -->
+  <text x="330" y="255" font-family="Arial" font-size="14" fill="#495057" font-weight="600">조정 유형 <text fill="#dc3545">*</text></text>
 
-  <!-- 입금 옵션 -->
+  <!-- 지급 옵션 -->
   <rect x="330" y="270" width="250" height="80" rx="6" fill="white" stroke="#198754" stroke-width="3"/>
   <circle cx="345" cy="295" r="8" fill="white" stroke="#198754" stroke-width="2"/>
   <circle cx="345" cy="295" r="5" fill="#198754"/>
-  <text x="365" y="300" font-family="Arial" font-size="15" fill="#198754" font-weight="600">➕ 입금 (지급)</text>
+  <text x="365" y="300" font-family="Arial" font-size="15" fill="#198754" font-weight="600">➕ 지급</text>
   <text x="365" y="325" font-family="Arial" font-size="12" fill="#6c757d">유저에게 재화를 지급합니다</text>
 
-  <!-- 출금 옵션 -->
+  <!-- 차감 옵션 -->
   <rect x="600" y="270" width="270" height="80" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
   <circle cx="615" cy="295" r="8" fill="white" stroke="#0d6efd" stroke-width="2"/>
-  <text x="635" y="300" font-family="Arial" font-size="15" fill="#495057">➖ 출금 (차감)</text>
+  <text x="635" y="300" font-family="Arial" font-size="15" fill="#495057">➖ 차감</text>
   <text x="635" y="325" font-family="Arial" font-size="12" fill="#6c757d">유저의 재화를 차감합니다</text>
 
   <!-- 금액 입력 -->
   <text x="330" y="385" font-family="Arial" font-size="14" fill="#495057" font-weight="600">금액 <text fill="#dc3545">*</text></text>
   <rect x="330" y="395" width="540" height="50" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
   <text x="350" y="427" font-family="Arial" font-size="20" fill="#495057">1,000</text>
-  <text x="820" y="427" font-family="Arial" font-size="16" fill="#6c757d">원</text>
+  <text x="820" y="427" font-family="Arial" font-size="16" fill="#6c757d">갈레온</text>
 
-  <!-- 적요 (사유) -->
-  <text x="330" y="480" font-family="Arial" font-size="14" fill="#495057" font-weight="600">적요 (사유) <text fill="#dc3545">*</text></text>
+  <!-- 내용 -->
+  <text x="330" y="480" font-family="Arial" font-size="14" fill="#495057" font-weight="600">내용 <text fill="#dc3545">*</text></text>
   <rect x="330" y="490" width="540" height="40" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
   <text x="350" y="515" font-family="Arial" font-size="13" fill="#495057">출석 이벤트 참여 보상</text>
 
@@ -71,12 +71,12 @@
   <!-- 세부 설명 (선택사항) -->
   <text x="330" y="650" font-family="Arial" font-size="14" fill="#495057" font-weight="600">세부 설명 (선택사항)</text>
   <rect x="330" y="660" width="540" height="80" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
-  <text x="350" y="685" font-family="Arial" font-size="12" fill="#adb5bd">거래에 대한 추가 설명이나 메모를 입력하세요</text>
+  <text x="350" y="685" font-family="Arial" font-size="12" fill="#adb5bd">조정에 대한 추가 설명이나 메모를 입력하세요</text>
 
   <!-- 안내 메시지 -->
   <rect x="330" y="760" width="540" height="60" rx="6" fill="#fff3cd"/>
   <text x="350" y="785" font-family="Arial" font-size="13" fill="#856404" font-weight="600">⚠️ 주의사항</text>
-  <text x="350" y="805" font-family="Arial" font-size="11" fill="#856404">• 거래 후 잔액은 자동으로 계산됩니다 (현재 15,420원 → 16,420원)</text>
+  <text x="350" y="805" font-family="Arial" font-size="11" fill="#856404">• 조정 후 잔액은 자동으로 계산됩니다 (현재 15,420갈레온 → 16,420갈레온)</text>
 
   <!-- 푸터 버튼 -->
   <line x1="300" y1="750" x2="900" y2="750" stroke="#dee2e6" stroke-width="1"/>
@@ -85,5 +85,5 @@
   <text x="450" y="795" font-family="Arial" font-size="14" fill="#6c757d" text-anchor="middle" font-weight="600">취소</text>
 
   <rect x="590" y="770" width="280" height="40" rx="6" fill="#198754"/>
-  <text x="730" y="795" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">✅ 거래 추가하기</text>
+  <text x="730" y="795" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">✅ 재화 조정 적용</text>
 </svg>
