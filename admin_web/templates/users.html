@@ -81,6 +81,15 @@
                                        class="text-decoration-none">
                                         @{{ user.username }}
                                     </a>
+                                    {% if mastodon_instance_url %}
+                                    <a href="{{ mastodon_instance_url }}/@{{ user.username }}"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       class="text-muted ms-1"
+                                       title="마스토돈 프로필 보기">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                    </a>
+                                    {% endif %}
                                 </td>
                                 <td>{{ user.display_name or '-' }}</td>
                                 <td>
