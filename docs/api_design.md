@@ -495,7 +495,7 @@ OAuth 콜백 처리
       "admin_name": "admin",
       "action_type": "adjust_balance",
       "target_user": "user1",
-      "details": "재화 100원 지급 (이벤트 보상)",
+      "details": "재화 100갈레온 지급 (이벤트 보상)",
       "timestamp": "2025-11-18T10:00:00Z"
     }
   ],
