@@ -15,19 +15,7 @@
   <text x="30" y="145" font-family="Arial" font-size="13" fill="white" font-weight="600">👥 유저 관리</text>
 
   <rect x="10" y="170" width="180" height="40" rx="6" fill="transparent"/>
-  <text x="30" y="195" font-family="Arial" font-size="13" fill="#a0aec0">💰 재화</text>
-
-  <rect x="10" y="220" width="180" height="40" rx="6" fill="transparent"/>
-  <text x="30" y="245" font-family="Arial" font-size="13" fill="#a0aec0">📅 콘텐츠</text>
-
-  <rect x="10" y="270" width="180" height="40" rx="6" fill="transparent"/>
-  <text x="30" y="295" font-family="Arial" font-size="13" fill="#a0aec0">🛒 상점</text>
-
-  <rect x="10" y="320" width="180" height="40" rx="6" fill="transparent"/>
-  <text x="30" y="345" font-family="Arial" font-size="13" fill="#a0aec0">📋 로그</text>
-
-  <rect x="10" y="370" width="180" height="40" rx="6" fill="transparent"/>
-  <text x="30" y="395" font-family="Arial" font-size="13" fill="#a0aec0">⚙️ 설정</text>
+  <text x="30" y="195" font-family="Arial" font-size="13" fill="#a0aec0">📅 콘텐츠</text>
 
   <!-- 메인 콘텐츠 영역 -->
   <text x="240" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">휴식 현황</text>
@@ -58,38 +46,37 @@
   <rect x="540" y="335" width="100" height="35" rx="4" fill="#0d6efd"/>
   <text x="590" y="358" font-family="Arial" font-size="13" fill="white" text-anchor="middle">검색</text>
 
+  <!-- 상태 체크박스 -->
   <text x="670" y="325" font-family="Arial" font-size="13" fill="#495057" font-weight="600">상태</text>
-  <rect x="670" y="335" width="120" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
-  <text x="680" y="358" font-family="Arial" font-size="13" fill="#495057">진행 중만</text>
+  <rect x="670" y="335" width="18" height="18" rx="3" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <text x="675" y="350" font-family="Arial" font-size="14" fill="#0d6efd">✓</text>
+  <text x="695" y="350" font-family="Arial" font-size="13" fill="#495057">진행 중만 표시</text>
 
   <!-- 휴식 목록 테이블 -->
   <rect x="240" y="380" width="720" height="40" rx="8" fill="#f8f9fa"/>
   <text x="260" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">사용자</text>
-  <text x="380" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">시작일</text>
-  <text x="500" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">종료일</text>
-  <text x="620" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">기간</text>
-  <text x="710" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">사유</text>
-  <text x="880" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">작업</text>
+  <text x="400" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">시작일</text>
+  <text x="540" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">종료일</text>
+  <text x="680" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">기간</text>
+  <text x="820" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">작업</text>
 
   <!-- 휴식 목록 행 1 (진행 중) -->
   <line x1="240" y1="420" x2="960" y2="420" stroke="#dee2e6" stroke-width="1"/>
   <text x="260" y="450" font-family="Arial" font-size="13" fill="#0d6efd">@user789</text>
-  <text x="380" y="450" font-family="Arial" font-size="13" fill="#495057">2025-11-18</text>
-  <text x="500" y="450" font-family="Arial" font-size="13" fill="#495057">2025-11-25</text>
-  <text x="620" y="450" font-family="Arial" font-size="13" fill="#6c757d">7일</text>
-  <text x="710" y="450" font-family="Arial" font-size="13" fill="#6c757d">개인 사정</text>
-  <rect x="870" y="435" width="80" height="24" rx="4" fill="#dc3545"/>
-  <text x="910" y="452" font-family="Arial" font-size="11" fill="white" text-anchor="middle">강제 해제</text>
+  <text x="400" y="450" font-family="Arial" font-size="13" fill="#495057">2025-11-18</text>
+  <text x="540" y="450" font-family="Arial" font-size="13" fill="#495057">2025-11-25</text>
+  <text x="680" y="450" font-family="Arial" font-size="13" fill="#6c757d">7일</text>
+  <rect x="810" y="435" width="80" height="24" rx="4" fill="#dc3545"/>
+  <text x="850" y="452" font-family="Arial" font-size="11" fill="white" text-anchor="middle">강제 해제</text>
 
   <!-- 휴식 목록 행 2 (진행 중, 이번 주 종료) -->
   <line x1="240" y1="470" x2="960" y2="470" stroke="#dee2e6" stroke-width="1"/>
   <text x="260" y="500" font-family="Arial" font-size="13" fill="#0d6efd">@user234</text>
-  <text x="380" y="500" font-family="Arial" font-size="13" fill="#495057">2025-11-15</text>
-  <text x="500" y="500" font-family="Arial" font-size="13" fill="#495057">2025-11-24</text>
-  <text x="620" y="500" font-family="Arial" font-size="13" fill="#6c757d">9일</text>
-  <text x="710" y="500" font-family="Arial" font-size="13" fill="#6c757d">건강상 이유</text>
-  <rect x="870" y="485" width="80" height="24" rx="4" fill="#dc3545"/>
-  <text x="910" y="502" font-family="Arial" font-size="11" fill="white" text-anchor="middle">강제 해제</text>
+  <text x="400" y="500" font-family="Arial" font-size="13" fill="#495057">2025-11-15</text>
+  <text x="540" y="500" font-family="Arial" font-size="13" fill="#495057">2025-11-24</text>
+  <text x="680" y="500" font-family="Arial" font-size="13" fill="#6c757d">9일</text>
+  <rect x="810" y="485" width="80" height="24" rx="4" fill="#dc3545"/>
+  <text x="850" y="502" font-family="Arial" font-size="11" fill="white" text-anchor="middle">강제 해제</text>
 
   <!-- Empty state hint -->
   <text x="600" y="575" font-family="Arial" font-size="13" fill="#adb5bd" text-anchor="middle">💡 유저가 <text font-family="monospace" fill="#0d6efd">@봇 휴식 해제</text> 명령어로 직접 종료 가능</text>
