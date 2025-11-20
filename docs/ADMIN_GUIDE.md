@@ -18,6 +18,7 @@
 9. [시스템 설정](#9-시스템-설정)
 10. [관리 로그](#10-관리-로그)
 11. [자주 묻는 질문](#11-자주-묻는-질문)
+12. [시스템 유지보수](#12-시스템-유지보수)
 
 ---
 
@@ -701,6 +702,175 @@ pkill -9 -f "python.*admin_web" && cd /home/user/commumanager && nohup python3 -
 - 발송 후 취소할 수 없습니다
 - 모든 발송 기록이 관리 로그에 남습니다
 - 레벨에 따라 자동으로 적절한 템플릿 메시지가 발송됩니다
+
+---
+
+## 12. 시스템 유지보수
+
+**대상**: 시스템 관리자 (서버 접근 권한 보유자)
+
+### 12.1 자동 유지보수 스케줄
+
+시스템은 새벽 시간대에 자동으로 유지보수 작업을 수행합니다:
+
+```
+02:00 - 데이터베이스 백업
+03:00 - 데이터베이스 최적화
+04:00 - 재화 정산 + 소셜 분석 + 활동량 체크
+05:00 - 로그 정리
+05:30 - 시스템 헬스체크
+10:00 - 출석 트윗 발행
+16:00 - 재화 정산 + 활동량 체크
+```
+
+### 12.2 백업 관리
+
+**자동 백업:**
+- 매일 02:00 데이터베이스 백업
+- 백업 파일 위치: `data/backups/`
+- 보관 정책: 7일 (일일), 4주 (주간), 12개월 (월간)
+
+**수동 백업:**
+```bash
+# SQLite 백업
+sqlite3 data/economy.db ".backup 'data/backups/manual_backup.db'"
+
+# 압축
+gzip data/backups/manual_backup.db
+```
+
+**복구 방법:**
+```bash
+# 압축 해제
+gunzip data/backups/economy_backup_YYYYMMDD.db.gz
+
+# 복구
+cp data/backups/economy_backup_YYYYMMDD.db data/economy.db
+
+# 서비스 재시작
+./scripts/docker/restart.sh
+```
+
+### 12.3 데이터베이스 최적화
+
+매일 03:00 자동 실행:
+- VACUUM: 삭제된 데이터 공간 회수
+- ANALYZE: 통계 정보 갱신
+- 무결성 체크
+
+**수동 실행:**
+```bash
+docker-compose exec web python -c "from bot.tasks import optimize_database_task; optimize_database_task()"
+```
+
+### 12.4 로그 관리
+
+**자동 정리 (매일 05:00):**
+- 30일 이상 로그 삭제
+- 7일 이상 로그 압축
+
+**로그 위치:**
+```
+logs/
+├── reward.log          # 재화 지급
+├── activity.log        # 활동량 체크
+├── command.log         # 명령어 처리
+└── error.log           # 에러
+```
+
+**로그 확인:**
+```bash
+# 최근 에러 확인
+tail -f logs/error.log
+
+# 특정 기간 로그 조회
+grep "2025-11-20" logs/reward.log
+```
+
+### 12.5 시스템 헬스체크
+
+매일 05:30 자동 실행 및 체크 항목:
+- ✓ SQLite 연결
+- ✓ PostgreSQL 연결
+- ✓ Redis 연결
+- ✓ 디스크 공간 (10% 미만 시 알림)
+- ✓ 마스토돈 API 연결
+
+**수동 실행:**
+```bash
+docker-compose exec web python -c "from bot.tasks import health_check_task; health_check_task()"
+```
+
+### 12.6 문제 해결
+
+**서비스 상태 확인:**
+```bash
+# 전체 서비스 상태
+docker-compose ps
+
+# 특정 서비스 로그
+docker-compose logs web
+docker-compose logs redis
+docker-compose logs celery-beat
+```
+
+**일반적인 문제:**
+
+| 문제 | 원인 | 해결 방법 |
+|------|------|-----------|
+| 백업 실패 | 디스크 공간 부족 | 오래된 백업 삭제 |
+| DB 잠금 오류 | 동시 접근 | WAL 모드 활성화 |
+| API 연결 실패 | 네트워크/인증 | 토큰 갱신 |
+| 디스크 공간 부족 | 로그/미디어 축적 | 정리 스크립트 실행 |
+
+**긴급 재시작:**
+```bash
+# 전체 서비스 재시작
+docker-compose restart
+
+# 특정 서비스만 재시작
+docker-compose restart web
+```
+
+### 12.7 정기 점검 체크리스트
+
+**일일 점검:**
+- [ ] 백업 성공 확인 (`ls -lh data/backups/`)
+- [ ] 디스크 공간 확인 (`df -h`)
+- [ ] 에러 로그 확인 (`tail logs/error.log`)
+
+**주간 점검:**
+- [ ] 성능 지표 검토 (대시보드)
+- [ ] 사용자 피드백 확인
+- [ ] 보안 업데이트 확인
+
+**월간 점검:**
+- [ ] 백업 복구 테스트
+- [ ] DB 무결성 전체 체크
+- [ ] 의존성 업데이트 (`pip list --outdated`)
+
+### 12.8 성능 모니터링
+
+**시스템 리소스:**
+```bash
+# CPU, 메모리 사용량
+htop
+
+# 디스크 사용량
+df -h
+
+# 프로세스별 리소스
+docker stats
+```
+
+**알림 조건:**
+- 에러율 5% 초과
+- 응답 시간 1초 초과
+- 디스크 공간 10% 미만
+- DB 백업 실패
+
+**관리자 알림:**
+긴급 문제 발생 시 총괄계정으로 DM 발송
 
 ---
 
