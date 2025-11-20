@@ -59,7 +59,7 @@
 
   <text x="280" y="330" font-family="Arial" font-size="13" fill="#495057" font-weight="600">답글 1개당 지급액</text>
   <rect x="280" y="340" width="150" height="35" rx="4" fill="white" stroke="#0d6efd" stroke-width="2"/>
-  <text x="355" y="363" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">10원</text>
+  <text x="355" y="363" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">10갈레온</text>
 
   <text x="550" y="330" font-family="Arial" font-size="13" fill="#495057" font-weight="600">정산 주기</text>
 
