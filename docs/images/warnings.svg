@@ -1,104 +1,131 @@
-<svg width="1000" height="700" xmlns="http://www.w3.org/2000/svg">
+<svg width="1000" height="800" xmlns="http://www.w3.org/2000/svg">
   <!-- 배경 -->
-  <rect width="1000" height="700" fill="#f8f9fa"/>
+  <rect width="1000" height="800" fill="#f8f9fa"/>
 
   <!-- 네비게이션 바 -->
   <rect width="1000" height="60" fill="#212529"/>
   <text x="20" y="38" font-family="Arial" font-size="18" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
   <text x="200" y="38" font-family="Arial" font-size="14" fill="#6c757d">대시보드</text>
   <text x="300" y="38" font-family="Arial" font-size="14" fill="#6c757d">사용자</text>
-  <text x="400" y="38" font-family="Arial" font-size="14" fill="#adb5bd">경고</text>
+  <text x="400" y="38" font-family="Arial" font-size="14" fill="#adb5bd">활동량</text>
 
   <!-- 제목 -->
-  <text x="40" y="110" font-family="Arial" font-size="24" fill="#333" font-weight="bold">경고 관리</text>
-  <text x="40" y="135" font-family="Arial" font-size="13" fill="#6c757d">사용자 경고를 조회하고 관리합니다</text>
+  <text x="40" y="110" font-family="Arial" font-size="24" fill="#333" font-weight="bold">활동량 모니터링</text>
+  <text x="40" y="135" font-family="Arial" font-size="13" fill="#6c757d">실시간 사용자 활동량 현황 및 경고 관리</text>
 
   <!-- 통계 카드들 -->
   <rect x="40" y="160" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="60" y="190" font-family="Arial" font-size="13" fill="#6c757d">전체 경고</text>
-  <text x="60" y="225" font-family="Arial" font-size="32" fill="#333" font-weight="bold">8</text>
-  <text x="190" y="235" font-family="Arial" font-size="36" fill="#ffc107">⚠️</text>
+  <text x="60" y="190" font-family="Arial" font-size="13" fill="#6c757d">위험군 (0~9개)</text>
+  <text x="60" y="225" font-family="Arial" font-size="32" fill="#dc3545" font-weight="bold">3명</text>
+  <text x="190" y="235" font-family="Arial" font-size="36" fill="#dc3545">🚨</text>
 
   <rect x="280" y="160" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="300" y="190" font-family="Arial" font-size="13" fill="#6c757d">이번 달</text>
-  <text x="300" y="225" font-family="Arial" font-size="32" fill="#333" font-weight="bold">3</text>
-  <text x="450" y="235" font-family="Arial" font-size="36" fill="#0d6efd">📅</text>
+  <text x="300" y="190" font-family="Arial" font-size="13" fill="#6c757d">주의군 (10~19개)</text>
+  <text x="300" y="225" font-family="Arial" font-size="32" fill="#ffc107" font-weight="bold">5명</text>
+  <text x="450" y="235" font-family="Arial" font-size="36" fill="#ffc107">⚠️</text>
 
   <rect x="520" y="160" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="540" y="190" font-family="Arial" font-size="13" fill="#6c757d">이번 주</text>
-  <text x="540" y="225" font-family="Arial" font-size="32" fill="#333" font-weight="bold">1</text>
-  <text x="690" y="235" font-family="Arial" font-size="36" fill="#dc3545">🔔</text>
+  <text x="540" y="190" font-family="Arial" font-size="13" fill="#6c757d">정상군 (20개+)</text>
+  <text x="540" y="225" font-family="Arial" font-size="32" fill="#198754" font-weight="bold">20명</text>
+  <text x="690" y="235" font-family="Arial" font-size="36" fill="#198754">✓</text>
 
   <rect x="760" y="160" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="780" y="190" font-family="Arial" font-size="13" fill="#6c757d">경고 대상자</text>
-  <text x="780" y="225" font-family="Arial" font-size="32" fill="#333" font-weight="bold">5</text>
-  <text x="930" y="235" font-family="Arial" font-size="36" fill="#6c757d">👤</text>
+  <text x="780" y="190" font-family="Arial" font-size="13" fill="#6c757d">다음 체크</text>
+  <text x="780" y="220" font-family="Arial" font-size="18" fill="#333" font-weight="bold">16:00</text>
+  <text x="780" y="245" font-family="Arial" font-size="12" fill="#6c757d">2시간 30분 후</text>
 
-  <!-- 필터 영역 -->
-  <rect x="40" y="280" width="940" height="80" rx="8" fill="#e9ecef"/>
-  <text x="60" y="305" font-family="Arial" font-size="13" fill="#495057" font-weight="600">사용자 필터</text>
-  <rect x="60" y="315" width="200" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
-  <text x="70" y="338" font-family="Arial" font-size="13" fill="#495057">전체</text>
+  <!-- 활동량 현황 (위험군) -->
+  <rect x="40" y="280" width="940" height="200" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <rect x="40" y="280" width="940" height="50" rx="8" fill="#fee2e2"/>
+  <text x="60" y="310" font-family="Arial" font-size="16" fill="#dc3545" font-weight="bold">🚨 위험군 사용자 (48시간 답글 부족)</text>
 
-  <text x="290" y="305" font-family="Arial" font-size="13" fill="#495057" font-weight="600">기간 필터</text>
-  <rect x="290" y="315" width="150" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
-  <text x="300" y="338" font-family="Arial" font-size="13" fill="#495057">전체 기간</text>
+  <!-- 위험군 사용자 1 -->
+  <rect x="60" y="350" width="280" height="50" rx="6" fill="#fff5f5" stroke="#fca5a5" stroke-width="2"/>
+  <text x="80" y="370" font-family="Arial" font-size="13" fill="#0d6efd" font-weight="600">@user456</text>
+  <text x="80" y="390" font-family="Arial" font-size="11" fill="#6c757d">김서연</text>
+  <rect x="200" y="360" width="50" height="24" rx="4" fill="#dc3545"/>
+  <text x="225" y="377" font-family="Arial" font-size="13" fill="white" text-anchor="middle" font-weight="bold">5개</text>
+  <text x="270" y="377" font-family="Arial" font-size="11" fill="#dc3545">위험</text>
 
-  <rect x="470" y="315" width="100" height="35" rx="4" fill="#0d6efd"/>
-  <text x="520" y="338" font-family="Arial" font-size="13" fill="white" text-anchor="middle">검색</text>
+  <!-- 위험군 사용자 2 -->
+  <rect x="360" y="350" width="280" height="50" rx="6" fill="#fff5f5" stroke="#fca5a5" stroke-width="2"/>
+  <text x="380" y="370" font-family="Arial" font-size="13" fill="#0d6efd" font-weight="600">@user234</text>
+  <text x="380" y="390" font-family="Arial" font-size="11" fill="#6c757d">이도윤</text>
+  <rect x="500" y="360" width="50" height="24" rx="4" fill="#dc3545"/>
+  <text x="525" y="377" font-family="Arial" font-size="13" fill="white" text-anchor="middle" font-weight="bold">8개</text>
+  <text x="570" y="377" font-family="Arial" font-size="11" fill="#dc3545">위험</text>
 
-  <!-- 경고 목록 테이블 -->
-  <rect x="40" y="380" width="940" height="40" rx="8" fill="#f8f9fa"/>
-  <text x="60" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">발급일시</text>
-  <text x="200" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">사용자</text>
-  <text x="340" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">사유</text>
-  <text x="680" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">발급자</text>
-  <text x="840" y="405" font-family="Arial" font-size="12" fill="#495057" font-weight="600">액션</text>
+  <!-- 위험군 사용자 3 -->
+  <rect x="660" y="350" width="280" height="50" rx="6" fill="#fff5f5" stroke="#fca5a5" stroke-width="2"/>
+  <text x="680" y="370" font-family="Arial" font-size="13" fill="#0d6efd" font-weight="600">@user789</text>
+  <text x="680" y="390" font-family="Arial" font-size="11" fill="#6c757d">최수아</text>
+  <rect x="800" y="360" width="50" height="24" rx="4" fill="#dc3545"/>
+  <text x="825" y="377" font-family="Arial" font-size="13" fill="white" text-anchor="middle" font-weight="bold">3개</text>
+  <text x="870" y="377" font-family="Arial" font-size="11" fill="#dc3545">위험</text>
 
-  <!-- 경고 목록 행 1 -->
-  <line x1="40" y1="420" x2="980" y2="420" stroke="#dee2e6" stroke-width="1"/>
-  <text x="60" y="450" font-family="Arial" font-size="13" fill="#6c757d">2025-11-20 10:15</text>
-  <text x="200" y="450" font-family="Arial" font-size="13" fill="#0d6efd">@user456</text>
-  <text x="340" y="450" font-family="Arial" font-size="13" fill="#495057">활동량 부족 (48시간 답글 8개)</text>
-  <text x="680" y="450" font-family="Arial" font-size="13" fill="#6c757d">마녀봇</text>
-  <rect x="840" y="435" width="50" height="24" rx="4" fill="#dc3545"/>
-  <text x="865" y="452" font-family="Arial" font-size="11" fill="white" text-anchor="middle">삭제</text>
+  <!-- 활동량 추이 그래프 -->
+  <rect x="60" y="420" width="900" height="40" rx="4" fill="#f8f9fa"/>
+  <text x="80" y="445" font-family="Arial" font-size="11" fill="#6c757d">활동량 추이</text>
 
-  <!-- 경고 목록 행 2 -->
-  <line x1="40" y1="470" x2="980" y2="470" stroke="#dee2e6" stroke-width="1"/>
-  <text x="60" y="500" font-family="Arial" font-size="13" fill="#6c757d">2025-11-19 15:30</text>
-  <text x="200" y="500" font-family="Arial" font-size="13" fill="#0d6efd">@user789</text>
-  <text x="340" y="500" font-family="Arial" font-size="13" fill="#495057">활동량 부족 (48시간 답글 5개)</text>
-  <text x="680" y="500" font-family="Arial" font-size="13" fill="#6c757d">마녀봇</text>
-  <rect x="840" y="485" width="50" height="24" rx="4" fill="#dc3545"/>
-  <text x="865" y="502" font-family="Arial" font-size="11" fill="white" text-anchor="middle">삭제</text>
+  <!-- 간단한 바 차트 -->
+  <rect x="200" y="430" width="40" height="20" rx="2" fill="#dc3545"/>
+  <text x="220" y="444" font-family="Arial" font-size="9" fill="white" text-anchor="middle">5</text>
 
-  <!-- 경고 목록 행 3 -->
-  <line x1="40" y1="520" x2="980" y2="520" stroke="#dee2e6" stroke-width="1"/>
-  <text x="60" y="550" font-family="Arial" font-size="13" fill="#6c757d">2025-11-18 08:45</text>
-  <text x="200" y="550" font-family="Arial" font-size="13" fill="#0d6efd">@user234</text>
-  <text x="340" y="550" font-family="Arial" font-size="13" fill="#495057">부적절한 언행으로 인한 수동 경고</text>
-  <text x="680" y="550" font-family="Arial" font-size="13" fill="#6c757d">운영진A</text>
-  <rect x="840" y="535" width="50" height="24" rx="4" fill="#dc3545"/>
-  <text x="865" y="552" font-family="Arial" font-size="11" fill="white" text-anchor="middle">삭제</text>
+  <rect x="260" y="425" width="40" height="25" rx="2" fill="#dc3545"/>
+  <text x="280" y="442" font-family="Arial" font-size="9" fill="white" text-anchor="middle">8</text>
 
-  <!-- 경고 목록 행 4 -->
-  <line x1="40" y1="570" x2="980" y2="570" stroke="#dee2e6" stroke-width="1"/>
-  <text x="60" y="600" font-family="Arial" font-size="13" fill="#6c757d">2025-11-17 16:20</text>
-  <text x="200" y="600" font-family="Arial" font-size="13" fill="#0d6efd">@user567</text>
-  <text x="340" y="600" font-family="Arial" font-size="13" fill="#495057">활동량 부족 (48시간 답글 12개)</text>
-  <text x="680" y="600" font-family="Arial" font-size="13" fill="#6c757d">마녀봇</text>
-  <rect x="840" y="585" width="50" height="24" rx="4" fill="#dc3545"/>
-  <text x="865" y="602" font-family="Arial" font-size="11" fill="white" text-anchor="middle">삭제</text>
+  <rect x="320" y="435" width="40" height="15" rx="2" fill="#dc3545"/>
+  <text x="340" y="447" font-family="Arial" font-size="9" fill="white" text-anchor="middle">3</text>
 
-  <!-- 페이지네이션 -->
-  <rect x="380" y="640" width="240" height="40" rx="6" fill="white" filter="drop-shadow(0px 1px 3px rgba(0,0,0,0.1))"/>
-  <rect x="390" y="650" width="70" height="24" rx="4" fill="#6c757d"/>
-  <text x="425" y="667" font-family="Arial" font-size="12" fill="white" text-anchor="middle">이전</text>
+  <!-- 활동량 현황 (주의군) -->
+  <rect x="40" y="500" width="460" height="180" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <rect x="40" y="500" width="460" height="50" rx="8" fill="#fef3c7"/>
+  <text x="60" y="530" font-family="Arial" font-size="16" fill="#f59e0b" font-weight="bold">⚠️ 주의군 (5명)</text>
 
-  <rect x="475" y="650" width="30" height="24" rx="4" fill="#0d6efd"/>
-  <text x="490" y="667" font-family="Arial" font-size="12" fill="white" text-anchor="middle" font-weight="bold">1</text>
+  <text x="70" y="570" font-family="Arial" font-size="13" fill="#0d6efd">@user567</text>
+  <text x="70" y="585" font-family="Arial" font-size="11" fill="#6c757d">박지호 | 답글: 12개</text>
 
-  <rect x="520" y="650" width="70" height="24" rx="4" fill="#e9ecef"/>
-  <text x="555" y="667" font-family="Arial" font-size="12" fill="#6c757d" text-anchor="middle">다음</text>
+  <text x="270" y="570" font-family="Arial" font-size="13" fill="#0d6efd">@user890</text>
+  <text x="270" y="585" font-family="Arial" font-size="11" fill="#6c757d">정민서 | 답글: 15개</text>
+
+  <text x="70" y="615" font-family="Arial" font-size="13" fill="#0d6efd">@user345</text>
+  <text x="70" y="630" font-family="Arial" font-size="11" fill="#6c757d">한지우 | 답글: 18개</text>
+
+  <text x="270" y="615" font-family="Arial" font-size="13" fill="#0d6efd">@user678</text>
+  <text x="270" y="630" font-family="Arial" font-size="11" fill="#6c757d">윤서준 | 답글: 11개</text>
+
+  <text x="70" y="660" font-family="Arial" font-size="13" fill="#0d6efd">@user901</text>
+  <text x="70" y="675" font-family="Arial" font-size="11" fill="#6c757d">강하윤 | 답글: 16개</text>
+
+  <!-- 최근 발송 경고 -->
+  <rect x="520" y="500" width="460" height="180" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <rect x="520" y="500" width="460" height="50" rx="8" fill="#f8f9fa"/>
+  <text x="540" y="530" font-family="Arial" font-size="16" fill="#333" font-weight="bold">📋 최근 발송 경고</text>
+
+  <text x="540" y="570" font-family="Arial" font-size="12" fill="#6c757d">2025-11-20 16:00</text>
+  <text x="680" y="570" font-family="Arial" font-size="12" fill="#0d6efd">@user456</text>
+  <rect x="780" y="560" width="60" height="20" rx="4" fill="#dc3545"/>
+  <text x="810" y="574" font-family="Arial" font-size="10" fill="white" text-anchor="middle">자동발송</text>
+
+  <text x="540" y="605" font-family="Arial" font-size="12" fill="#6c757d">2025-11-20 16:00</text>
+  <text x="680" y="605" font-family="Arial" font-size="12" fill="#0d6efd">@user234</text>
+  <rect x="780" y="595" width="60" height="20" rx="4" fill="#dc3545"/>
+  <text x="810" y="609" font-family="Arial" font-size="10" fill="white" text-anchor="middle">자동발송</text>
+
+  <text x="540" y="640" font-family="Arial" font-size="12" fill="#6c757d">2025-11-19 04:00</text>
+  <text x="680" y="640" font-family="Arial" font-size="12" fill="#0d6efd">@user789</text>
+  <rect x="780" y="630" width="60" height="20" rx="4" fill="#dc3545"/>
+  <text x="810" y="644" font-family="Arial" font-size="10" fill="white" text-anchor="middle">자동발송</text>
+
+  <text x="540" y="670" font-family="Arial" font-size="11" fill="#adb5bd">총 8건의 경고가 발송되었습니다</text>
+
+  <!-- 액션 버튼 -->
+  <rect x="40" y="700" width="200" height="45" rx="8" fill="#0d6efd"/>
+  <text x="140" y="728" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">📊 전체 경고 내역</text>
+
+  <rect x="260" y="700" width="200" height="45" rx="8" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <text x="360" y="728" font-family="Arial" font-size="14" fill="#0d6efd" text-anchor="middle" font-weight="600">🔄 수동 체크</text>
+
+  <rect x="480" y="700" width="200" height="45" rx="8" fill="white" stroke="#6c757d" stroke-width="2"/>
+  <text x="580" y="728" font-family="Arial" font-size="14" fill="#6c757d" text-anchor="middle" font-weight="600">⚙️ 체크 설정</text>
 </svg>
