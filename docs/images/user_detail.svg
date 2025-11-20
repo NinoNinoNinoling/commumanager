@@ -1,0 +1,96 @@
+<svg width="1000" height="900" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
+  <rect width="1000" height="900" fill="#f8f9fa"/>
+
+  <!-- 네비게이션 바 -->
+  <rect width="1000" height="60" fill="#212529"/>
+  <text x="20" y="38" font-family="Arial" font-size="18" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
+  <text x="200" y="38" font-family="Arial" font-size="14" fill="#6c757d">대시보드</text>
+  <text x="300" y="38" font-family="Arial" font-size="14" fill="#adb5bd">사용자</text>
+
+  <!-- 제목 -->
+  <text x="40" y="110" font-family="Arial" font-size="24" fill="#333" font-weight="bold">사용자 상세 정보</text>
+  <text x="40" y="135" font-family="Arial" font-size="13" fill="#6c757d">@user123 (김민준) 님의 상세 정보</text>
+
+  <!-- 통계 카드 4개 -->
+  <rect x="40" y="160" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="60" y="190" font-family="Arial" font-size="13" fill="#6c757d">현재 잔액</text>
+  <text x="60" y="230" font-family="Arial" font-size="28" fill="#333" font-weight="bold">35,200원</text>
+  <text x="200" y="240" font-family="Arial" font-size="32" fill="#198754">💰</text>
+
+  <rect x="280" y="160" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="300" y="190" font-family="Arial" font-size="13" fill="#6c757d">48시간 답글</text>
+  <text x="300" y="230" font-family="Arial" font-size="28" fill="#333" font-weight="bold">42개</text>
+  <text x="460" y="240" font-family="Arial" font-size="32" fill="#0d6efd">💬</text>
+
+  <rect x="520" y="160" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="540" y="190" font-family="Arial" font-size="13" fill="#6c757d">경고 횟수</text>
+  <text x="540" y="230" font-family="Arial" font-size="28" fill="#333" font-weight="bold">0회</text>
+  <text x="700" y="240" font-family="Arial" font-size="32" fill="#28a745">✓</text>
+
+  <rect x="760" y="160" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="780" y="190" font-family="Arial" font-size="13" fill="#6c757d">휴식 상태</text>
+  <rect x="780" y="210" width="70" height="28" rx="4" fill="#28a745"/>
+  <text x="815" y="230" font-family="Arial" font-size="13" fill="white" text-anchor="middle">활동 중</text>
+  <text x="920" y="240" font-family="Arial" font-size="32" fill="#28a745">🏃</text>
+
+  <!-- 기본 정보 카드 -->
+  <rect x="40" y="280" width="940" height="140" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="60" y="310" font-family="Arial" font-size="16" fill="#333" font-weight="bold">기본 정보</text>
+
+  <text x="80" y="350" font-family="Arial" font-size="13" fill="#495057" font-weight="600">사용자명</text>
+  <text x="80" y="375" font-family="Arial" font-size="13" fill="#6c757d">@user123</text>
+
+  <text x="280" y="350" font-family="Arial" font-size="13" fill="#495057" font-weight="600">표시명</text>
+  <text x="280" y="375" font-family="Arial" font-size="13" fill="#6c757d">김민준</text>
+
+  <text x="480" y="350" font-family="Arial" font-size="13" fill="#495057" font-weight="600">역할</text>
+  <rect x="480" y="358" width="60" height="22" rx="4" fill="#6c757d"/>
+  <text x="510" y="373" font-family="Arial" font-size="11" fill="white" text-anchor="middle">사용자</text>
+
+  <text x="680" y="350" font-family="Arial" font-size="13" fill="#495057" font-weight="600">최종 활동</text>
+  <text x="680" y="375" font-family="Arial" font-size="13" fill="#6c757d">2025-11-20 14:35</text>
+
+  <!-- 거래 내역 -->
+  <rect x="40" y="440" width="940" height="200" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <rect x="40" y="440" width="940" height="50" rx="8" fill="#f8f9fa"/>
+  <text x="60" y="470" font-family="Arial" font-size="16" fill="#333" font-weight="bold">💸 거래 내역</text>
+  <rect x="900" y="455" width="60" height="24" rx="12" fill="#198754"/>
+  <text x="930" y="472" font-family="Arial" font-size="11" fill="white" text-anchor="middle">12건</text>
+
+  <!-- 거래 내역 리스트 -->
+  <text x="60" y="520" font-family="Arial" font-size="12" fill="#495057">2025-11-20 16:00</text>
+  <text x="200" y="520" font-family="Arial" font-size="12" fill="#198754" font-weight="600">+840원</text>
+  <text x="320" y="520" font-family="Arial" font-size="12" fill="#6c757d">정산 지급 (답글 84개)</text>
+
+  <text x="60" y="550" font-family="Arial" font-size="12" fill="#495057">2025-11-19 04:00</text>
+  <text x="200" y="550" font-family="Arial" font-size="12" fill="#198754" font-weight="600">+920원</text>
+  <text x="320" y="550" font-family="Arial" font-size="12" fill="#6c757d">정산 지급 (답글 92개)</text>
+
+  <text x="60" y="580" font-family="Arial" font-size="12" fill="#495057">2025-11-18 10:30</text>
+  <text x="200" y="580" font-family="Arial" font-size="12" fill="#dc3545" font-weight="600">-5,000원</text>
+  <text x="320" y="580" font-family="Arial" font-size="12" fill="#6c757d">상점 구매 (프로필 뱃지)</text>
+
+  <text x="60" y="610" font-family="Arial" font-size="12" fill="#495057">2025-11-17 16:00</text>
+  <text x="200" y="610" font-family="Arial" font-size="12" fill="#198754" font-weight="600">+750원</text>
+  <text x="320" y="610" font-family="Arial" font-size="12" fill="#6c757d">정산 지급 (답글 75개)</text>
+
+  <!-- 경고 내역 -->
+  <rect x="40" y="660" width="460" height="140" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <rect x="40" y="660" width="460" height="50" rx="8" fill="#f8f9fa"/>
+  <text x="60" y="690" font-family="Arial" font-size="16" fill="#333" font-weight="bold">⚠️ 경고 내역</text>
+  <rect x="420" y="675" width="60" height="24" rx="12" fill="#6c757d"/>
+  <text x="450" y="692" font-family="Arial" font-size="11" fill="white" text-anchor="middle">0건</text>
+
+  <text x="230" y="755" font-family="Arial" font-size="13" fill="#6c757d" text-anchor="middle">경고 내역이 없습니다</text>
+
+  <!-- 휴식 내역 -->
+  <rect x="520" y="660" width="460" height="140" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <rect x="520" y="660" width="460" height="50" rx="8" fill="#f8f9fa"/>
+  <text x="540" y="690" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🏖️ 휴식 내역</text>
+  <rect x="900" y="675" width="60" height="24" rx="12" fill="#0dcaf0"/>
+  <text x="930" y="692" font-family="Arial" font-size="11" fill="#212529" text-anchor="middle">1건</text>
+
+  <text x="560" y="740" font-family="Arial" font-size="12" fill="#495057">2025-09-15 ~ 2025-09-22</text>
+  <text x="560" y="765" font-family="Arial" font-size="11" fill="#6c757d">사유: 개인 사정으로 인한 휴식 | 승인자: 총괄관리자</text>
+</svg>
