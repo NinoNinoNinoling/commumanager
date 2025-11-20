@@ -77,10 +77,9 @@
   <rect x="240" y="420" width="940" height="140" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
   <text x="260" y="450" font-family="Arial" font-size="16" fill="#333" font-weight="bold">⚠️ 경고 시스템 설정</text>
 
-  <text x="280" y="490" font-family="Arial" font-size="13" fill="#495057" font-weight="600">자동 경고 활성화</text>
-  <rect x="280" y="500" width="60" height="30" rx="15" fill="#198754"/>
-  <circle cx="320" cy="515" r="12" fill="white"/>
-  <text x="355" y="520" font-family="Arial" font-size="13" fill="#198754" font-weight="600">활성화됨</text>
+  <text x="280" y="490" font-family="Arial" font-size="13" fill="#495057" font-weight="600">경고 발송 방식</text>
+  <rect x="280" y="500" width="200" height="35" rx="4" fill="#fff3cd"/>
+  <text x="380" y="523" font-family="Arial" font-size="13" fill="#856404" text-anchor="middle">수동 (관리자 판단)</text>
 
   <text x="550" y="490" font-family="Arial" font-size="13" fill="#495057" font-weight="600">누적 경고 제한</text>
   <rect x="550" y="500" width="150" height="35" rx="4" fill="white" stroke="#dc3545" stroke-width="2"/>

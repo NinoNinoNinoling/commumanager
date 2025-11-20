@@ -243,7 +243,7 @@ INSERT INTO settings (key, value, description) VALUES
 ('max_vacation_days', '90', '최대 휴식 기간 (일)'),
 ('vacation_self_service_enabled', '1', '봇 명령어 셀프 등록 허용'),
 ('isolation_threshold', '7', '고립 판정 기준 (N명 미만)'),
-('bias_threshold', '0.3', '편중 판정 기준 (비율)'),
+('bias_threshold', '0.1', '편향 판정 기준 (비율)'),
 ('inactive_threshold', '0.5', '비활동 판정 기준 (접속률)'),
 ('archive_warning_threshold', '3', '툿 아카이빙 경고 임계값'),
 ('admin_account_id', '', '어드민 마스토돈 계정 ID');
@@ -447,7 +447,7 @@ CREATE INDEX idx_user_stats_biased ON user_stats(is_biased);
 - 답글 미달: 48시간 내 5개 미만
 - 고립: 대화 상대 < 7명 (48h)
 - 비활동: 접속률 < 50% (7d)
-- 편중: 특정 1명과 > 30%
+- 편향: 특정 1명과 > 10%
 
 ### warning_templates
 ```sql
@@ -468,7 +468,7 @@ INSERT INTO warning_templates (name, warning_type, template) VALUES
  '@{username}님, 최근 대화 상대가 {unique_partners}명으로 적습니다.'),
 ('비활동', 'inactive',
  '@{username}님, 최근 7일 접속률이 {login_rate}%입니다.'),
-('편중 경고', 'bias',
+('편향 경고', 'bias',
  '@{username}님, @{top_partner}와의 대화가 {ratio}%입니다.');
 ```
 
