@@ -303,11 +303,31 @@
 
 ---
 
+## 예약 발송 시스템 (구현 완료)
+
+### 스토리 이벤트
+- 여러 포스트를 일정 간격으로 자동 발송
+- 이벤트 단위 관리 (제목, 시작 시간, 간격)
+- Calendar Events와 연결 가능
+- 엑셀 일괄 업로드 지원
+- **API**: `/api/v1/story-events`, `/api/v1/story-posts`
+- **UI**: `/story-events`
+
+### 공지 예약
+- 단일 공지를 특정 시간에 예약 발송
+- 공개/비공개 설정 가능
+- **API**: `/api/v1/announcements`
+- **UI**: `/announcements`
+
+**참고**: 실제 자동 발송은 Celery Task 구현 필요 (TODO)
+
+---
+
 ## 추후 구현
 - 게임 시스템
 - 아이템 양도
 - 유저별 시각화 (Chart.js)
-- 스토리 봇 (예약 발송)
+- 예약 발송 자동화 (Celery Task)
 - 일반 유저 웹 (프로필, 랭킹)
 
 ---
@@ -512,14 +532,18 @@
 
 ### UC-14: 예약 발송 (스토리/공지)
 
-**액터**: Celery 스케줄러
+**액터**: Celery 스케줄러 (TODO: 구현 필요)
 **스케줄**: 매 1분마다 체크
 
 **흐름**:
-1. 예약 발송 대상 조회
-2. 각 예약 건별 처리: post_type에 따라 계정 선택, 마스토돈 API로 발송
-3. 발송 결과 업데이트
+1. 예약 발송 대상 조회 (story_events, scheduled_posts)
+2. 스토리 이벤트: 각 포스트의 scheduled_at 확인 후 발송
+3. 공지: scheduled_at 확인 후 발송
+4. 발송 결과 업데이트 (status, published_at, error_message)
 
-**예외**: API 오류 시 status = 'failed', 재시도 큐
+**현재 상태**: DB 스키마 및 API 구현 완료, Celery Task 미구현
 
-**참고**: `@봇 공지` 명령어는 is_public=1인 공지만 표시
+**참고**:
+- 스토리 포스트는 간격(interval_minutes)에 따라 scheduled_at 자동 계산
+- `@봇 공지` 명령어는 is_public=1인 공지만 표시
+- **API 문서**: docs/SCHEDULING_FEATURES.md (삭제 예정 - 내용 통합됨)
