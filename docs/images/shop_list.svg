@@ -1,0 +1,238 @@
+<svg width="1200" height="950" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
+  <rect width="1200" height="950" fill="#f8f9fa"/>
+
+  <!-- 왼쪽 사이드바 -->
+  <rect width="200" height="950" fill="#2d3748"/>
+  <text x="20" y="35" font-family="Arial" font-size="16" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
+  <line x1="20" y1="50" x2="180" y2="50" stroke="#4a5568" stroke-width="1"/>
+
+  <rect x="10" y="70" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="95" font-family="Arial" font-size="13" fill="#a0aec0">📊 대시보드</text>
+
+  <rect x="10" y="120" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="145" font-family="Arial" font-size="13" fill="#a0aec0">👥 유저 관리</text>
+
+  <rect x="10" y="170" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="195" font-family="Arial" font-size="13" fill="#a0aec0">💰 재화</text>
+
+  <rect x="10" y="220" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="245" font-family="Arial" font-size="13" fill="#a0aec0">📅 콘텐츠</text>
+
+  <!-- 상점 (활성) -->
+  <rect x="10" y="270" width="180" height="40" rx="6" fill="#4299e1"/>
+  <text x="30" y="295" font-family="Arial" font-size="13" fill="white" font-weight="600">🛒 상점</text>
+
+  <rect x="10" y="320" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="345" font-family="Arial" font-size="13" fill="#a0aec0">📋 로그</text>
+
+  <rect x="10" y="370" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="395" font-family="Arial" font-size="13" fill="#a0aec0">⚙️ 설정</text>
+
+  <!-- 메인 콘텐츠 영역 -->
+  <text x="240" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">상점 관리</text>
+  <text x="240" y="75" font-family="Arial" font-size="13" fill="#6c757d">호그와트 상점 아이템을 관리합니다</text>
+
+  <!-- + 아이템 추가 버튼 -->
+  <rect x="1050" y="35" width="130" height="40" rx="4" fill="#198754"/>
+  <text x="1115" y="60" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">+ 아이템 추가</text>
+
+  <!-- 통계 카드들 -->
+  <rect x="240" y="100" width="300" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="130" font-family="Arial" font-size="13" fill="#6c757d">전체 아이템</text>
+  <text x="260" y="165" font-family="Arial" font-size="32" fill="#333" font-weight="bold">15</text>
+  <text x="490" y="175" font-family="Arial" font-size="36" fill="#0d6efd">📦</text>
+
+  <rect x="560" y="100" width="300" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="580" y="130" font-family="Arial" font-size="13" fill="#6c757d">활성 아이템</text>
+  <text x="580" y="165" font-family="Arial" font-size="32" fill="#333" font-weight="bold">12</text>
+  <text x="810" y="175" font-family="Arial" font-size="36" fill="#198754">✓</text>
+
+  <rect x="880" y="100" width="300" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="900" y="130" font-family="Arial" font-size="13" fill="#6c757d">비활성 아이템</text>
+  <text x="900" y="165" font-family="Arial" font-size="32" fill="#333" font-weight="bold">3</text>
+  <text x="1130" y="175" font-family="Arial" font-size="36" fill="#6c757d">✕</text>
+
+  <!-- 필터 및 검색 -->
+  <rect x="240" y="220" width="200" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="255" y="243" font-family="Arial" font-size="13" fill="#495057">전체 카테고리</text>
+  <text x="415" y="243" font-family="Arial" font-size="13" fill="#adb5bd">▼</text>
+
+  <rect x="460" y="220" width="150" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="475" y="243" font-family="Arial" font-size="13" fill="#495057">전체 상태</text>
+  <text x="590" y="243" font-family="Arial" font-size="13" fill="#adb5bd">▼</text>
+
+  <rect x="630" y="220" width="250" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="645" y="243" font-family="Arial" font-size="13" fill="#adb5bd">🔍 아이템 검색...</text>
+
+  <!-- 아이템 카드 1 -->
+  <rect x="240" y="275" width="300" height="240" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="305" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🪄 마법 지팡이</text>
+  <text x="260" y="330" font-family="Arial" font-size="12" fill="#6c757d">올리밴더 지팡이 가게의</text>
+  <text x="260" y="345" font-family="Arial" font-size="12" fill="#6c757d">엄선된 마법 지팡이입니다</text>
+
+  <rect x="480" y="290" width="50" height="22" rx="4" fill="#198754"/>
+  <text x="505" y="305" font-family="Arial" font-size="11" fill="white" text-anchor="middle">활성</text>
+
+  <rect x="260" y="370" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="320" y="390" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
+  <text x="320" y="410" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">5,000</text>
+
+  <rect x="390" y="370" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="450" y="390" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">구매 횟수</text>
+  <text x="450" y="410" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">23회</text>
+
+  <line x1="260" y1="435" x2="510" y2="435" stroke="#dee2e6" stroke-width="1"/>
+  <text x="260" y="455" font-family="Arial" font-size="11" fill="#adb5bd">카테고리: 마법 도구 | ID: #7</text>
+
+  <rect x="260" y="470" width="100" height="28" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="310" y="490" font-family="Arial" font-size="12" fill="#0d6efd" text-anchor="middle">편집</text>
+
+  <rect x="370" y="470" width="100" height="28" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="420" y="490" font-family="Arial" font-size="12" fill="#dc3545" text-anchor="middle">비활성화</text>
+
+  <!-- 아이템 카드 2 -->
+  <rect x="560" y="275" width="300" height="240" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="580" y="305" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🍺 버터비어</text>
+  <text x="580" y="330" font-family="Arial" font-size="12" fill="#6c757d">호그스미드 마을의 인기 음료</text>
+  <text x="580" y="345" font-family="Arial" font-size="12" fill="#6c757d">따뜻하고 달콤합니다</text>
+
+  <rect x="800" y="290" width="50" height="22" rx="4" fill="#198754"/>
+  <text x="825" y="305" font-family="Arial" font-size="11" fill="white" text-anchor="middle">활성</text>
+
+  <rect x="580" y="370" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="640" y="390" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
+  <text x="640" y="410" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">3,000</text>
+
+  <rect x="710" y="370" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="770" y="390" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">구매 횟수</text>
+  <text x="770" y="410" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">47회</text>
+
+  <line x1="580" y1="435" x2="830" y2="435" stroke="#dee2e6" stroke-width="1"/>
+  <text x="580" y="455" font-family="Arial" font-size="11" fill="#adb5bd">카테고리: 식음료 | ID: #11</text>
+
+  <rect x="580" y="470" width="100" height="28" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="630" y="490" font-family="Arial" font-size="12" fill="#0d6efd" text-anchor="middle">편집</text>
+
+  <rect x="690" y="470" width="100" height="28" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="740" y="490" font-family="Arial" font-size="12" fill="#dc3545" text-anchor="middle">비활성화</text>
+
+  <!-- 아이템 카드 3 (비활성) -->
+  <rect x="880" y="275" width="300" height="240" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))" opacity="0.7"/>
+  <text x="900" y="305" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🧪 마법 약 재료</text>
+  <text x="900" y="330" font-family="Arial" font-size="12" fill="#6c757d">스네이프 교수 추천</text>
+  <text x="900" y="345" font-family="Arial" font-size="12" fill="#6c757d">고급 마법 약 재료 세트</text>
+
+  <rect x="1120" y="290" width="50" height="22" rx="4" fill="#6c757d"/>
+  <text x="1145" y="305" font-family="Arial" font-size="11" fill="white" text-anchor="middle">비활성</text>
+
+  <rect x="900" y="370" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="960" y="390" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
+  <text x="960" y="410" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">7,500</text>
+
+  <rect x="1030" y="370" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="1090" y="390" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">구매 횟수</text>
+  <text x="1090" y="410" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">8회</text>
+
+  <line x1="900" y1="435" x2="1150" y2="435" stroke="#dee2e6" stroke-width="1"/>
+  <text x="900" y="455" font-family="Arial" font-size="11" fill="#adb5bd">카테고리: 마법 재료 | ID: #4</text>
+
+  <rect x="900" y="470" width="100" height="28" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="950" y="490" font-family="Arial" font-size="12" fill="#0d6efd" text-anchor="middle">편집</text>
+
+  <rect x="1010" y="470" width="100" height="28" rx="4" fill="white" stroke="#198754" stroke-width="1"/>
+  <text x="1060" y="490" font-family="Arial" font-size="12" fill="#198754" text-anchor="middle">활성화</text>
+
+  <!-- 아이템 카드 4 -->
+  <rect x="240" y="535" width="300" height="240" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="565" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🧹 님버스 2000</text>
+  <text x="260" y="590" font-family="Arial" font-size="12" fill="#6c757d">최고급 비행 빗자루</text>
+  <text x="260" y="605" font-family="Arial" font-size="12" fill="#6c757d">퀴디치 선수 필수품</text>
+
+  <rect x="480" y="550" width="50" height="22" rx="4" fill="#198754"/>
+  <text x="505" y="565" font-family="Arial" font-size="11" fill="white" text-anchor="middle">활성</text>
+
+  <rect x="260" y="630" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="320" y="650" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
+  <text x="320" y="670" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">15,000</text>
+
+  <rect x="390" y="630" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="450" y="650" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">구매 횟수</text>
+  <text x="450" y="670" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">5회</text>
+
+  <line x1="260" y1="695" x2="510" y2="695" stroke="#dee2e6" stroke-width="1"/>
+  <text x="260" y="715" font-family="Arial" font-size="11" fill="#adb5bd">카테고리: 마법 도구 | ID: #15</text>
+
+  <rect x="260" y="730" width="100" height="28" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="310" y="750" font-family="Arial" font-size="12" fill="#0d6efd" text-anchor="middle">편집</text>
+
+  <rect x="370" y="730" width="100" height="28" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="420" y="750" font-family="Arial" font-size="12" fill="#dc3545" text-anchor="middle">비활성화</text>
+
+  <!-- 아이템 카드 5 -->
+  <rect x="560" y="535" width="300" height="240" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="580" y="565" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🎭 마법 가면</text>
+  <text x="580" y="590" font-family="Arial" font-size="12" fill="#6c757d">할로윈 파티 필수 아이템</text>
+  <text x="580" y="605" font-family="Arial" font-size="12" fill="#6c757d">다양한 디자인 보유</text>
+
+  <rect x="800" y="550" width="50" height="22" rx="4" fill="#198754"/>
+  <text x="825" y="565" font-family="Arial" font-size="11" fill="white" text-anchor="middle">활성</text>
+
+  <rect x="580" y="630" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="640" y="650" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
+  <text x="640" y="670" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">2,500</text>
+
+  <rect x="710" y="630" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="770" y="650" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">구매 횟수</text>
+  <text x="770" y="670" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">31회</text>
+
+  <line x1="580" y1="695" x2="830" y2="695" stroke="#dee2e6" stroke-width="1"/>
+  <text x="580" y="715" font-family="Arial" font-size="11" fill="#adb5bd">카테고리: 의류/액세서리 | ID: #9</text>
+
+  <rect x="580" y="730" width="100" height="28" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="630" y="750" font-family="Arial" font-size="12" fill="#0d6efd" text-anchor="middle">편집</text>
+
+  <rect x="690" y="730" width="100" height="28" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="740" y="750" font-family="Arial" font-size="12" fill="#dc3545" text-anchor="middle">비활성화</text>
+
+  <!-- 아이템 카드 6 -->
+  <rect x="880" y="535" width="300" height="240" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="900" y="565" font-family="Arial" font-size="16" fill="#333" font-weight="bold">📚 마법 교과서</text>
+  <text x="900" y="590" font-family="Arial" font-size="12" fill="#6c757d">고급 마법 이론서</text>
+  <text x="900" y="605" font-family="Arial" font-size="12" fill="#6c757d">1학년 필수 교재</text>
+
+  <rect x="1120" y="550" width="50" height="22" rx="4" fill="#198754"/>
+  <text x="1145" y="565" font-family="Arial" font-size="11" fill="white" text-anchor="middle">활성</text>
+
+  <rect x="900" y="630" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="960" y="650" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
+  <text x="960" y="670" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">8,000</text>
+
+  <rect x="1030" y="630" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="1090" y="650" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">구매 횟수</text>
+  <text x="1090" y="670" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">12회</text>
+
+  <line x1="900" y1="695" x2="1150" y2="695" stroke="#dee2e6" stroke-width="1"/>
+  <text x="900" y="715" font-family="Arial" font-size="11" fill="#adb5bd">카테고리: 서적 | ID: #13</text>
+
+  <rect x="900" y="730" width="100" height="28" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="950" y="750" font-family="Arial" font-size="12" fill="#0d6efd" text-anchor="middle">편집</text>
+
+  <rect x="1010" y="730" width="100" height="28" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="1060" y="750" font-family="Arial" font-size="12" fill="#dc3545" text-anchor="middle">비활성화</text>
+
+  <!-- 페이지네이션 -->
+  <text x="240" y="825" font-family="Arial" font-size="12" fill="#6c757d">총 15개 아이템 | 1-6 표시</text>
+
+  <rect x="1050" y="805" width="30" height="30" rx="4" fill="#0d6efd"/>
+  <text x="1065" y="827" font-family="Arial" font-size="12" fill="white" text-anchor="middle" font-weight="600">1</text>
+
+  <rect x="1085" y="805" width="30" height="30" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="1100" y="827" font-family="Arial" font-size="12" fill="#495057" text-anchor="middle">2</text>
+
+  <rect x="1120" y="805" width="30" height="30" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="1135" y="827" font-family="Arial" font-size="12" fill="#495057" text-anchor="middle">3</text>
+
+  <rect x="1155" y="805" width="25" height="30" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="1167" y="827" font-family="Arial" font-size="12" fill="#495057" text-anchor="middle">→</text>
+</svg>

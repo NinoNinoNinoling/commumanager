@@ -1,0 +1,236 @@
+<svg width="1200" height="1000" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
+  <rect width="1200" height="1000" fill="#f8f9fa"/>
+
+  <!-- 왼쪽 사이드바 -->
+  <rect width="200" height="1000" fill="#2d3748"/>
+  <text x="20" y="35" font-family="Arial" font-size="16" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
+  <line x1="20" y1="50" x2="180" y2="50" stroke="#4a5568" stroke-width="1"/>
+
+  <rect x="10" y="70" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="95" font-family="Arial" font-size="13" fill="#a0aec0">📊 대시보드</text>
+
+  <rect x="10" y="120" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="145" font-family="Arial" font-size="13" fill="#a0aec0">👥 유저 관리</text>
+
+  <rect x="10" y="170" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="195" font-family="Arial" font-size="13" fill="#a0aec0">💰 재화</text>
+
+  <!-- 콘텐츠 (활성) -->
+  <rect x="10" y="220" width="180" height="40" rx="6" fill="#4299e1"/>
+  <text x="30" y="245" font-family="Arial" font-size="13" fill="white" font-weight="600">📅 콘텐츠</text>
+
+  <rect x="10" y="270" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="295" font-family="Arial" font-size="13" fill="#a0aec0">🛒 상점</text>
+
+  <rect x="10" y="320" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="345" font-family="Arial" font-size="13" fill="#a0aec0">📋 로그</text>
+
+  <rect x="10" y="370" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="395" font-family="Arial" font-size="13" fill="#a0aec0">⚙️ 설정</text>
+
+  <!-- 메인 콘텐츠 영역 -->
+  <text x="240" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">일정 및 이벤트 관리</text>
+  <text x="240" y="75" font-family="Arial" font-size="13" fill="#6c757d">커뮤니티 일정을 관리하고 리뉴얼 기간을 설정합니다</text>
+
+  <!-- 버튼들 -->
+  <rect x="860" y="35" width="160" height="40" rx="4" fill="#6f42c1"/>
+  <text x="940" y="60" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">🔄 리뉴얼 기간 설정</text>
+
+  <rect x="1040" y="35" width="140" height="40" rx="4" fill="#198754"/>
+  <text x="1110" y="60" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">+ 일정 등록</text>
+
+  <!-- 통계 카드들 -->
+  <rect x="240" y="100" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="130" font-family="Arial" font-size="13" fill="#6c757d">전체 일정</text>
+  <text x="260" y="165" font-family="Arial" font-size="32" fill="#333" font-weight="bold">15</text>
+  <text x="390" y="175" font-family="Arial" font-size="36" fill="#0d6efd">📅</text>
+
+  <rect x="480" y="100" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="500" y="130" font-family="Arial" font-size="13" fill="#6c757d">진행 중</text>
+  <text x="500" y="165" font-family="Arial" font-size="32" fill="#333" font-weight="bold">3</text>
+  <text x="650" y="175" font-family="Arial" font-size="36" fill="#198754">▶️</text>
+
+  <rect x="720" y="100" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="740" y="130" font-family="Arial" font-size="13" fill="#6c757d">예정</text>
+  <text x="740" y="165" font-family="Arial" font-size="32" fill="#333" font-weight="bold">5</text>
+  <text x="890" y="175" font-family="Arial" font-size="36" fill="#ffc107">⏳</text>
+
+  <rect x="960" y="100" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="980" y="130" font-family="Arial" font-size="13" fill="#6c757d">종료</text>
+  <text x="980" y="165" font-family="Arial" font-size="32" fill="#333" font-weight="bold">7</text>
+  <text x="1130" y="175" font-family="Arial" font-size="36" fill="#6c757d">✓</text>
+
+  <!-- 필터 및 검색 -->
+  <text x="240" y="230" font-family="Arial" font-size="14" fill="#495057" font-weight="600">필터 및 검색</text>
+
+  <rect x="240" y="240" width="200" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="255" y="263" font-family="Arial" font-size="13" fill="#495057">전체 학기/기간</text>
+  <text x="415" y="263" font-family="Arial" font-size="13" fill="#adb5bd">▼</text>
+
+  <rect x="460" y="240" width="150" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="475" y="263" font-family="Arial" font-size="13" fill="#495057">전체 상태</text>
+  <text x="590" y="263" font-family="Arial" font-size="13" fill="#adb5bd">▼</text>
+
+  <rect x="630" y="240" width="150" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="645" y="263" font-family="Arial" font-size="13" fill="#495057">전체 유형</text>
+  <text x="760" y="263" font-family="Arial" font-size="13" fill="#adb5bd">▼</text>
+
+  <rect x="800" y="240" width="200" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="815" y="263" font-family="Arial" font-size="13" fill="#adb5bd">🔍 일정 검색...</text>
+
+  <!-- 현재 기간 정보 -->
+  <rect x="240" y="295" width="940" height="60" rx="8" fill="#e7f5ff" stroke="#339af0" stroke-width="1"/>
+  <text x="260" y="320" font-family="Arial" font-size="14" fill="#1971c2" font-weight="600">📌 현재 러닝 기간: Period 3 (2025-01-01 ~ 2025-06-30)</text>
+  <text x="260" y="340" font-family="Arial" font-size="12" fill="#1971c2">러닝 기간 중이므로 커뮤니티가 정상 운영되며, 활동량 체크 및 재화 지급이 활성화됩니다 | 다음 리뉴얼: 2025-07-01</text>
+
+  <!-- 일정 카드 1 (진행 중) -->
+  <rect x="240" y="375" width="560" height="170" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="405" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🏰 호그스미드 방문 주간</text>
+  <text x="260" y="430" font-family="Arial" font-size="13" fill="#6c757d">마법 마을 호그스미드 자유 방문 기간입니다</text>
+
+  <rect x="260" y="445" width="70" height="24" rx="4" fill="#6f42c1"/>
+  <text x="295" y="462" font-family="Arial" font-size="11" fill="white" text-anchor="middle">외출</text>
+
+  <rect x="340" y="445" width="80" height="24" rx="4" fill="#198754"/>
+  <text x="380" y="462" font-family="Arial" font-size="11" fill="white" text-anchor="middle" font-weight="600">진행 중</text>
+
+  <rect x="430" y="445" width="18" height="24" fill="transparent"/>
+  <text x="435" y="462" font-family="Arial" font-size="20" fill="#198754">✓</text>
+  <text x="450" y="462" font-family="Arial" font-size="11" fill="#6c757d">공개</text>
+
+  <text x="260" y="495" font-family="Arial" font-size="12" fill="#495057" font-weight="600">시작:</text>
+  <text x="300" y="495" font-family="Arial" font-size="12" fill="#6c757d">2025-11-15 10:00</text>
+  <text x="450" y="495" font-family="Arial" font-size="12" fill="#495057" font-weight="600">종료:</text>
+  <text x="490" y="495" font-family="Arial" font-size="12" fill="#6c757d">2025-11-21 23:59</text>
+
+  <text x="260" y="515" font-family="Arial" font-size="11" fill="#adb5bd">Period 3 | 관리자: 총괄 | ID: #8</text>
+
+  <rect x="260" y="520" width="80" height="28" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="300" y="540" font-family="Arial" font-size="12" fill="#0d6efd" text-anchor="middle">편집</text>
+
+  <rect x="350" y="520" width="80" height="28" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="390" y="540" font-family="Arial" font-size="12" fill="#dc3545" text-anchor="middle">삭제</text>
+
+  <!-- 일정 카드 2 (예정) -->
+  <rect x="820" y="375" width="360" height="170" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="840" y="405" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🎄 크리스마스 대연회</text>
+  <text x="840" y="430" font-family="Arial" font-size="13" fill="#6c757d">대강당에서 펼쳐지는 연말 축제</text>
+
+  <rect x="840" y="445" width="70" height="24" rx="4" fill="#dc3545"/>
+  <text x="875" y="462" font-family="Arial" font-size="11" fill="white" text-anchor="middle">특별</text>
+
+  <rect x="920" y="445" width="70" height="24" rx="4" fill="#ffc107"/>
+  <text x="955" y="462" font-family="Arial" font-size="11" fill="#212529" text-anchor="middle">예정</text>
+
+  <rect x="1000" y="445" width="18" height="24" fill="transparent"/>
+  <text x="1005" y="462" font-family="Arial" font-size="20" fill="#198754">✓</text>
+  <text x="1020" y="462" font-family="Arial" font-size="11" fill="#6c757d">공개</text>
+
+  <text x="840" y="495" font-family="Arial" font-size="12" fill="#495057" font-weight="600">시작:</text>
+  <text x="880" y="495" font-family="Arial" font-size="12" fill="#6c757d">2025-12-24 18:00</text>
+
+  <text x="840" y="515" font-family="Arial" font-size="12" fill="#495057" font-weight="600">종료:</text>
+  <text x="880" y="515" font-family="Arial" font-size="12" fill="#6c757d">2025-12-26 23:59</text>
+
+  <text x="840" y="535" font-family="Arial" font-size="11" fill="#adb5bd">Period 3 | 관리자: 마녀봇 | ID: #12</text>
+
+  <rect x="840" y="520" width="80" height="28" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="880" y="540" font-family="Arial" font-size="12" fill="#0d6efd" text-anchor="middle">편집</text>
+
+  <!-- 일정 카드 3 (스토리 일정) -->
+  <rect x="240" y="565" width="560" height="190" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="595" font-family="Arial" font-size="16" fill="#333" font-weight="bold">📖 마법사의 돌 찾기 (스토리)</text>
+  <text x="260" y="620" font-family="Arial" font-size="13" fill="#6c757d">신비한 마법의 돌을 찾는 모험 시리즈 - 총 5개 포스트 예약 발송</text>
+
+  <rect x="260" y="635" width="70" height="24" rx="4" fill="#0d6efd"/>
+  <text x="295" y="652" font-family="Arial" font-size="11" fill="white" text-anchor="middle">스토리</text>
+
+  <rect x="340" y="635" width="80" height="24" rx="4" fill="#ffc107"/>
+  <text x="380" y="652" font-family="Arial" font-size="11" fill="#212529" text-anchor="middle" font-weight="600">예정</text>
+
+  <rect x="430" y="635" width="18" height="24" fill="transparent"/>
+  <text x="435" y="652" font-family="Arial" font-size="20" fill="#6c757d">✕</text>
+  <text x="450" y="652" font-family="Arial" font-size="11" fill="#6c757d">비공개</text>
+
+  <text x="260" y="685" font-family="Arial" font-size="12" fill="#495057" font-weight="600">시작:</text>
+  <text x="300" y="685" font-family="Arial" font-size="12" fill="#6c757d">2025-11-25 20:00</text>
+  <text x="450" y="685" font-family="Arial" font-size="12" fill="#495057" font-weight="600">포스트 간격:</text>
+  <text x="530" y="685" font-family="Arial" font-size="12" fill="#6c757d">5분</text>
+
+  <text x="260" y="705" font-family="Arial" font-size="12" fill="#495057" font-weight="600">포스트 수:</text>
+  <text x="320" y="705" font-family="Arial" font-size="12" fill="#0d6efd" font-weight="600">5개</text>
+  <text x="370" y="705" font-family="Arial" font-size="11" fill="#adb5bd">(1/5 발송 완료)</text>
+
+  <text x="260" y="725" font-family="Arial" font-size="11" fill="#adb5bd">Period 3 | 작성자: 스토리계정 | ID: #15</text>
+
+  <rect x="260" y="730" width="80" height="28" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="300" y="750" font-family="Arial" font-size="12" fill="#0d6efd" text-anchor="middle">편집</text>
+
+  <rect x="350" y="730" width="100" height="28" rx="4" fill="white" stroke="#6c757d" stroke-width="1"/>
+  <text x="400" y="750" font-family="Arial" font-size="12" fill="#6c757d" text-anchor="middle">포스트 관리</text>
+
+  <rect x="460" y="730" width="80" height="28" rx="4" fill="white" stroke="#dc3545" stroke-width="1"/>
+  <text x="500" y="750" font-family="Arial" font-size="12" fill="#dc3545" text-anchor="middle">취소</text>
+
+  <!-- 일정 카드 4 (리뉴얼 기간) -->
+  <rect x="820" y="565" width="360" height="190" rx="8" fill="#f8f9fa" stroke="#6f42c1" stroke-width="2"/>
+  <text x="840" y="595" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🔄 여름 리뉴얼 기간</text>
+  <text x="840" y="620" font-family="Arial" font-size="13" fill="#6c757d">여름 방학 중 시스템 점검 및 개편</text>
+
+  <rect x="840" y="635" width="100" height="24" rx="4" fill="#6f42c1"/>
+  <text x="890" y="652" font-family="Arial" font-size="11" fill="white" text-anchor="middle" font-weight="600">리뉴얼 기간</text>
+
+  <rect x="950" y="635" width="70" height="24" rx="4" fill="#ffc107"/>
+  <text x="985" y="652" font-family="Arial" font-size="11" fill="#212529" text-anchor="middle">예정</text>
+
+  <text x="840" y="685" font-family="Arial" font-size="12" fill="#495057" font-weight="600">시작:</text>
+  <text x="880" y="685" font-family="Arial" font-size="12" fill="#6c757d">2025-07-01 00:00</text>
+
+  <text x="840" y="705" font-family="Arial" font-size="12" fill="#495057" font-weight="600">종료:</text>
+  <text x="880" y="705" font-family="Arial" font-size="12" fill="#6c757d">2025-08-31 23:59</text>
+
+  <rect x="840" y="715" width="280" height="30" rx="4" fill="#fff3cd"/>
+  <text x="850" y="735" font-family="Arial" font-size="11" fill="#856404">⚠️ 활동량 체크/출석 트윗 중단됩니다</text>
+
+  <text x="840" y="760" font-family="Arial" font-size="11" fill="#adb5bd">Period 3 → Period 4 전환 | ID: #20</text>
+
+  <rect x="840" y="730" width="80" height="28" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
+  <text x="880" y="750" font-family="Arial" font-size="12" fill="#0d6efd" text-anchor="middle">편집</text>
+
+  <!-- 일정 카드 5 (종료됨) -->
+  <rect x="240" y="775" width="560" height="170" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))" opacity="0.6"/>
+  <text x="260" y="805" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🎃 할로윈 파티</text>
+  <text x="260" y="830" font-family="Arial" font-size="13" fill="#6c757d">대강당에서 진행된 할로윈 코스튬 파티</text>
+
+  <rect x="260" y="845" width="70" height="24" rx="4" fill="#dc3545"/>
+  <text x="295" y="862" font-family="Arial" font-size="11" fill="white" text-anchor="middle">특별</text>
+
+  <rect x="340" y="845" width="70" height="24" rx="4" fill="#6c757d"/>
+  <text x="375" y="862" font-family="Arial" font-size="11" fill="white" text-anchor="middle">종료</text>
+
+  <text x="260" y="895" font-family="Arial" font-size="12" fill="#495057" font-weight="600">시작:</text>
+  <text x="300" y="895" font-family="Arial" font-size="12" fill="#6c757d">2025-10-31 19:00</text>
+  <text x="450" y="895" font-family="Arial" font-size="12" fill="#495057" font-weight="600">종료:</text>
+  <text x="490" y="895" font-family="Arial" font-size="12" fill="#6c757d">2025-11-01 02:00</text>
+
+  <text x="260" y="915" font-family="Arial" font-size="11" fill="#adb5bd">Period 3 | 관리자: 총괄 | ID: #6</text>
+
+  <rect x="260" y="920" width="80" height="28" rx="4" fill="white" stroke="#6c757d" stroke-width="1"/>
+  <text x="300" y="940" font-family="Arial" font-size="12" fill="#6c757d" text-anchor="middle">상세</text>
+
+  <!-- 페이지네이션 -->
+  <text x="820" y="930" font-family="Arial" font-size="12" fill="#6c757d">총 15개 일정 | 1-5 표시</text>
+
+  <rect x="1050" y="910" width="30" height="30" rx="4" fill="#0d6efd"/>
+  <text x="1065" y="932" font-family="Arial" font-size="12" fill="white" text-anchor="middle" font-weight="600">1</text>
+
+  <rect x="1085" y="910" width="30" height="30" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="1100" y="932" font-family="Arial" font-size="12" fill="#495057" text-anchor="middle">2</text>
+
+  <rect x="1120" y="910" width="30" height="30" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="1135" y="932" font-family="Arial" font-size="12" fill="#495057" text-anchor="middle">3</text>
+
+  <rect x="1155" y="910" width="25" height="30" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="1167" y="932" font-family="Arial" font-size="12" fill="#495057" text-anchor="middle">→</text>
+</svg>
