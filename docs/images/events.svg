@@ -31,11 +31,11 @@
 
   <!-- 메인 콘텐츠 영역 -->
   <text x="240" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">일정 및 이벤트 관리</text>
-  <text x="240" y="75" font-family="Arial" font-size="13" fill="#6c757d">커뮤니티 일정을 관리하고 리뉴얼 기간을 설정합니다</text>
+  <text x="240" y="75" font-family="Arial" font-size="13" fill="#6c757d">커뮤니티 일정을 관리하고 학기/방학 기간을 설정합니다</text>
 
   <!-- 버튼들 -->
-  <rect x="880" y="35" width="140" height="40" rx="4" fill="#6f42c1"/>
-  <text x="950" y="60" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">🔄 리뉴얼 기간</text>
+  <rect x="860" y="35" width="160" height="40" rx="4" fill="#6f42c1"/>
+  <text x="940" y="60" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">🔄 학기/방학 설정</text>
 
   <rect x="1040" y="35" width="140" height="40" rx="4" fill="#198754"/>
   <text x="1110" y="60" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">+ 일정 등록</text>
@@ -65,7 +65,7 @@
   <text x="240" y="230" font-family="Arial" font-size="14" fill="#495057" font-weight="600">필터 및 검색</text>
 
   <rect x="240" y="240" width="200" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
-  <text x="255" y="263" font-family="Arial" font-size="13" fill="#495057">전체 리뉴얼 기간</text>
+  <text x="255" y="263" font-family="Arial" font-size="13" fill="#495057">전체 학기/기간</text>
   <text x="415" y="263" font-family="Arial" font-size="13" fill="#adb5bd">▼</text>
 
   <rect x="460" y="240" width="150" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
@@ -76,10 +76,10 @@
   <text x="645" y="263" font-family="Arial" font-size="13" fill="#495057">전체 유형</text>
   <text x="760" y="263" font-family="Arial" font-size="13" fill="#adb5bd">▼</text>
 
-  <!-- 현재 리뉴얼 기간 정보 -->
+  <!-- 현재 기간 정보 -->
   <rect x="240" y="295" width="940" height="60" rx="8" fill="#e7f5ff" stroke="#339af0" stroke-width="1"/>
-  <text x="260" y="320" font-family="Arial" font-size="14" fill="#1971c2" font-weight="600">📌 현재 리뉴얼 기간: Period 3 (2025-01-01 ~ 2025-06-30)</text>
-  <text x="260" y="340" font-family="Arial" font-size="12" fill="#1971c2">이 기간 동안 커뮤니티는 정상 운영되며, 활동량 체크 및 재화 지급이 활성화됩니다</text>
+  <text x="260" y="320" font-family="Arial" font-size="14" fill="#1971c2" font-weight="600">📌 현재 러닝 기간 (학기): Period 3 (2025-01-01 ~ 2025-06-30)</text>
+  <text x="260" y="340" font-family="Arial" font-size="12" fill="#1971c2">학기 중이므로 커뮤니티가 정상 운영되며, 활동량 체크 및 재화 지급이 활성화됩니다 | 방학 시작: 2025-07-01</text>
 
   <!-- 일정 카드 1 -->
   <rect x="240" y="375" width="460" height="160" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
@@ -199,16 +199,16 @@
 
   <rect x="620" y="608" width="18" height="18" rx="2" fill="#6f42c1" stroke="#6f42c1" stroke-width="1"/>
   <text x="625" y="623" font-family="Arial" font-size="14" fill="white">✓</text>
-  <text x="648" y="623" font-family="Arial" font-size="13" fill="#495057">전역 휴식기간 (리뉴얼)</text>
+  <text x="648" y="623" font-family="Arial" font-size="13" fill="#495057">방학 기간 (전역 휴식)</text>
 
   <rect x="648" y="633" width="200" height="60" rx="4" fill="#fff3cd"/>
-  <text x="658" y="653" font-family="Arial" font-size="11" fill="#856404">전역 휴식기간 설정 시:</text>
+  <text x="658" y="653" font-family="Arial" font-size="11" fill="#856404">방학 기간 설정 시:</text>
   <text x="658" y="668" font-family="Arial" font-size="11" fill="#856404">• 활동량 체크 중단</text>
   <text x="658" y="683" font-family="Arial" font-size="11" fill="#856404">• 출석 트윗 중단</text>
 
-  <text x="320" y="740" font-family="Arial" font-size="13" fill="#495057" font-weight="600">연결할 리뉴얼 기간</text>
+  <text x="320" y="740" font-family="Arial" font-size="13" fill="#495057" font-weight="600">소속 학기</text>
   <rect x="320" y="748" width="240" height="40" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
-  <text x="330" y="773" font-family="Arial" font-size="13" fill="#495057">Period 3 (현재)</text>
+  <text x="330" y="773" font-family="Arial" font-size="13" fill="#495057">Period 3 (현재 학기)</text>
   <text x="540" y="773" font-family="Arial" font-size="13" fill="#adb5bd">▼</text>
 
   <!-- 모달 푸터 -->

@@ -63,11 +63,11 @@
   <text x="740" y="185" font-family="Arial" font-size="32" fill="#333" font-weight="bold">6</text>
   <text x="880" y="195" font-family="Arial" font-size="36" fill="#dc3545">⚠️</text>
 
-  <!-- 총 재화 -->
+  <!-- 어제 총 툿수 -->
   <rect x="960" y="120" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="980" y="150" font-family="Arial" font-size="13" fill="#6c757d">총 재화</text>
-  <text x="980" y="185" font-family="Arial" font-size="28" fill="#333" font-weight="bold">5,280원</text>
-  <text x="1120" y="195" font-family="Arial" font-size="36" fill="#ffc107">💰</text>
+  <text x="980" y="150" font-family="Arial" font-size="13" fill="#6c757d">어제 총 툿수</text>
+  <text x="980" y="185" font-family="Arial" font-size="32" fill="#333" font-weight="bold">142</text>
+  <text x="1120" y="195" font-family="Arial" font-size="36" fill="#0d6efd">💬</text>
 
   <!-- 2열: 활동량 위험 유형별 현황 -->
   <text x="240" y="250" font-family="Arial" font-size="14" fill="#495057" font-weight="600">⚠️ 활동량 위험 유형별 현황</text>

@@ -33,8 +33,15 @@
   <text x="30" y="445" font-family="Arial" font-size="13" fill="#a0aec0">⚙️ 설정</text>
 
   <!-- 메인 콘텐츠 영역 -->
-  <text x="240" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">관리자 로그</text>
-  <text x="240" y="75" font-family="Arial" font-size="13" fill="#6c757d">시스템 관리자 활동 로그를 실시간으로 모니터링합니다</text>
+  <text x="240" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">로그 관리</text>
+  <text x="240" y="75" font-family="Arial" font-size="13" fill="#6c757d">관리자 활동 및 서버 헬스를 실시간으로 모니터링합니다</text>
+
+  <!-- 탭 버튼들 -->
+  <rect x="720" y="30" width="140" height="40" rx="6" fill="#0d6efd"/>
+  <text x="790" y="55" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">📋 관리자 로그</text>
+
+  <rect x="880" y="30" width="120" height="40" rx="6" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="940" y="55" font-family="Arial" font-size="14" fill="#495057" text-anchor="middle">🖥️ 서버 로그</text>
 
   <!-- 다운로드 버튼 -->
   <rect x="1020" y="30" width="150" height="40" rx="6" fill="#198754"/>
@@ -114,7 +121,7 @@
   <text x="420" y="465" font-family="Courier New" font-size="11" fill="#4ec9b0">마녀봇</text>
   <text x="510" y="465" font-family="Courier New" font-size="11" fill="#4ec9b0" font-weight="bold">adjust_balance</text>
   <text x="640" y="465" font-family="Courier New" font-size="11" fill="#9cdcfe">→ user_123</text>
-  <text x="760" y="465" font-family="Courier New" font-size="11" fill="#ce9178">+1000원 지급</text>
+  <text x="760" y="465" font-family="Courier New" font-size="11" fill="#ce9178">+1000갈레온 지급</text>
 
   <text x="260" y="490" font-family="Courier New" font-size="11" fill="#569cd6">2025-11-18 14:15:10</text>
   <text x="420" y="490" font-family="Courier New" font-size="11" fill="#4ec9b0">운영진A</text>
@@ -156,7 +163,7 @@
   <text x="420" y="640" font-family="Courier New" font-size="11" fill="#4ec9b0">총괄관리자</text>
   <text x="510" y="640" font-family="Courier New" font-size="11" fill="#4ec9b0" font-weight="bold">adjust_balance</text>
   <text x="640" y="640" font-family="Courier New" font-size="11" fill="#9cdcfe">→ user_999</text>
-  <text x="760" y="640" font-family="Courier New" font-size="11" fill="#ce9178">+5000원 지급 (이벤트 보상)</text>
+  <text x="760" y="640" font-family="Courier New" font-size="11" fill="#ce9178">+5000갈레온 지급 (이벤트 보상)</text>
 
   <text x="260" y="665" font-family="Courier New" font-size="11" fill="#569cd6">2025-11-18 08:20:10</text>
   <text x="420" y="665" font-family="Courier New" font-size="11" fill="#4ec9b0">운영진B</text>
