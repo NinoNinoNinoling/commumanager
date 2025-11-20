@@ -26,9 +26,14 @@ setting_service = SettingService()
 
 @web_bp.route('/')
 def index():
-    """메인 페이지 - 로그인 페이지로 리다이렉트"""
+    """메인 페이지 - 대시보드 또는 로그인 페이지"""
     if 'user_id' in session:
-        return redirect(url_for('web.dashboard'))
+        # 로그인된 경우 대시보드 표시
+        try:
+            stats = dashboard_service.get_stats()
+            return render_template('dashboard.html', stats=stats)
+        except Exception as e:
+            return render_template('errors/500.html', error=str(e)), 500
     return redirect(url_for('auth.login'))
 
 
