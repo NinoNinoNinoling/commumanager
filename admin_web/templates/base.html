@@ -31,13 +31,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'web.users' or request.endpoint == 'web.user_detail' %}active{% endif %}" href="{{ url_for('web.users') }}">
-                            <i class="bi bi-people"></i> 사용자
+                        <a class="nav-link {% if request.endpoint == 'web.warnings' %}active{% endif %}" href="{{ url_for('web.warnings') }}">
+                            <i class="bi bi-people"></i> 유저 관리
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'web.warnings' %}active{% endif %}" href="{{ url_for('web.warnings') }}">
-                            <i class="bi bi-exclamation-triangle"></i> 활동량
+                        <a class="nav-link {% if request.endpoint == 'web.users' or request.endpoint == 'web.user_detail' %}active{% endif %}" href="{{ url_for('web.users') }}">
+                            <i class="bi bi-coin"></i> 재화
                         </a>
                     </li>
                     <li class="nav-item dropdown">
