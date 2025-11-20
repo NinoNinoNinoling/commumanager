@@ -47,16 +47,17 @@ commumanager/
 │   └── celeryconfig.py        # Celery 설정
 │
 ├── docs/                  # 프로젝트 문서
-│   ├── ADMIN_GUIDE.md      # 관리자 웹 가이드
-│   ├── ARCHITECTURE.md     # 시스템 아키텍처
-│   ├── features.md         # 기능 목록 및 유즈케이스
-│   ├── database.md         # 데이터베이스 설계
-│   ├── api_design.md       # API 설계
-│   ├── server_setup.md     # 서버 구축 가이드
-│   ├── DOCKER_GUIDE.md     # Docker 배포 가이드
-│   ├── MAINTENANCE.md      # 유지보수 시스템
-│   ├── EMERGENCY.md        # 긴급 대응 절차
-│   └── 로드맵.md            # 개발 로드맵
+│   ├── ADMIN_GUIDE.md         # 관리자 웹 가이드
+│   ├── SCREEN_EXAMPLES.md     # UI 목업 및 디자인 가이드
+│   ├── ARCHITECTURE.md        # 시스템 아키텍처
+│   ├── features.md            # 기능 목록 및 유즈케이스
+│   ├── database.md            # 데이터베이스 설계
+│   ├── api_design.md          # API 설계
+│   ├── server_setup.md        # 서버 구축 가이드
+│   ├── DOCKER_GUIDE.md        # Docker 배포 가이드
+│   ├── MAINTENANCE.md         # 유지보수 시스템
+│   ├── EMERGENCY.md           # 긴급 대응 절차
+│   └── 로드맵.md               # 개발 로드맵
 │
 ├── .env.example           # 환경 변수 예시
 ├── .gitignore             # Git 제외 파일 목록
@@ -177,6 +178,7 @@ celery -A bot.tasks beat --loglevel=info
 
 ### 👨‍💼 관리자용
 - **[관리자 가이드](docs/ADMIN_GUIDE.md)** - 웹 인터페이스 사용법
+- **[화면 예시 및 디자인 가이드](docs/SCREEN_EXAMPLES.md)** - UI 목업 및 디자인 시스템
 - **[유지보수 시스템](docs/MAINTENANCE.md)** 🔧 - 자동 유지보수
 - **[긴급 대응](docs/EMERGENCY.md)** 🚨 - 트러블슈팅
 

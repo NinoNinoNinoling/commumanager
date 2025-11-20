@@ -1,0 +1,97 @@
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
+  <rect width="1200" height="800" fill="#f8f9fa"/>
+
+  <!-- 왼쪽 사이드바 -->
+  <rect width="200" height="800" fill="#2d3748"/>
+  <text x="20" y="35" font-family="Arial" font-size="16" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
+  <line x1="20" y1="50" x2="180" y2="50" stroke="#4a5568" stroke-width="1"/>
+
+  <rect x="10" y="70" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="95" font-family="Arial" font-size="13" fill="#a0aec0">📊 대시보드</text>
+
+  <rect x="10" y="120" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="145" font-family="Arial" font-size="13" fill="#a0aec0">👥 사용자</text>
+
+  <rect x="10" y="170" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="195" font-family="Arial" font-size="13" fill="#a0aec0">⚠️ 활동량</text>
+
+  <rect x="10" y="220" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="245" font-family="Arial" font-size="13" fill="#a0aec0">🏖️ 휴식</text>
+
+  <rect x="10" y="270" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="295" font-family="Arial" font-size="13" fill="#a0aec0">🎉 이벤트</text>
+
+  <rect x="10" y="320" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="345" font-family="Arial" font-size="13" fill="#a0aec0">🛒 상점</text>
+
+  <rect x="10" y="370" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="395" font-family="Arial" font-size="13" fill="#a0aec0">📋 로그</text>
+
+  <!-- 설정 (활성) -->
+  <rect x="10" y="420" width="180" height="40" rx="6" fill="#4299e1"/>
+  <text x="30" y="445" font-family="Arial" font-size="13" fill="white" font-weight="600">⚙️ 설정</text>
+
+  <!-- 메인 콘텐츠 영역 -->
+  <text x="240" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">시스템 설정</text>
+  <text x="240" y="75" font-family="Arial" font-size="13" fill="#6c757d">봇 동작 및 시스템 파라미터를 조정합니다</text>
+
+  <!-- 활동량 체크 설정 -->
+  <rect x="240" y="100" width="940" height="140" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="130" font-family="Arial" font-size="16" fill="#333" font-weight="bold">⏰ 활동량 체크 설정</text>
+
+  <text x="280" y="170" font-family="Arial" font-size="13" fill="#495057" font-weight="600">체크 주기</text>
+  <rect x="280" y="180" width="300" height="35" rx="4" fill="#e9ecef" stroke="#ced4da" stroke-width="1"/>
+  <text x="290" y="203" font-family="Arial" font-size="13" fill="#495057">오전 4시, 오후 4시 (12시간 간격)</text>
+
+  <text x="700" y="170" font-family="Arial" font-size="13" fill="#495057" font-weight="600">최소 답글 기준 (48시간)</text>
+  <rect x="700" y="180" width="150" height="35" rx="4" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <text x="775" y="203" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">20개</text>
+
+  <!-- 재화 지급 설정 -->
+  <rect x="240" y="260" width="940" height="140" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="290" font-family="Arial" font-size="16" fill="#333" font-weight="bold">💰 재화 지급 설정</text>
+
+  <text x="280" y="330" font-family="Arial" font-size="13" fill="#495057" font-weight="600">답글 1개당 지급액</text>
+  <rect x="280" y="340" width="150" height="35" rx="4" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <text x="355" y="363" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">10원</text>
+
+  <text x="550" y="330" font-family="Arial" font-size="13" fill="#495057" font-weight="600">정산 주기</text>
+  <rect x="550" y="340" width="300" height="35" rx="4" fill="#e9ecef" stroke="#ced4da" stroke-width="1"/>
+  <text x="560" y="363" font-family="Arial" font-size="13" fill="#495057">오전 4시, 오후 4시 (12시간 간격)</text>
+
+  <!-- 경고 시스템 설정 -->
+  <rect x="240" y="420" width="940" height="140" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="450" font-family="Arial" font-size="16" fill="#333" font-weight="bold">⚠️ 경고 시스템 설정</text>
+
+  <text x="280" y="490" font-family="Arial" font-size="13" fill="#495057" font-weight="600">자동 경고 활성화</text>
+  <rect x="280" y="500" width="60" height="30" rx="15" fill="#198754"/>
+  <circle cx="320" cy="515" r="12" fill="white"/>
+  <text x="355" y="520" font-family="Arial" font-size="13" fill="#198754" font-weight="600">활성화됨</text>
+
+  <text x="550" y="490" font-family="Arial" font-size="13" fill="#495057" font-weight="600">경고 유지 기간</text>
+  <rect x="550" y="500" width="150" height="35" rx="4" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <text x="625" y="523" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">30일</text>
+
+  <text x="820" y="490" font-family="Arial" font-size="13" fill="#495057" font-weight="600">누적 경고 제한</text>
+  <rect x="820" y="500" width="150" height="35" rx="4" fill="white" stroke="#dc3545" stroke-width="2"/>
+  <text x="895" y="523" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">3회</text>
+
+  <!-- 휴식 시스템 설정 -->
+  <rect x="240" y="580" width="940" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="610" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🏖️ 휴식 시스템 설정</text>
+
+  <text x="280" y="650" font-family="Arial" font-size="13" fill="#495057" font-weight="600">휴식 중 활동량 체크</text>
+  <rect x="280" y="660" width="60" height="30" rx="15" fill="#6c757d"/>
+  <circle cx="300" cy="675" r="12" fill="white"/>
+  <text x="355" y="680" font-family="Arial" font-size="13" fill="#6c757d" font-weight="600">비활성화됨</text>
+
+  <text x="550" y="650" font-family="Arial" font-size="13" fill="#495057" font-weight="600">휴식 중 재화 지급</text>
+  <rect x="550" y="660" width="60" height="30" rx="15" fill="#6c757d"/>
+  <circle cx="570" cy="675" r="12" fill="white"/>
+  <text x="625" y="680" font-family="Arial" font-size="13" fill="#6c757d" font-weight="600">비활성화됨</text>
+
+  <!-- 저장 버튼 -->
+  <rect x="620" y="720" width="160" height="40" rx="6" fill="#0d6efd"/>
+  <text x="700" y="745" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">💾 변경사항 저장</text>
+</svg>

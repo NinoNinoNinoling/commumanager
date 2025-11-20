@@ -13,7 +13,18 @@
             <h1 class="h2">
                 <i class="bi bi-person-circle"></i> {{ user.display_name or user.username }}
             </h1>
-            <p class="text-muted">@{{ user.username }} ({{ user.mastodon_id }})</p>
+            <p class="text-muted">
+                @{{ user.username }} ({{ user.mastodon_id }})
+                {% if mastodon_instance_url %}
+                <a href="{{ mastodon_instance_url }}/@{{ user.username }}"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="btn btn-sm btn-outline-primary ms-2"
+                   title="마스토돈 프로필 보기">
+                    <i class="bi bi-box-arrow-up-right"></i> 프로필 보기
+                </a>
+                {% endif %}
+            </p>
         </div>
     </div>
 
@@ -58,10 +69,10 @@
             <div class="card">
                 <div class="card-body text-center">
                     <i class="bi bi-suitcase fs-1 text-info mb-3"></i>
-                    <h6 class="text-muted mb-1">휴가 상태</h6>
+                    <h6 class="text-muted mb-1">휴식 상태</h6>
                     <h3 class="mb-0">
                         {% if user.is_on_vacation %}
-                            <span class="badge bg-info">휴가 중</span>
+                            <span class="badge bg-info">휴식 중</span>
                         {% else %}
                             <span class="badge bg-success">활동 중</span>
                         {% endif %}
@@ -84,7 +95,18 @@
                         <dd class="col-sm-8">{{ user.mastodon_id }}</dd>
 
                         <dt class="col-sm-4">사용자명</dt>
-                        <dd class="col-sm-8">@{{ user.username }}</dd>
+                        <dd class="col-sm-8">
+                            @{{ user.username }}
+                            {% if mastodon_instance_url %}
+                            <a href="{{ mastodon_instance_url }}/@{{ user.username }}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="text-muted ms-1"
+                               title="마스토돈 프로필 보기">
+                                <i class="bi bi-box-arrow-up-right"></i>
+                            </a>
+                            {% endif %}
+                        </dd>
 
                         <dt class="col-sm-4">표시명</dt>
                         <dd class="col-sm-8">{{ user.display_name or '-' }}</dd>
@@ -149,10 +171,10 @@
         </div>
     </div>
 
-    <!-- 휴가 내역 -->
+    <!-- 휴식 내역 -->
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0"><i class="bi bi-suitcase"></i> 휴가 내역</h5>
+            <h5 class="mb-0"><i class="bi bi-suitcase"></i> 휴식 내역</h5>
             <span class="badge bg-info">{{ vacations|length }}건</span>
         </div>
         <div class="card-body">
@@ -181,7 +203,7 @@
                 </div>
             {% else %}
                 <p class="text-muted text-center py-3 mb-0">
-                    휴가 내역이 없습니다
+                    휴식 내역이 없습니다
                 </p>
             {% endif %}
         </div>

@@ -199,7 +199,7 @@ def parse_mention_command(content: str) -> tuple[str, list[str]]:
 
     Examples:
         "멘션 내재화" -> ("내재화", [])
-        "멘션 휴가 7" -> ("휴가", ["7"])
+        "멘션 휴식 7" -> ("휴식", ["7"])
         "멘션 구매 아이템1" -> ("구매", ["아이템1"])
     """
     # HTML 태그 제거 (Mastodon.py 파싱에서 이미 제거된 경우도 있음)

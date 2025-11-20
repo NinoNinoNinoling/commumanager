@@ -26,9 +26,14 @@ setting_service = SettingService()
 
 @web_bp.route('/')
 def index():
-    """메인 페이지 - 로그인 페이지로 리다이렉트"""
+    """메인 페이지 - 대시보드 또는 로그인 페이지"""
     if 'user_id' in session:
-        return redirect(url_for('web.dashboard'))
+        # 로그인된 경우 대시보드 표시
+        try:
+            stats = dashboard_service.get_stats()
+            return render_template('dashboard.html', stats=stats)
+        except Exception as e:
+            return render_template('errors/500.html', error=str(e)), 500
     return redirect(url_for('auth.login'))
 
 
@@ -201,13 +206,13 @@ def warnings():
 
 
 # ============================================================================
-# 휴가 관리
+# 휴식 관리
 # ============================================================================
 
 @web_bp.route('/vacations')
 @login_required
 def vacations():
-    """휴가 목록 페이지"""
+    """휴식 목록 페이지"""
     try:
         page = int(request.args.get('page', 1))
         user_id = request.args.get('user_id', '')
@@ -224,14 +229,14 @@ def vacations():
         with get_economy_db() as conn:
             cursor = conn.cursor()
 
-            # 현재 휴가 중인 사용자 수
+            # 현재 휴식 중인 사용자 수
             cursor.execute("""
                 SELECT COUNT(*) FROM vacation
                 WHERE date('now') BETWEEN start_date AND end_date
             """)
             active = cursor.fetchone()[0]
 
-            # 이번 달 휴가 신청 수
+            # 이번 달 휴식 신청 수
             cursor.execute("""
                 SELECT COUNT(*) FROM vacation
                 WHERE strftime('%Y-%m', start_date) = strftime('%Y-%m', 'now')

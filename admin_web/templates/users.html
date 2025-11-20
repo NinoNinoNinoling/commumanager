@@ -32,10 +32,10 @@
                     </select>
                 </div>
                 <div class="col-md-3">
-                    <label for="vacation_status" class="form-label">휴가 상태</label>
+                    <label for="vacation_status" class="form-label">휴식 상태</label>
                     <select class="form-select" id="vacation_status" name="vacation_status">
                         <option value="">전체</option>
-                        <option value="on_vacation" {% if vacation_status == 'on_vacation' %}selected{% endif %}>휴가 중</option>
+                        <option value="on_vacation" {% if vacation_status == 'on_vacation' %}selected{% endif %}>휴식 중</option>
                         <option value="not_on_vacation" {% if vacation_status == 'not_on_vacation' %}selected{% endif %}>활동 중</option>
                     </select>
                 </div>
@@ -66,7 +66,7 @@
                             <th>역할</th>
                             <th>잔액</th>
                             <th>경고</th>
-                            <th>휴가 상태</th>
+                            <th>휴식 상태</th>
                             <th>가입일</th>
                             <th>최종 활동</th>
                             <th>액션</th>
@@ -81,6 +81,15 @@
                                        class="text-decoration-none">
                                         @{{ user.username }}
                                     </a>
+                                    {% if mastodon_instance_url %}
+                                    <a href="{{ mastodon_instance_url }}/@{{ user.username }}"
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       class="text-muted ms-1"
+                                       title="마스토돈 프로필 보기">
+                                        <i class="bi bi-box-arrow-up-right"></i>
+                                    </a>
+                                    {% endif %}
                                 </td>
                                 <td>{{ user.display_name or '-' }}</td>
                                 <td>
@@ -102,7 +111,7 @@
                                 </td>
                                 <td>
                                     {% if user.is_on_vacation %}
-                                        <span class="badge bg-info">휴가 중</span>
+                                        <span class="badge bg-info">휴식 중</span>
                                     {% else %}
                                         <span class="text-success">활동 중</span>
                                     {% endif %}

@@ -1,90 +1,115 @@
-<svg width="1000" height="700" xmlns="http://www.w3.org/2000/svg">
+<svg width="1200" height="700" xmlns="http://www.w3.org/2000/svg">
   <!-- 배경 -->
-  <rect width="1000" height="700" fill="#f8f9fa"/>
+  <rect width="1200" height="700" fill="#f8f9fa"/>
 
-  <!-- 네비게이션 바 -->
-  <rect width="1000" height="60" fill="#212529"/>
-  <text x="20" y="38" font-family="Arial" font-size="18" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
-  <text x="200" y="38" font-family="Arial" font-size="14" fill="#6c757d">대시보드</text>
-  <text x="300" y="38" font-family="Arial" font-size="14" fill="#adb5bd">상점</text>
+  <!-- 왼쪽 사이드바 -->
+  <rect width="200" height="700" fill="#2d3748"/>
+  <text x="20" y="35" font-family="Arial" font-size="16" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
+  <line x1="20" y1="50" x2="180" y2="50" stroke="#4a5568" stroke-width="1"/>
 
+  <rect x="10" y="70" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="95" font-family="Arial" font-size="13" fill="#a0aec0">📊 대시보드</text>
+
+  <rect x="10" y="120" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="145" font-family="Arial" font-size="13" fill="#a0aec0">👥 사용자</text>
+
+  <rect x="10" y="170" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="195" font-family="Arial" font-size="13" fill="#a0aec0">⚠️ 활동량</text>
+
+  <rect x="10" y="220" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="245" font-family="Arial" font-size="13" fill="#a0aec0">🏖️ 휴식</text>
+
+  <rect x="10" y="270" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="295" font-family="Arial" font-size="13" fill="#a0aec0">🎉 이벤트</text>
+
+  <!-- 상점 (활성) -->
+  <rect x="10" y="320" width="180" height="40" rx="6" fill="#4299e1"/>
+  <text x="30" y="345" font-family="Arial" font-size="13" fill="white" font-weight="600">🛒 상점</text>
+
+  <rect x="10" y="370" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="395" font-family="Arial" font-size="13" fill="#a0aec0">📋 로그</text>
+
+  <rect x="10" y="420" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="445" font-family="Arial" font-size="13" fill="#a0aec0">⚙️ 설정</text>
+
+  <!-- 메인 콘텐츠 영역 -->
   <!-- 제목 -->
-  <text x="40" y="110" font-family="Arial" font-size="24" fill="#333" font-weight="bold">상점 관리</text>
-  <text x="40" y="135" font-family="Arial" font-size="13" fill="#6c757d">상점 아이템을 조회하고 관리합니다</text>
+  <text x="240" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">상점 관리</text>
+  <text x="240" y="75" font-family="Arial" font-size="13" fill="#6c757d">상점 아이템을 조회하고 관리합니다</text>
 
   <!-- 통계 카드들 -->
-  <rect x="40" y="160" width="300" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="60" y="190" font-family="Arial" font-size="13" fill="#6c757d">전체 아이템</text>
-  <text x="60" y="225" font-family="Arial" font-size="32" fill="#333" font-weight="bold">18</text>
-  <text x="290" y="235" font-family="Arial" font-size="36" fill="#0d6efd">📦</text>
+  <rect x="240" y="100" width="300" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="130" font-family="Arial" font-size="13" fill="#6c757d">전체 아이템</text>
+  <text x="260" y="165" font-family="Arial" font-size="32" fill="#333" font-weight="bold">18</text>
+  <text x="490" y="175" font-family="Arial" font-size="36" fill="#0d6efd">📦</text>
 
-  <rect x="360" y="160" width="300" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="380" y="190" font-family="Arial" font-size="13" fill="#6c757d">활성 아이템</text>
-  <text x="380" y="225" font-family="Arial" font-size="32" fill="#333" font-weight="bold">14</text>
-  <text x="610" y="235" font-family="Arial" font-size="36" fill="#198754">✓</text>
+  <rect x="560" y="100" width="300" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="580" y="130" font-family="Arial" font-size="13" fill="#6c757d">활성 아이템</text>
+  <text x="580" y="165" font-family="Arial" font-size="32" fill="#333" font-weight="bold">14</text>
+  <text x="810" y="175" font-family="Arial" font-size="36" fill="#198754">✓</text>
 
-  <rect x="680" y="160" width="300" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="700" y="190" font-family="Arial" font-size="13" fill="#6c757d">비활성 아이템</text>
-  <text x="700" y="225" font-family="Arial" font-size="32" fill="#333" font-weight="bold">4</text>
-  <text x="930" y="235" font-family="Arial" font-size="36" fill="#6c757d">✕</text>
+  <rect x="880" y="100" width="300" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="900" y="130" font-family="Arial" font-size="13" fill="#6c757d">비활성 아이템</text>
+  <text x="900" y="165" font-family="Arial" font-size="32" fill="#333" font-weight="bold">4</text>
+  <text x="1130" y="175" font-family="Arial" font-size="36" fill="#6c757d">✕</text>
 
   <!-- 아이템 카드 1 -->
-  <rect x="40" y="280" width="300" height="200" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="60" y="310" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🎁 행운의 상자</text>
-  <text x="60" y="335" font-family="Arial" font-size="12" fill="#6c757d">랜덤 보상이 들어있는 신비한</text>
-  <text x="60" y="350" font-family="Arial" font-size="12" fill="#6c757d">상자입니다</text>
+  <rect x="240" y="220" width="300" height="200" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="250" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🎁 행운의 상자</text>
+  <text x="260" y="275" font-family="Arial" font-size="12" fill="#6c757d">랜덤 보상이 들어있는 신비한</text>
+  <text x="260" y="290" font-family="Arial" font-size="12" fill="#6c757d">상자입니다</text>
 
-  <rect x="280" y="295" width="50" height="22" rx="4" fill="#198754"/>
-  <text x="305" y="310" font-family="Arial" font-size="11" fill="white" text-anchor="middle">활성</text>
+  <rect x="480" y="235" width="50" height="22" rx="4" fill="#198754"/>
+  <text x="505" y="250" font-family="Arial" font-size="11" fill="white" text-anchor="middle">활성</text>
 
-  <rect x="60" y="375" width="120" height="50" rx="6" fill="#f8f9fa"/>
-  <text x="120" y="395" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
-  <text x="120" y="415" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">5,000원</text>
+  <rect x="260" y="315" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="320" y="335" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
+  <text x="320" y="355" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">5,000원</text>
 
-  <rect x="190" y="375" width="120" height="50" rx="6" fill="#f8f9fa"/>
-  <text x="250" y="395" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">ID</text>
-  <text x="250" y="415" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">1</text>
+  <rect x="390" y="315" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="450" y="335" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">ID</text>
+  <text x="450" y="355" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">1</text>
 
-  <line x1="60" y1="440" x2="310" y2="440" stroke="#dee2e6" stroke-width="1"/>
-  <text x="60" y="460" font-family="Arial" font-size="11" fill="#adb5bd">생성: 2025-01-10 | 마녀봇</text>
+  <line x1="260" y1="380" x2="510" y2="380" stroke="#dee2e6" stroke-width="1"/>
+  <text x="260" y="400" font-family="Arial" font-size="11" fill="#adb5bd">생성: 2025-01-10 | 마녀봇</text>
 
   <!-- 아이템 카드 2 -->
-  <rect x="360" y="280" width="300" height="200" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="380" y="310" font-family="Arial" font-size="16" fill="#333" font-weight="bold">⭐ 특별 칭호</text>
-  <text x="380" y="335" font-family="Arial" font-size="12" fill="#6c757d">프로필에 표시되는 특별한</text>
-  <text x="380" y="350" font-family="Arial" font-size="12" fill="#6c757d">칭호를 획득합니다</text>
+  <rect x="560" y="220" width="300" height="200" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="580" y="250" font-family="Arial" font-size="16" fill="#333" font-weight="bold">⭐ 특별 칭호</text>
+  <text x="580" y="275" font-family="Arial" font-size="12" fill="#6c757d">프로필에 표시되는 특별한</text>
+  <text x="580" y="290" font-family="Arial" font-size="12" fill="#6c757d">칭호를 획득합니다</text>
 
-  <rect x="600" y="295" width="50" height="22" rx="4" fill="#198754"/>
-  <text x="625" y="310" font-family="Arial" font-size="11" fill="white" text-anchor="middle">활성</text>
+  <rect x="800" y="235" width="50" height="22" rx="4" fill="#198754"/>
+  <text x="825" y="250" font-family="Arial" font-size="11" fill="white" text-anchor="middle">활성</text>
 
-  <rect x="380" y="375" width="120" height="50" rx="6" fill="#f8f9fa"/>
-  <text x="440" y="395" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
-  <text x="440" y="415" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">10,000원</text>
+  <rect x="580" y="315" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="640" y="335" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
+  <text x="640" y="355" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">10,000원</text>
 
-  <rect x="510" y="375" width="120" height="50" rx="6" fill="#f8f9fa"/>
-  <text x="570" y="395" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">ID</text>
-  <text x="570" y="415" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">2</text>
+  <rect x="710" y="315" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="770" y="335" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">ID</text>
+  <text x="770" y="355" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">2</text>
 
-  <line x1="380" y1="440" x2="630" y2="440" stroke="#dee2e6" stroke-width="1"/>
-  <text x="380" y="460" font-family="Arial" font-size="11" fill="#adb5bd">생성: 2025-01-08 | 운영진A</text>
+  <line x1="580" y1="380" x2="830" y2="380" stroke="#dee2e6" stroke-width="1"/>
+  <text x="580" y="400" font-family="Arial" font-size="11" fill="#adb5bd">생성: 2025-01-08 | 운영진A</text>
 
   <!-- 아이템 카드 3 (비활성) -->
-  <rect x="680" y="280" width="300" height="200" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))" opacity="0.7"/>
-  <text x="700" y="310" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🎨 프로필 배경</text>
-  <text x="700" y="335" font-family="Arial" font-size="12" fill="#6c757d">프로필 배경을 변경할 수</text>
-  <text x="700" y="350" font-family="Arial" font-size="12" fill="#6c757d">있습니다</text>
+  <rect x="880" y="220" width="300" height="200" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))" opacity="0.7"/>
+  <text x="900" y="250" font-family="Arial" font-size="16" fill="#333" font-weight="bold">🎨 프로필 배경</text>
+  <text x="900" y="275" font-family="Arial" font-size="12" fill="#6c757d">프로필 배경을 변경할 수</text>
+  <text x="900" y="290" font-family="Arial" font-size="12" fill="#6c757d">있습니다</text>
 
-  <rect x="920" y="295" width="50" height="22" rx="4" fill="#6c757d"/>
-  <text x="945" y="310" font-family="Arial" font-size="11" fill="white" text-anchor="middle">비활성</text>
+  <rect x="1120" y="235" width="50" height="22" rx="4" fill="#6c757d"/>
+  <text x="1145" y="250" font-family="Arial" font-size="11" fill="white" text-anchor="middle">비활성</text>
 
-  <rect x="700" y="375" width="120" height="50" rx="6" fill="#f8f9fa"/>
-  <text x="760" y="395" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
-  <text x="760" y="415" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">8,000원</text>
+  <rect x="900" y="315" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="960" y="335" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">가격</text>
+  <text x="960" y="355" font-family="Arial" font-size="16" fill="#0d6efd" text-anchor="middle" font-weight="bold">8,000원</text>
 
-  <rect x="830" y="375" width="120" height="50" rx="6" fill="#f8f9fa"/>
-  <text x="890" y="395" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">ID</text>
-  <text x="890" y="415" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">3</text>
+  <rect x="1030" y="315" width="120" height="50" rx="6" fill="#f8f9fa"/>
+  <text x="1090" y="335" font-family="Arial" font-size="11" fill="#6c757d" text-anchor="middle">ID</text>
+  <text x="1090" y="355" font-family="Arial" font-size="16" fill="#495057" text-anchor="middle" font-weight="bold">3</text>
 
-  <line x1="700" y1="440" x2="950" y2="440" stroke="#dee2e6" stroke-width="1"/>
-  <text x="700" y="460" font-family="Arial" font-size="11" fill="#adb5bd">수정: 2025-01-12 | 운영진B</text>
+  <line x1="900" y1="380" x2="1150" y2="380" stroke="#dee2e6" stroke-width="1"/>
+  <text x="900" y="400" font-family="Arial" font-size="11" fill="#adb5bd">수정: 2025-01-12 | 운영진B</text>
 </svg>

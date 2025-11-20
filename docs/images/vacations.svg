@@ -1,0 +1,149 @@
+<svg width="1200" height="750" xmlns="http://www.w3.org/2000/svg">
+  <!-- 배경 -->
+  <rect width="1200" height="750" fill="#f8f9fa"/>
+
+  <!-- 왼쪽 사이드바 -->
+  <rect width="200" height="750" fill="#2d3748"/>
+  <text x="20" y="35" font-family="Arial" font-size="16" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
+  <line x1="20" y1="50" x2="180" y2="50" stroke="#4a5568" stroke-width="1"/>
+
+  <rect x="10" y="70" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="95" font-family="Arial" font-size="13" fill="#a0aec0">📊 대시보드</text>
+
+  <rect x="10" y="120" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="145" font-family="Arial" font-size="13" fill="#a0aec0">👥 사용자</text>
+
+  <rect x="10" y="170" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="195" font-family="Arial" font-size="13" fill="#a0aec0">⚠️ 활동량</text>
+
+  <!-- 휴식 (활성) -->
+  <rect x="10" y="220" width="180" height="40" rx="6" fill="#4299e1"/>
+  <text x="30" y="245" font-family="Arial" font-size="13" fill="white" font-weight="600">🏖️ 휴식</text>
+
+  <rect x="10" y="270" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="295" font-family="Arial" font-size="13" fill="#a0aec0">🎉 이벤트</text>
+
+  <rect x="10" y="320" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="345" font-family="Arial" font-size="13" fill="#a0aec0">🛒 상점</text>
+
+  <rect x="10" y="370" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="395" font-family="Arial" font-size="13" fill="#a0aec0">📋 로그</text>
+
+  <rect x="10" y="420" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="445" font-family="Arial" font-size="13" fill="#a0aec0">⚙️ 설정</text>
+
+  <!-- 메인 콘텐츠 영역 -->
+  <!-- 제목 -->
+  <text x="240" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">휴식 관리</text>
+  <text x="240" y="75" font-family="Arial" font-size="13" fill="#6c757d">사용자 휴식을 조회하고 관리합니다</text>
+
+  <!-- 통계 카드들 -->
+  <rect x="240" y="100" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="130" font-family="Arial" font-size="13" fill="#6c757d">총 휴식 기간</text>
+  <text x="260" y="165" font-family="Arial" font-size="32" fill="#333" font-weight="bold">6</text>
+  <text x="390" y="175" font-family="Arial" font-size="36" fill="#0dcaf0">🏖️</text>
+
+  <rect x="480" y="100" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="500" y="130" font-family="Arial" font-size="13" fill="#6c757d">현재 휴식 중</text>
+  <text x="500" y="165" font-family="Arial" font-size="32" fill="#333" font-weight="bold">2</text>
+  <text x="650" y="175" font-family="Arial" font-size="36" fill="#198754">✓</text>
+
+  <rect x="720" y="100" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="740" y="130" font-family="Arial" font-size="13" fill="#6c757d">이번 달 휴식</text>
+  <text x="740" y="165" font-family="Arial" font-size="32" fill="#333" font-weight="bold">3</text>
+  <text x="890" y="175" font-family="Arial" font-size="36" fill="#ffc107">📅</text>
+
+  <rect x="960" y="100" width="220" height="100" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="980" y="130" font-family="Arial" font-size="13" fill="#6c757d">종료된 휴식</text>
+  <text x="980" y="165" font-family="Arial" font-size="32" fill="#333" font-weight="bold">4</text>
+  <text x="1130" y="175" font-family="Arial" font-size="36" fill="#6c757d">⏸️</text>
+
+  <!-- 필터 영역 -->
+  <rect x="240" y="220" width="940" height="80" rx="8" fill="#e9ecef"/>
+  <text x="260" y="245" font-family="Arial" font-size="13" fill="#495057" font-weight="600">사용자 필터</text>
+  <rect x="260" y="255" width="200" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="270" y="278" font-family="Arial" font-size="13" fill="#495057">전체</text>
+
+  <text x="490" y="245" font-family="Arial" font-size="13" fill="#495057" font-weight="600">상태 필터</text>
+  <rect x="490" y="255" width="150" height="35" rx="4" fill="white" stroke="#ced4da" stroke-width="1"/>
+  <text x="500" y="278" font-family="Arial" font-size="13" fill="#495057">전체</text>
+
+  <rect x="670" y="255" width="100" height="35" rx="4" fill="#0d6efd"/>
+  <text x="720" y="278" font-family="Arial" font-size="13" fill="white" text-anchor="middle">검색</text>
+
+  <!-- 휴식 목록 테이블 -->
+  <rect x="240" y="320" width="940" height="40" rx="8" fill="#f8f9fa"/>
+  <text x="260" y="345" font-family="Arial" font-size="12" fill="#495057" font-weight="600">사용자</text>
+  <text x="380" y="345" font-family="Arial" font-size="12" fill="#495057" font-weight="600">시작일</text>
+  <text x="500" y="345" font-family="Arial" font-size="12" fill="#495057" font-weight="600">종료일</text>
+  <text x="620" y="345" font-family="Arial" font-size="12" fill="#495057" font-weight="600">기간</text>
+  <text x="710" y="345" font-family="Arial" font-size="12" fill="#495057" font-weight="600">사유</text>
+  <text x="950" y="345" font-family="Arial" font-size="12" fill="#495057" font-weight="600">승인자</text>
+  <text x="1070" y="345" font-family="Arial" font-size="12" fill="#495057" font-weight="600">상태</text>
+
+  <!-- 휴식 목록 행 1 (진행 중) -->
+  <line x1="240" y1="360" x2="1180" y2="360" stroke="#dee2e6" stroke-width="1"/>
+  <text x="260" y="390" font-family="Arial" font-size="13" fill="#0d6efd">@user789</text>
+  <text x="380" y="390" font-family="Arial" font-size="13" fill="#495057">2025-11-18</text>
+  <text x="500" y="390" font-family="Arial" font-size="13" fill="#495057">2025-11-25</text>
+  <text x="620" y="390" font-family="Arial" font-size="13" fill="#6c757d">7일</text>
+  <text x="710" y="390" font-family="Arial" font-size="13" fill="#6c757d">개인 사정</text>
+  <text x="950" y="390" font-family="Arial" font-size="13" fill="#6c757d">총괄관리자</text>
+  <rect x="1070" y="375" width="70" height="24" rx="4" fill="#198754"/>
+  <text x="1105" y="392" font-family="Arial" font-size="11" fill="white" text-anchor="middle">진행 중</text>
+
+  <!-- 휴식 목록 행 2 (진행 중) -->
+  <line x1="240" y1="410" x2="1180" y2="410" stroke="#dee2e6" stroke-width="1"/>
+  <text x="260" y="440" font-family="Arial" font-size="13" fill="#0d6efd">@user234</text>
+  <text x="380" y="440" font-family="Arial" font-size="13" fill="#495057">2025-11-15</text>
+  <text x="500" y="440" font-family="Arial" font-size="13" fill="#495057">2025-11-29</text>
+  <text x="620" y="440" font-family="Arial" font-size="13" fill="#6c757d">14일</text>
+  <text x="710" y="440" font-family="Arial" font-size="13" fill="#6c757d">건강상 이유</text>
+  <text x="950" y="440" font-family="Arial" font-size="13" fill="#6c757d">운영진A</text>
+  <rect x="1070" y="425" width="70" height="24" rx="4" fill="#198754"/>
+  <text x="1105" y="442" font-family="Arial" font-size="11" fill="white" text-anchor="middle">진행 중</text>
+
+  <!-- 휴식 목록 행 3 (종료) -->
+  <line x1="240" y1="460" x2="1180" y2="460" stroke="#dee2e6" stroke-width="1"/>
+  <text x="260" y="490" font-family="Arial" font-size="13" fill="#0d6efd">@user567</text>
+  <text x="380" y="490" font-family="Arial" font-size="13" fill="#495057">2025-10-20</text>
+  <text x="500" y="490" font-family="Arial" font-size="13" fill="#495057">2025-10-27</text>
+  <text x="620" y="490" font-family="Arial" font-size="13" fill="#6c757d">7일</text>
+  <text x="710" y="490" font-family="Arial" font-size="13" fill="#6c757d">학업 집중</text>
+  <text x="950" y="490" font-family="Arial" font-size="13" fill="#6c757d">마녀봇</text>
+  <rect x="1070" y="475" width="70" height="24" rx="4" fill="#6c757d"/>
+  <text x="1105" y="492" font-family="Arial" font-size="11" fill="white" text-anchor="middle">종료</text>
+
+  <!-- 휴식 목록 행 4 (종료) -->
+  <line x1="240" y1="510" x2="1180" y2="510" stroke="#dee2e6" stroke-width="1"/>
+  <text x="260" y="540" font-family="Arial" font-size="13" fill="#0d6efd">@user890</text>
+  <text x="380" y="540" font-family="Arial" font-size="13" fill="#495057">2025-09-15</text>
+  <text x="500" y="540" font-family="Arial" font-size="13" fill="#495057">2025-09-22</text>
+  <text x="620" y="540" font-family="Arial" font-size="13" fill="#6c757d">7일</text>
+  <text x="710" y="540" font-family="Arial" font-size="13" fill="#6c757d">가족 행사</text>
+  <text x="950" y="540" font-family="Arial" font-size="13" fill="#6c757d">총괄관리자</text>
+  <rect x="1070" y="525" width="70" height="24" rx="4" fill="#6c757d"/>
+  <text x="1105" y="542" font-family="Arial" font-size="11" fill="white" text-anchor="middle">종료</text>
+
+  <!-- 휴식 목록 행 5 (종료) -->
+  <line x1="240" y1="560" x2="1180" y2="560" stroke="#dee2e6" stroke-width="1"/>
+  <text x="260" y="590" font-family="Arial" font-size="13" fill="#0d6efd">@user123</text>
+  <text x="380" y="590" font-family="Arial" font-size="13" fill="#495057">2025-08-10</text>
+  <text x="500" y="590" font-family="Arial" font-size="13" fill="#495057">2025-08-17</text>
+  <text x="620" y="590" font-family="Arial" font-size="13" fill="#6c757d">7일</text>
+  <text x="710" y="590" font-family="Arial" font-size="13" fill="#6c757d">휴가</text>
+  <text x="950" y="590" font-family="Arial" font-size="13" fill="#6c757d">운영진B</text>
+  <rect x="1070" y="575" width="70" height="24" rx="4" fill="#6c757d"/>
+  <text x="1105" y="592" font-family="Arial" font-size="11" fill="white" text-anchor="middle">종료</text>
+
+  <!-- 페이지네이션 -->
+  <rect x="580" y="630" width="240" height="40" rx="6" fill="white" filter="drop-shadow(0px 1px 3px rgba(0,0,0,0.1))"/>
+  <rect x="590" y="640" width="70" height="24" rx="4" fill="#6c757d"/>
+  <text x="625" y="657" font-family="Arial" font-size="12" fill="white" text-anchor="middle">이전</text>
+
+  <rect x="675" y="640" width="30" height="24" rx="4" fill="#0d6efd"/>
+  <text x="690" y="657" font-family="Arial" font-size="12" fill="white" text-anchor="middle" font-weight="bold">1</text>
+
+  <rect x="720" y="640" width="70" height="24" rx="4" fill="#e9ecef"/>
+  <text x="755" y="657" font-family="Arial" font-size="12" fill="#6c757d" text-anchor="middle">다음</text>
+</svg>
