@@ -31,14 +31,30 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'web.users' %}active{% endif %}" href="{{ url_for('web.users') }}">
+                        <a class="nav-link {% if request.endpoint == 'web.users' or request.endpoint == 'web.user_detail' %}active{% endif %}" href="{{ url_for('web.users') }}">
                             <i class="bi bi-people"></i> 사용자
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.endpoint == 'web.events' %}active{% endif %}" href="{{ url_for('web.events') }}">
-                            <i class="bi bi-calendar-event"></i> 이벤트
+                        <a class="nav-link {% if request.endpoint == 'web.warnings' %}active{% endif %}" href="{{ url_for('web.warnings') }}">
+                            <i class="bi bi-exclamation-triangle"></i> 활동량
                         </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% if request.endpoint in ['web.events', 'web.story_events', 'web.announcements'] %}active{% endif %}" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-calendar3"></i> 콘텐츠
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('web.events') }}">
+                                <i class="bi bi-calendar-event"></i> 일정 관리
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('web.story_events') }}">
+                                <i class="bi bi-camera-reels"></i> 스토리 이벤트
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('web.announcements') }}">
+                                <i class="bi bi-megaphone"></i> 공지 예약
+                            </a></li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'web.items' %}active{% endif %}" href="{{ url_for('web.items') }}">
