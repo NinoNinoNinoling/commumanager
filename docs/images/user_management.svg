@@ -1,9 +1,9 @@
-<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+<svg width="1200" height="850" xmlns="http://www.w3.org/2000/svg">
   <!-- 배경 -->
-  <rect width="1200" height="800" fill="#f8f9fa"/>
+  <rect width="1200" height="850" fill="#f8f9fa"/>
 
   <!-- 왼쪽 사이드바 -->
-  <rect width="200" height="800" fill="#2d3748"/>
+  <rect width="200" height="850" fill="#2d3748"/>
   <text x="20" y="35" font-family="Arial" font-size="16" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
   <line x1="20" y1="50" x2="180" y2="50" stroke="#4a5568" stroke-width="1"/>
 
@@ -31,103 +31,143 @@
 
   <!-- 메인 콘텐츠 영역 -->
   <text x="240" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">유저 관리</text>
-  <text x="240" y="75" font-family="Arial" font-size="13" fill="#6c757d">경고 발송 및 휴식 관리</text>
+  <text x="240" y="75" font-family="Arial" font-size="13" fill="#6c757d">활동량 모니터링 및 휴식 관리</text>
 
   <!-- 탭 메뉴 -->
   <rect x="240" y="95" width="940" height="50" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
 
-  <!-- 탭 1: 경고 발송 (활성) -->
+  <!-- 탭 1: 활동량 모니터링 (활성) -->
   <rect x="250" y="105" width="150" height="35" rx="6" fill="#0d6efd"/>
-  <text x="325" y="128" font-family="Arial" font-size="13" fill="white" font-weight="600" text-anchor="middle">⚠️ 경고 발송</text>
+  <text x="325" y="128" font-family="Arial" font-size="13" fill="white" font-weight="600" text-anchor="middle">⚠️ 활동량 모니터링</text>
 
-  <!-- 탭 2: 휴식 관리 -->
+  <!-- 탭 2: 휴식 현황 -->
   <rect x="410" y="105" width="150" height="35" rx="6" fill="transparent"/>
-  <text x="485" y="128" font-family="Arial" font-size="13" fill="#6c757d" text-anchor="middle">🏖️ 휴식 관리</text>
+  <text x="485" y="128" font-family="Arial" font-size="13" fill="#6c757d" text-anchor="middle">🏖️ 휴식 현황</text>
 
-  <!-- 경고 발송 섹션 (활성 탭) -->
-  <rect x="240" y="165" width="940" height="600" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <!-- 활동량 모니터링 섹션 (활성 탭) -->
+  <rect x="240" y="165" width="940" height="650" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
 
-  <!-- 레벨별 경고 유저 현황 -->
-  <text x="260" y="200" font-family="Arial" font-size="16" fill="#333" font-weight="bold">경고 레벨별 유저 현황</text>
+  <!-- 위험 유형 필터 -->
+  <text x="260" y="200" font-family="Arial" font-size="16" fill="#333" font-weight="bold">위험 유형별 필터</text>
 
-  <!-- 레벨 1 (주의) -->
-  <rect x="260" y="220" width="280" height="90" rx="6" fill="#fff3cd" stroke="#ffc107" stroke-width="2"/>
-  <text x="280" y="245" font-family="Arial" font-size="14" fill="#856404" font-weight="600">⚡ 레벨 1 - 주의</text>
-  <text x="280" y="270" font-family="Arial" font-size="24" fill="#856404" font-weight="bold">3명</text>
-  <text x="280" y="295" font-family="Arial" font-size="12" fill="#856404">답글 15-19개 (기준 미달)</text>
+  <rect x="260" y="215" width="900" height="110" rx="6" fill="#f8f9fa"/>
 
-  <!-- 레벨 2 (경고) -->
-  <rect x="560" y="220" width="280" height="90" rx="6" fill="#ffe5d0" stroke="#fd7e14" stroke-width="2"/>
-  <text x="580" y="245" font-family="Arial" font-size="14" fill="#cc5200" font-weight="600">⚠️ 레벨 2 - 경고</text>
-  <text x="580" y="270" font-family="Arial" font-size="24" fill="#cc5200" font-weight="bold">2명</text>
-  <text x="580" y="295" font-family="Arial" font-size="12" fill="#cc5200">답글 10-14개 (심각)</text>
+  <!-- 필터 체크박스들 (5개 유형) -->
+  <!-- 고립 위험 -->
+  <rect x="280" y="230" width="16" height="16" rx="2" fill="#6f42c1" stroke="#6f42c1" stroke-width="2"/>
+  <path d="M 283 238 L 290 245 L 298 230" stroke="white" stroke-width="2" fill="none"/>
+  <text x="305" y="242" font-family="Arial" font-size="13" fill="#333">🎯 고립 위험 (3명)</text>
+  <text x="305" y="258" font-family="Arial" font-size="11" fill="#6c757d">소수(3명 이하)와만 대화</text>
 
-  <!-- 레벨 3 (위험) -->
-  <rect x="860" y="220" width="280" height="90" rx="6" fill="#f8d7da" stroke="#dc3545" stroke-width="2"/>
-  <text x="880" y="245" font-family="Arial" font-size="14" fill="#721c24" font-weight="600">🚨 레벨 3 - 위험</text>
-  <text x="880" y="270" font-family="Arial" font-size="24" fill="#721c24" font-weight="bold">1명</text>
-  <text x="880" y="295" font-family="Arial" font-size="12" fill="#721c24">답글 0-9개 (강제 퇴출 임박)</text>
+  <!-- 편향 위험 -->
+  <rect x="480" y="230" width="16" height="16" rx="2" fill="#fd7e14" stroke="#fd7e14" stroke-width="2"/>
+  <path d="M 483 238 L 490 245 L 498 230" stroke="white" stroke-width="2" fill="none"/>
+  <text x="505" y="242" font-family="Arial" font-size="13" fill="#333">⚖️ 편향 위험 (2명)</text>
+  <text x="505" y="258" font-family="Arial" font-size="11" fill="#6c757d">한 유저와 대화 20% 이상</text>
 
-  <!-- 경고 대상 유저 목록 -->
-  <text x="260" y="345" font-family="Arial" font-size="16" fill="#333" font-weight="bold">경고 대상 유저 목록</text>
+  <!-- 회피 패턴 -->
+  <rect x="680" y="230" width="16" height="16" rx="2" fill="#dc3545" stroke="#dc3545" stroke-width="2"/>
+  <path d="M 683 238 L 690 245 L 698 230" stroke="white" stroke-width="2" fill="none"/>
+  <text x="705" y="242" font-family="Arial" font-size="13" fill="#333">🚫 회피 패턴 (1명)</text>
+  <text x="705" y="258" font-family="Arial" font-size="11" fill="#6c757d">활동하지만 특정 유저 회피</text>
+
+  <!-- 비활동 -->
+  <rect x="280" y="280" width="16" height="16" rx="2" fill="#ffc107" stroke="#ffc107" stroke-width="2"/>
+  <path d="M 283 288 L 290 295 L 298 280" stroke="white" stroke-width="2" fill="none"/>
+  <text x="305" y="292" font-family="Arial" font-size="13" fill="#333">📉 비활동 (4명)</text>
+  <text x="305" y="308" font-family="Arial" font-size="11" fill="#6c757d">접속 빈도 낮음 (48h에 3회 미만)</text>
+
+  <!-- 답글 미달 -->
+  <rect x="480" y="280" width="16" height="16" rx="2" fill="#17a2b8" stroke="#17a2b8" stroke-width="2"/>
+  <path d="M 483 288 L 490 295 L 498 280" stroke="white" stroke-width="2" fill="none"/>
+  <text x="505" y="292" font-family="Arial" font-size="13" fill="#333">💬 답글 미달 (6명)</text>
+  <text x="505" y="308" font-family="Arial" font-size="11" fill="#6c757d">48h 내 5개 미만</text>
+
+  <!-- 위험 유저 목록 -->
+  <text x="260" y="355" font-family="Arial" font-size="16" fill="#333" font-weight="bold">위험 감지 유저 목록</text>
+  <text x="260" y="375" font-family="Arial" font-size="12" fill="#6c757d">선택한 유형에 해당하는 유저만 표시됩니다</text>
 
   <!-- 테이블 헤더 -->
-  <rect x="260" y="360" width="880" height="35" rx="6" fill="#f8f9fa"/>
-  <text x="280" y="383" font-family="Arial" font-size="12" fill="#495057" font-weight="600">선택</text>
-  <text x="350" y="383" font-family="Arial" font-size="12" fill="#495057" font-weight="600">사용자</text>
-  <text x="500" y="383" font-family="Arial" font-size="12" fill="#495057" font-weight="600">현재 레벨</text>
-  <text x="650" y="383" font-family="Arial" font-size="12" fill="#495057" font-weight="600">답글 수 (48h)</text>
-  <text x="800" y="383" font-family="Arial" font-size="12" fill="#495057" font-weight="600">최근 경고</text>
-  <text x="1000" y="383" font-family="Arial" font-size="12" fill="#495057" font-weight="600">작업</text>
+  <rect x="260" y="390" width="900" height="35" rx="6" fill="#f8f9fa"/>
+  <text x="280" y="413" font-family="Arial" font-size="12" fill="#495057" font-weight="600">선택</text>
+  <text x="350" y="413" font-family="Arial" font-size="12" fill="#495057" font-weight="600">사용자</text>
+  <text x="480" y="413" font-family="Arial" font-size="12" fill="#495057" font-weight="600">위험 유형</text>
+  <text x="650" y="413" font-family="Arial" font-size="12" fill="#495057" font-weight="600">상세 지표</text>
+  <text x="900" y="413" font-family="Arial" font-size="12" fill="#495057" font-weight="600">최근 경고</text>
+  <text x="1050" y="413" font-family="Arial" font-size="12" fill="#495057" font-weight="600">작업</text>
 
-  <!-- 유저 1 (레벨 3) -->
-  <line x1="260" y1="395" x2="1140" y2="395" stroke="#dee2e6" stroke-width="1"/>
-  <rect x="280" y="407" width="16" height="16" rx="2" fill="white" stroke="#0d6efd" stroke-width="2"/>
-  <text x="350" y="422" font-family="Arial" font-size="13" fill="#0d6efd">@user_critical</text>
-  <rect x="500" y="407" width="80" height="20" rx="4" fill="#dc3545"/>
-  <text x="540" y="422" font-family="Arial" font-size="11" fill="white" text-anchor="middle">레벨 3</text>
-  <text x="650" y="422" font-family="Arial" font-size="13" fill="#dc3545" font-weight="600">5개</text>
-  <text x="800" y="422" font-family="Arial" font-size="13" fill="#6c757d">2일 전</text>
-  <rect x="1000" y="407" width="110" height="24" rx="4" fill="#dc3545"/>
-  <text x="1055" y="424" font-family="Arial" font-size="11" fill="white" text-anchor="middle">즉시 경고 발송</text>
+  <!-- 유저 1 (고립 위험) -->
+  <line x1="260" y1="425" x2="1160" y2="425" stroke="#dee2e6" stroke-width="1"/>
+  <rect x="280" y="437" width="16" height="16" rx="2" fill="white" stroke="#0d6efd" stroke-width="2"/>
+  <text x="350" y="452" font-family="Arial" font-size="13" fill="#0d6efd">@user_isolated</text>
+  <rect x="480" y="437" width="110" height="20" rx="4" fill="#6f42c1"/>
+  <text x="535" y="452" font-family="Arial" font-size="11" fill="white" text-anchor="middle">🎯 고립 위험</text>
+  <text x="650" y="452" font-family="Arial" font-size="13" fill="#6c757d">2명과만 대화</text>
+  <text x="900" y="452" font-family="Arial" font-size="13" fill="#6c757d">3일 전</text>
+  <rect x="1040" y="437" width="100" height="24" rx="4" fill="#dc3545"/>
+  <text x="1090" y="454" font-family="Arial" font-size="11" fill="white" text-anchor="middle">경고 발송</text>
 
-  <!-- 유저 2 (레벨 2) -->
-  <line x1="260" y1="435" x2="1140" y2="435" stroke="#dee2e6" stroke-width="1"/>
-  <rect x="280" y="447" width="16" height="16" rx="2" fill="white" stroke="#0d6efd" stroke-width="2"/>
-  <text x="350" y="462" font-family="Arial" font-size="13" fill="#0d6efd">@user_warn</text>
-  <rect x="500" y="447" width="80" height="20" rx="4" fill="#fd7e14"/>
-  <text x="540" y="462" font-family="Arial" font-size="11" fill="white" text-anchor="middle">레벨 2</text>
-  <text x="650" y="462" font-family="Arial" font-size="13" fill="#fd7e14" font-weight="600">12개</text>
-  <text x="800" y="462" font-family="Arial" font-size="13" fill="#6c757d">5일 전</text>
-  <rect x="1000" y="447" width="110" height="24" rx="4" fill="#fd7e14"/>
-  <text x="1055" y="464" font-family="Arial" font-size="11" fill="white" text-anchor="middle">경고 발송</text>
+  <!-- 유저 2 (편향 위험) -->
+  <line x1="260" y1="465" x2="1160" y2="465" stroke="#dee2e6" stroke-width="1"/>
+  <rect x="280" y="477" width="16" height="16" rx="2" fill="#0d6efd" stroke="#0d6efd" stroke-width="2"/>
+  <path d="M 283 485 L 290 492 L 298 477" stroke="white" stroke-width="2" fill="none"/>
+  <text x="350" y="492" font-family="Arial" font-size="13" fill="#0d6efd">@user_biased</text>
+  <rect x="480" y="477" width="110" height="20" rx="4" fill="#fd7e14"/>
+  <text x="535" y="492" font-family="Arial" font-size="11" fill="white" text-anchor="middle">⚖️ 편향 위험</text>
+  <text x="650" y="492" font-family="Arial" font-size="13" fill="#6c757d">@userA와 35%</text>
+  <text x="900" y="492" font-family="Arial" font-size="13" fill="#6c757d">없음</text>
+  <rect x="1040" y="477" width="100" height="24" rx="4" fill="#fd7e14"/>
+  <text x="1090" y="494" font-family="Arial" font-size="11" fill="white" text-anchor="middle">경고 발송</text>
 
-  <!-- 유저 3 (레벨 2) -->
-  <line x1="260" y1="475" x2="1140" y2="475" stroke="#dee2e6" stroke-width="1"/>
-  <rect x="280" y="487" width="16" height="16" rx="2" fill="#0d6efd" stroke="#0d6efd" stroke-width="2"/>
-  <path d="M 283 495 L 290 502 L 298 487" stroke="white" stroke-width="2" fill="none"/>
-  <text x="350" y="502" font-family="Arial" font-size="13" fill="#0d6efd">@user_warn2</text>
-  <rect x="500" y="487" width="80" height="20" rx="4" fill="#fd7e14"/>
-  <text x="540" y="502" font-family="Arial" font-size="11" fill="white" text-anchor="middle">레벨 2</text>
-  <text x="650" y="502" font-family="Arial" font-size="13" fill="#fd7e14" font-weight="600">11개</text>
-  <text x="800" y="502" font-family="Arial" font-size="13" fill="#6c757d">없음</text>
-  <rect x="1000" y="487" width="110" height="24" rx="4" fill="#fd7e14"/>
-  <text x="1055" y="504" font-family="Arial" font-size="11" fill="white" text-anchor="middle">경고 발송</text>
+  <!-- 유저 3 (회피 패턴) -->
+  <line x1="260" y1="505" x2="1160" y2="505" stroke="#dee2e6" stroke-width="1"/>
+  <rect x="280" y="517" width="16" height="16" rx="2" fill="white" stroke="#ced4da" stroke-width="2"/>
+  <text x="350" y="532" font-family="Arial" font-size="13" fill="#0d6efd">@user_avoidance</text>
+  <rect x="480" y="517" width="110" height="20" rx="4" fill="#dc3545"/>
+  <text x="535" y="532" font-family="Arial" font-size="11" fill="white" text-anchor="middle">🚫 회피 패턴</text>
+  <text x="650" y="532" font-family="Arial" font-size="13" fill="#6c757d">주요 5명과 대화 없음</text>
+  <text x="900" y="532" font-family="Arial" font-size="13" fill="#6c757d">없음</text>
+  <rect x="1040" y="517" width="100" height="24" rx="4" fill="#dc3545"/>
+  <text x="1090" y="534" font-family="Arial" font-size="11" fill="white" text-anchor="middle">경고 발송</text>
 
-  <!-- 유저 4 (레벨 1) -->
-  <line x1="260" y1="515" x2="1140" y2="515" stroke="#dee2e6" stroke-width="1"/>
-  <rect x="280" y="527" width="16" height="16" rx="2" fill="white" stroke="#ced4da" stroke-width="2"/>
-  <text x="350" y="542" font-family="Arial" font-size="13" fill="#0d6efd">@user_caution</text>
-  <rect x="500" y="527" width="80" height="20" rx="4" fill="#ffc107"/>
-  <text x="540" y="542" font-family="Arial" font-size="11" fill="white" text-anchor="middle">레벨 1</text>
-  <text x="650" y="542" font-family="Arial" font-size="13" fill="#ffc107" font-weight="600">17개</text>
-  <text x="800" y="542" font-family="Arial" font-size="13" fill="#6c757d">없음</text>
-  <rect x="1000" y="527" width="110" height="24" rx="4" fill="#ffc107"/>
-  <text x="1055" y="544" font-family="Arial" font-size="11" fill="white" text-anchor="middle">주의 발송</text>
+  <!-- 유저 4 (비활동) -->
+  <line x1="260" y1="545" x2="1160" y2="545" stroke="#dee2e6" stroke-width="1"/>
+  <rect x="280" y="557" width="16" height="16" rx="2" fill="white" stroke="#ced4da" stroke-width="2"/>
+  <text x="350" y="572" font-family="Arial" font-size="13" fill="#0d6efd">@user_inactive</text>
+  <rect x="480" y="557" width="110" height="20" rx="4" fill="#ffc107"/>
+  <text x="535" y="572" font-family="Arial" font-size="11" fill="white" text-anchor="middle">📉 비활동</text>
+  <text x="650" y="572" font-family="Arial" font-size="13" fill="#6c757d">48h에 2회 접속</text>
+  <text x="900" y="572" font-family="Arial" font-size="13" fill="#6c757d">5일 전</text>
+  <rect x="1040" y="557" width="100" height="24" rx="4" fill="#ffc107"/>
+  <text x="1090" y="574" font-family="Arial" font-size="11" fill="white" text-anchor="middle">경고 발송</text>
+
+  <!-- 유저 5 (답글 미달) -->
+  <line x1="260" y1="585" x2="1160" y2="585" stroke="#dee2e6" stroke-width="1"/>
+  <rect x="280" y="597" width="16" height="16" rx="2" fill="white" stroke="#ced4da" stroke-width="2"/>
+  <text x="350" y="612" font-family="Arial" font-size="13" fill="#0d6efd">@user_low_replies</text>
+  <rect x="480" y="597" width="110" height="20" rx="4" fill="#17a2b8"/>
+  <text x="535" y="612" font-family="Arial" font-size="11" fill="white" text-anchor="middle">💬 답글 미달</text>
+  <text x="650" y="612" font-family="Arial" font-size="13" fill="#6c757d">48h에 3개</text>
+  <text x="900" y="612" font-family="Arial" font-size="13" fill="#6c757d">없음</text>
+  <rect x="1040" y="597" width="100" height="24" rx="4" fill="#17a2b8"/>
+  <text x="1090" y="614" font-family="Arial" font-size="11" fill="white" text-anchor="middle">경고 발송</text>
+
+  <!-- 유저 6 (복합: 편향 + 답글 미달) -->
+  <line x1="260" y1="625" x2="1160" y2="625" stroke="#dee2e6" stroke-width="1"/>
+  <rect x="280" y="637" width="16" height="16" rx="2" fill="white" stroke="#ced4da" stroke-width="2"/>
+  <text x="350" y="652" font-family="Arial" font-size="13" fill="#0d6efd">@user_multiple</text>
+  <rect x="480" y="637" width="55" height="20" rx="4" fill="#fd7e14"/>
+  <text x="507" y="652" font-family="Arial" font-size="10" fill="white" text-anchor="middle">편향</text>
+  <rect x="540" y="637" width="55" height="20" rx="4" fill="#17a2b8"/>
+  <text x="567" y="652" font-family="Arial" font-size="10" fill="white" text-anchor="middle">미달</text>
+  <text x="650" y="652" font-family="Arial" font-size="13" fill="#6c757d">@userB와 25% / 4개 답글</text>
+  <text x="900" y="652" font-family="Arial" font-size="13" fill="#6c757d">2일 전</text>
+  <rect x="1040" y="637" width="100" height="24" rx="4" fill="#dc3545"/>
+  <text x="1090" y="654" font-family="Arial" font-size="11" fill="white" text-anchor="middle">경고 발송</text>
 
   <!-- 일괄 작업 영역 -->
-  <rect x="260" y="680" width="880" height="60" rx="6" fill="#e9ecef"/>
-  <text x="280" y="705" font-family="Arial" font-size="13" fill="#495057" font-weight="600">선택한 유저 (1명)</text>
-  <rect x="900" y="690" width="220" height="40" rx="6" fill="#0d6efd"/>
-  <text x="1010" y="715" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">선택한 유저에게 경고 발송</text>
+  <rect x="260" y="730" width="900" height="60" rx="6" fill="#e9ecef"/>
+  <text x="280" y="755" font-family="Arial" font-size="13" fill="#495057" font-weight="600">선택한 유저 (1명)</text>
+  <rect x="950" y="740" width="190" height="40" rx="6" fill="#0d6efd"/>
+  <text x="1045" y="765" font-family="Arial" font-size="14" fill="white" text-anchor="middle" font-weight="600">선택 유저에게 경고 발송</text>
 </svg>
