@@ -17,25 +17,25 @@
   <!-- 통계 카드 1: 전체 유저 -->
   <rect x="40" y="160" width="220" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
   <text x="60" y="190" font-family="Arial" font-size="13" fill="#6c757d">전체 유저</text>
-  <text x="60" y="230" font-family="Arial" font-size="32" fill="#333" font-weight="bold">1,247</text>
+  <text x="60" y="230" font-family="Arial" font-size="32" fill="#333" font-weight="bold">28</text>
   <text x="220" y="240" font-family="Arial" font-size="40" fill="#0d6efd">👥</text>
 
   <!-- 통계 카드 2: 활성 유저 -->
   <rect x="280" y="160" width="220" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
   <text x="300" y="190" font-family="Arial" font-size="13" fill="#6c757d">활성 유저 (24시간)</text>
-  <text x="300" y="230" font-family="Arial" font-size="32" fill="#333" font-weight="bold">342</text>
+  <text x="300" y="230" font-family="Arial" font-size="32" fill="#333" font-weight="bold">22</text>
   <text x="460" y="240" font-family="Arial" font-size="40" fill="#198754">✓</text>
 
-  <!-- 통계 카드 3: 휴가 중 -->
+  <!-- 통계 카드 3: 휴식 중 -->
   <rect x="520" y="160" width="220" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="540" y="190" font-family="Arial" font-size="13" fill="#6c757d">휴가 중</text>
-  <text x="540" y="230" font-family="Arial" font-size="32" fill="#333" font-weight="bold">23</text>
+  <text x="540" y="190" font-family="Arial" font-size="13" fill="#6c757d">휴식 중</text>
+  <text x="540" y="230" font-family="Arial" font-size="32" fill="#333" font-weight="bold">3</text>
   <text x="700" y="240" font-family="Arial" font-size="40" fill="#0dcaf0">🏖️</text>
 
   <!-- 통계 카드 4: 경고 발송 -->
   <rect x="760" y="160" width="220" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
   <text x="780" y="190" font-family="Arial" font-size="13" fill="#6c757d">경고 발송 (7일)</text>
-  <text x="780" y="230" font-family="Arial" font-size="32" fill="#333" font-weight="bold">8</text>
+  <text x="780" y="230" font-family="Arial" font-size="32" fill="#333" font-weight="bold">4</text>
   <text x="940" y="240" font-family="Arial" font-size="40" fill="#ffc107">⚠️</text>
 
   <!-- 시스템 정보 카드 -->

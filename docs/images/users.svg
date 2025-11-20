@@ -36,7 +36,7 @@
   <text x="340" y="285" font-family="Arial" font-size="12" fill="#495057" font-weight="600">역할</text>
   <text x="460" y="285" font-family="Arial" font-size="12" fill="#495057" font-weight="600">잔액</text>
   <text x="560" y="285" font-family="Arial" font-size="12" fill="#495057" font-weight="600">경고</text>
-  <text x="660" y="285" font-family="Arial" font-size="12" fill="#495057" font-weight="600">휴가 상태</text>
+  <text x="660" y="285" font-family="Arial" font-size="12" fill="#495057" font-weight="600">휴식 상태</text>
   <text x="780" y="285" font-family="Arial" font-size="12" fill="#495057" font-weight="600">최종 활동</text>
   <text x="910" y="285" font-family="Arial" font-size="12" fill="#495057" font-weight="600">액션</text>
 
@@ -76,12 +76,12 @@
   <text x="460" y="430" font-family="Arial" font-size="13" fill="#495057">22,100원</text>
   <text x="560" y="430" font-family="Arial" font-size="13" fill="#6c757d">없음</text>
   <rect x="660" y="418" width="70" height="22" rx="4" fill="#0dcaf0"/>
-  <text x="695" y="433" font-family="Arial" font-size="11" fill="#212529" text-anchor="middle">휴가 중</text>
+  <text x="695" y="433" font-family="Arial" font-size="11" fill="#212529" text-anchor="middle">휴식 중</text>
   <text x="780" y="430" font-family="Arial" font-size="12" fill="#6c757d">2025-11-15</text>
   <rect x="910" y="418" width="50" height="24" rx="4" fill="white" stroke="#0d6efd" stroke-width="1"/>
   <text x="935" y="433" font-family="Arial" font-size="11" fill="#0d6efd" text-anchor="middle">상세</text>
 
   <!-- 배지 -->
-  <rect x="900" y="268" width="70" height="24" rx="12" fill="#6c757d"/>
-  <text x="935" y="285" font-family="Arial" font-size="11" fill="white" text-anchor="middle">총 1,247명</text>
+  <rect x="900" y="268" width="60" height="24" rx="12" fill="#6c757d"/>
+  <text x="930" y="285" font-family="Arial" font-size="11" fill="white" text-anchor="middle">총 28명</text>
 </svg>
