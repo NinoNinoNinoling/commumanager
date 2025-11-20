@@ -515,6 +515,66 @@ CREATE INDEX idx_archived_toots_toot ON archived_toots(toot_id);
 CREATE UNIQUE INDEX idx_archived_toots_unique ON archived_toots(user_id, toot_id);
 ```
 
+### story_events
+```sql
+CREATE TABLE story_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT,
+    calendar_event_id INTEGER,
+    start_time TIMESTAMP NOT NULL,
+    interval_minutes INTEGER DEFAULT 5,
+    status TEXT DEFAULT 'pending',
+    created_by TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    published_at TIMESTAMP,
+    FOREIGN KEY(calendar_event_id) REFERENCES calendar_events(id) ON DELETE SET NULL
+);
+CREATE INDEX idx_story_events_start ON story_events(start_time);
+CREATE INDEX idx_story_events_status ON story_events(status);
+CREATE INDEX idx_story_events_calendar ON story_events(calendar_event_id);
+```
+
+**설명**:
+- 여러 포스트를 일정 간격으로 발송하는 이벤트 단위
+- `interval_minutes`: 포스트 간 간격 (분)
+- `calendar_event_id`: 연결된 일정 (선택, FK)
+- `status`: pending, in_progress, completed, failed
+
+**예시**:
+- 제목: "새해 인사 시리즈"
+- 시작: 2025-01-01 00:00
+- 간격: 10분
+- 포스트 3개 → 00:00, 00:10, 00:20 발송
+
+### story_posts
+```sql
+CREATE TABLE story_posts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id INTEGER NOT NULL,
+    sequence INTEGER NOT NULL,
+    content TEXT NOT NULL,
+    media_urls TEXT,
+    status TEXT DEFAULT 'pending',
+    mastodon_post_id TEXT,
+    scheduled_at TIMESTAMP,
+    published_at TIMESTAMP,
+    error_message TEXT,
+    FOREIGN KEY(event_id) REFERENCES story_events(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_story_posts_event ON story_posts(event_id, sequence);
+CREATE INDEX idx_story_posts_status ON story_posts(status);
+```
+
+**설명**:
+- 스토리 이벤트에 속한 개별 포스트
+- `sequence`: 순서 (1, 2, 3, ...)
+- `media_urls`: JSON 배열 (예: `["url1", "url2"]`)
+- `scheduled_at`: 자동 계산 (start_time + interval_minutes × (sequence - 1))
+- `status`: pending, published, failed
+
+**CASCADE**: 이벤트 삭제 시 포스트도 함께 삭제
+
 ## PostgreSQL 참조 (읽기 전용)
 
 ### 48시간 답글 수 조회 (벌크)
