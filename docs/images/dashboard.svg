@@ -1,54 +1,100 @@
-<svg width="1000" height="600" xmlns="http://www.w3.org/2000/svg">
+<svg width="1200" height="600" xmlns="http://www.w3.org/2000/svg">
   <!-- 배경 -->
-  <rect width="1000" height="600" fill="#f8f9fa"/>
+  <rect width="1200" height="600" fill="#f8f9fa"/>
 
-  <!-- 네비게이션 바 -->
-  <rect width="1000" height="60" fill="#212529"/>
-  <text x="20" y="38" font-family="Arial" font-size="18" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
-  <text x="200" y="38" font-family="Arial" font-size="14" fill="#adb5bd">대시보드</text>
-  <text x="300" y="38" font-family="Arial" font-size="14" fill="#6c757d">사용자</text>
-  <text x="380" y="38" font-family="Arial" font-size="14" fill="#6c757d">이벤트</text>
-  <text x="460" y="38" font-family="Arial" font-size="14" fill="#6c757d">로그</text>
+  <!-- 왼쪽 사이드바 -->
+  <rect width="200" height="600" fill="#2d3748"/>
 
+  <!-- 로고/제목 -->
+  <text x="20" y="35" font-family="Arial" font-size="16" fill="white" font-weight="bold">✨ 마녀봇 관리</text>
+  <line x1="20" y1="50" x2="180" y2="50" stroke="#4a5568" stroke-width="1"/>
+
+  <!-- 메뉴 항목들 -->
+  <!-- 대시보드 (활성) -->
+  <rect x="10" y="70" width="180" height="40" rx="6" fill="#4299e1"/>
+  <text x="30" y="95" font-family="Arial" font-size="13" fill="white" font-weight="600">📊 대시보드</text>
+
+  <!-- 사용자 -->
+  <rect x="10" y="120" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="145" font-family="Arial" font-size="13" fill="#a0aec0">👥 사용자</text>
+
+  <!-- 활동량 -->
+  <rect x="10" y="170" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="195" font-family="Arial" font-size="13" fill="#a0aec0">⚠️ 활동량</text>
+
+  <!-- 휴식 -->
+  <rect x="10" y="220" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="245" font-family="Arial" font-size="13" fill="#a0aec0">🏖️ 휴식</text>
+
+  <!-- 이벤트 -->
+  <rect x="10" y="270" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="295" font-family="Arial" font-size="13" fill="#a0aec0">🎉 이벤트</text>
+
+  <!-- 상점 -->
+  <rect x="10" y="320" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="345" font-family="Arial" font-size="13" fill="#a0aec0">🛒 상점</text>
+
+  <!-- 로그 -->
+  <rect x="10" y="370" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="395" font-family="Arial" font-size="13" fill="#a0aec0">📋 로그</text>
+
+  <!-- 설정 -->
+  <rect x="10" y="420" width="180" height="40" rx="6" fill="transparent"/>
+  <text x="30" y="445" font-family="Arial" font-size="13" fill="#a0aec0">⚙️ 설정</text>
+
+  <!-- 메인 콘텐츠 영역 -->
   <!-- 제목 -->
-  <text x="40" y="110" font-family="Arial" font-size="24" fill="#333" font-weight="bold">대시보드</text>
-  <text x="40" y="135" font-family="Arial" font-size="13" fill="#6c757d">시스템 현황을 한눈에 확인하세요</text>
+  <text x="240" y="50" font-family="Arial" font-size="24" fill="#333" font-weight="bold">대시보드</text>
+  <text x="240" y="75" font-family="Arial" font-size="13" fill="#6c757d">시스템 현황을 한눈에 확인하세요</text>
 
   <!-- 통계 카드 1: 전체 유저 -->
-  <rect x="40" y="160" width="220" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="60" y="190" font-family="Arial" font-size="13" fill="#6c757d">전체 유저</text>
-  <text x="60" y="230" font-family="Arial" font-size="32" fill="#333" font-weight="bold">28</text>
-  <text x="220" y="240" font-family="Arial" font-size="40" fill="#0d6efd">👥</text>
+  <rect x="240" y="100" width="220" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="130" font-family="Arial" font-size="13" fill="#6c757d">전체 유저</text>
+  <text x="260" y="170" font-family="Arial" font-size="32" fill="#333" font-weight="bold">28</text>
+  <text x="420" y="180" font-family="Arial" font-size="40" fill="#0d6efd">👥</text>
 
   <!-- 통계 카드 2: 활성 유저 -->
-  <rect x="280" y="160" width="220" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="300" y="190" font-family="Arial" font-size="13" fill="#6c757d">활성 유저 (24시간)</text>
-  <text x="300" y="230" font-family="Arial" font-size="32" fill="#333" font-weight="bold">22</text>
-  <text x="460" y="240" font-family="Arial" font-size="40" fill="#198754">✓</text>
+  <rect x="480" y="100" width="220" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="500" y="130" font-family="Arial" font-size="13" fill="#6c757d">활성 유저 (24시간)</text>
+  <text x="500" y="170" font-family="Arial" font-size="32" fill="#333" font-weight="bold">22</text>
+  <text x="660" y="180" font-family="Arial" font-size="40" fill="#198754">✓</text>
 
   <!-- 통계 카드 3: 휴식 중 -->
-  <rect x="520" y="160" width="220" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="540" y="190" font-family="Arial" font-size="13" fill="#6c757d">휴식 중</text>
-  <text x="540" y="230" font-family="Arial" font-size="32" fill="#333" font-weight="bold">3</text>
-  <text x="700" y="240" font-family="Arial" font-size="40" fill="#0dcaf0">🏖️</text>
+  <rect x="720" y="100" width="220" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="740" y="130" font-family="Arial" font-size="13" fill="#6c757d">휴식 중</text>
+  <text x="740" y="170" font-family="Arial" font-size="32" fill="#333" font-weight="bold">3</text>
+  <text x="900" y="180" font-family="Arial" font-size="40" fill="#0dcaf0">🏖️</text>
 
   <!-- 통계 카드 4: 경고 발송 -->
-  <rect x="760" y="160" width="220" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="780" y="190" font-family="Arial" font-size="13" fill="#6c757d">경고 발송 (7일)</text>
-  <text x="780" y="230" font-family="Arial" font-size="32" fill="#333" font-weight="bold">4</text>
-  <text x="940" y="240" font-family="Arial" font-size="40" fill="#ffc107">⚠️</text>
+  <rect x="960" y="100" width="220" height="120" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="980" y="130" font-family="Arial" font-size="13" fill="#6c757d">경고 발송 (7일)</text>
+  <text x="980" y="170" font-family="Arial" font-size="32" fill="#333" font-weight="bold">4</text>
+  <text x="1140" y="180" font-family="Arial" font-size="40" fill="#ffc107">⚠️</text>
 
   <!-- 시스템 정보 카드 -->
-  <rect x="40" y="310" width="940" height="250" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
-  <text x="60" y="340" font-family="Arial" font-size="16" fill="#333" font-weight="bold">시스템 정보</text>
+  <rect x="240" y="240" width="940" height="250" rx="8" fill="white" filter="drop-shadow(0px 2px 4px rgba(0,0,0,0.1))"/>
+  <text x="260" y="270" font-family="Arial" font-size="16" fill="#333" font-weight="bold">시스템 정보</text>
 
   <!-- 정보 항목들 -->
-  <text x="80" y="380" font-family="Arial" font-size="13" fill="#495057" font-weight="600">활동량 체크 주기</text>
-  <text x="80" y="405" font-family="Arial" font-size="13" fill="#6c757d">오전 4시, 오후 4시 (12시간 간격)</text>
+  <text x="280" y="310" font-family="Arial" font-size="13" fill="#495057" font-weight="600">활동량 체크 주기</text>
+  <text x="280" y="335" font-family="Arial" font-size="13" fill="#6c757d">오전 4시, 오후 4시 (12시간 간격)</text>
 
-  <text x="380" y="380" font-family="Arial" font-size="13" fill="#495057" font-weight="600">최소 답글 기준</text>
-  <text x="380" y="405" font-family="Arial" font-size="13" fill="#6c757d">48시간 내 20개</text>
+  <text x="580" y="310" font-family="Arial" font-size="13" fill="#495057" font-weight="600">최소 답글 기준</text>
+  <text x="580" y="335" font-family="Arial" font-size="13" fill="#6c757d">48시간 내 20개</text>
 
-  <text x="680" y="380" font-family="Arial" font-size="13" fill="#495057" font-weight="600">재화 지급 비율</text>
-  <text x="680" y="405" font-family="Arial" font-size="13" fill="#6c757d">답글 1개당 10원</text>
+  <text x="880" y="310" font-family="Arial" font-size="13" fill="#495057" font-weight="600">재화 지급 비율</text>
+  <text x="880" y="335" font-family="Arial" font-size="13" fill="#6c757d">답글 1개당 10원</text>
+
+  <text x="280" y="380" font-family="Arial" font-size="13" fill="#495057" font-weight="600">휴식 중 활동량 체크</text>
+  <text x="280" y="405" font-family="Arial" font-size="13" fill="#6c757d">비활성화</text>
+
+  <text x="580" y="380" font-family="Arial" font-size="13" fill="#495057" font-weight="600">휴식 중 재화 지급</text>
+  <text x="580" y="405" font-family="Arial" font-size="13" fill="#6c757d">비활성화</text>
+
+  <text x="880" y="380" font-family="Arial" font-size="13" fill="#495057" font-weight="600">자동 경고 발송</text>
+  <text x="880" y="405" font-family="Arial" font-size="13" fill="#6c757d">활성화</text>
+
+  <!-- 최근 활동 -->
+  <text x="280" y="450" font-family="Arial" font-size="13" fill="#495057" font-weight="600">🕐 최근 정산</text>
+  <text x="280" y="470" font-family="Arial" font-size="12" fill="#6c757d">2025-11-20 16:00 | 28명 정산 완료</text>
 </svg>
