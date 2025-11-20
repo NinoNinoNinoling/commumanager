@@ -56,9 +56,12 @@ class WarningRepository:
         with get_economy_db() as conn:
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO warnings (user_id, reason, count, admin_name)
-                VALUES (?, ?, ?, ?)
-            """, (warning.user_id, warning.reason, warning.count, warning.admin_name))
+                INSERT INTO warnings (user_id, warning_type, check_period_hours, required_replies,
+                                    actual_replies, message, dm_sent, admin_name)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (warning.user_id, warning.warning_type, warning.check_period_hours,
+                  warning.required_replies, warning.actual_replies, warning.message,
+                  warning.dm_sent, warning.admin_name))
             conn.commit()
 
             # 생성된 ID로 조회

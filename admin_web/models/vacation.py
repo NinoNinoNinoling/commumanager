@@ -14,6 +14,8 @@ class Vacation:
     start_time: Optional[str] = None
     end_time: Optional[str] = None
     reason: Optional[str] = None
+    approved: bool = True
+    registered_by: Optional[str] = None
     created_at: Optional[datetime] = None
 
     def to_dict(self) -> dict:
@@ -26,5 +28,7 @@ class Vacation:
             'start_time': self.start_time,
             'end_time': self.end_time,
             'reason': self.reason,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'approved': self.approved,
+            'registered_by': self.registered_by,
+            'created_at': self.created_at.isoformat() if (self.created_at and isinstance(self.created_at, datetime)) else self.created_at,
         }

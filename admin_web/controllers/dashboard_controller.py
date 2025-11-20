@@ -13,7 +13,8 @@ class DashboardController:
         """
         Args:
             config: Flask app config
-        """        self.user_service = UserService()
+        """
+        self.user_service = UserService()
 
     def show_dashboard(self):
         """

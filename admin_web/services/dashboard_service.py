@@ -26,7 +26,7 @@ class DashboardService:
 
             # 현재 휴가 중인 사용자 수
             cursor.execute("""
-                SELECT COUNT(DISTINCT user_id) FROM vacations
+                SELECT COUNT(DISTINCT user_id) FROM vacation
                 WHERE date('now') BETWEEN start_date AND end_date
             """)
             on_vacation = cursor.fetchone()[0]

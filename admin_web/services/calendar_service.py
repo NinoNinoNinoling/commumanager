@@ -55,7 +55,7 @@ class CalendarService:
             log = AdminLog(
                 id=None,
                 admin_name=admin_name,
-                action='create_event',
+                action_type='create_event',
                 details=f"{title} ({event_type})",
             )
             self.admin_log_repo.create(log)
@@ -84,7 +84,7 @@ class CalendarService:
             log = AdminLog(
                 id=None,
                 admin_name=admin_name,
-                action='update_event',
+                action_type='update_event',
                 details=f"{title} (id: {event_id})",
             )
             self.admin_log_repo.create(log)
@@ -100,7 +100,7 @@ class CalendarService:
             log = AdminLog(
                 id=None,
                 admin_name=admin_name,
-                action='delete_event',
+                action_type='delete_event',
                 details=f"event_id: {event_id}",
             )
             self.admin_log_repo.create(log)

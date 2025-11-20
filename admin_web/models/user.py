@@ -36,7 +36,7 @@ class User:
             'total_earned': self.total_earned,
             'total_spent': self.total_spent,
             'reply_count': self.reply_count,
-            'last_active': self.last_active.isoformat() if self.last_active else None,
-            'last_check': self.last_check.isoformat() if self.last_check else None,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'last_active': self.last_active.isoformat() if (self.last_active and isinstance(self.last_active, datetime)) else self.last_active,
+            'last_check': self.last_check.isoformat() if (self.last_check and isinstance(self.last_check, datetime)) else self.last_check,
+            'created_at': self.created_at.isoformat() if (self.created_at and isinstance(self.created_at, datetime)) else self.created_at,
         }

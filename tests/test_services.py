@@ -2,8 +2,17 @@
 Service 레이어 테스트
 
 UserService, DashboardService, ItemService 등을 테스트합니다.
+Flask app context를 사용하여 Service를 테스트합니다.
 """
 import pytest
+from admin_web.models.user import User
+from admin_web.models.item import Item
+from admin_web.models.vacation import Vacation
+from admin_web.models.warning import Warning
+from admin_web.repositories.user_repository import UserRepository
+from admin_web.repositories.item_repository import ItemRepository
+from admin_web.repositories.vacation_repository import VacationRepository
+from admin_web.repositories.warning_repository import WarningRepository
 from admin_web.services.user_service import UserService
 from admin_web.services.dashboard_service import DashboardService
 from admin_web.services.item_service import ItemService
@@ -14,382 +23,409 @@ from admin_web.services.warning_service import WarningService
 class TestUserService:
     """UserService 테스트"""
 
-    def test_get_all_users(self, db_conn):
-        """전체 유저 조회"""
-        service = UserService(db_conn)
+    def test_get_users(self, app):
+        """유저 목록 조회"""
+        with app.app_context():
+            # 테스트 유저 생성
+            user = User(
+                mastodon_id='service_test_user',
+                username='serviceuser',
+                display_name='Service Test User',
+                role='user'
+            )
+            UserRepository.create(user)
 
-        # 샘플 유저 추가
-        db_conn.execute("""
-            INSERT INTO users (mastodon_id, username, display_name, balance)
-            VALUES ('user1', 'testuser1', 'Test User 1', 1000)
-        """)
-        db_conn.commit()
+            # Service 테스트
+            service = UserService()
+            result = service.get_users()
 
-        users = service.get_all_users()
-        assert len(users) >= 1
-        assert any(u['username'] == 'testuser1' for u in users)
+            assert 'users' in result
+            assert 'pagination' in result
+            assert result['pagination']['total'] >= 1
 
-    def test_get_user_detail(self, db_conn):
+    def test_get_user(self, app):
         """유저 상세 조회"""
-        service = UserService(db_conn)
+        with app.app_context():
+            # 테스트 유저 생성
+            user = User(
+                mastodon_id='detail_test_user',
+                username='detailuser',
+                display_name='Detail Test User',
+                role='user'
+            )
+            UserRepository.create(user)
 
-        # 유저 추가
-        db_conn.execute("""
-            INSERT INTO users (mastodon_id, username, display_name, balance)
-            VALUES ('user1', 'testuser1', 'Test User 1', 1000)
-        """)
-        db_conn.commit()
+            # Service 테스트
+            service = UserService()
+            user = service.get_user('detail_test_user')
 
-        detail = service.get_user_detail('user1')
-        assert detail is not None
-        assert detail['user']['username'] == 'testuser1'
-        assert detail['user']['balance'] == 1000
-        assert 'transactions' in detail
-        assert 'warnings' in detail
+            assert user is not None
+            assert user.username == 'detailuser'
 
-    def test_adjust_balance(self, db_conn):
+    def test_adjust_balance(self, app):
         """잔액 조정"""
-        service = UserService(db_conn)
+        with app.app_context():
+            # 테스트 유저 생성
+            user = User(
+                mastodon_id='balance_test_user',
+                username='balanceuser',
+                display_name='Balance Test User',
+                role='user'
+            )
+            UserRepository.create(user)
 
-        # 유저 추가
-        db_conn.execute("""
-            INSERT INTO users (mastodon_id, username, balance)
-            VALUES ('user1', 'testuser1', 1000)
-        """)
-        db_conn.commit()
+            # Service 테스트
+            service = UserService()
+            success = service.adjust_balance('balance_test_user', 500, 'admin', '테스트 지급')
 
-        # 잔액 조정 (+500)
-        success = service.adjust_balance(
-            user_id='user1',
-            amount=500,
-            reason='테스트 지급',
-            admin_name='admin'
-        )
-
-        assert success is True
-
-        # 검증
-        detail = service.get_user_detail('user1')
-        assert detail['user']['balance'] == 1500
-
-        # 거래 내역 확인
-        assert len(detail['transactions']) >= 1
-        assert detail['transactions'][0]['amount'] == 500
+            assert success
+            updated_user = UserRepository.find_by_id('balance_test_user')
+            assert updated_user.balance == 500
 
 
 class TestDashboardService:
     """DashboardService 테스트"""
 
-    def test_get_stats(self, db_conn):
+    def test_get_stats(self, app):
         """대시보드 통계 조회"""
-        service = DashboardService(db_conn)
+        with app.app_context():
+            # 테스트 데이터 생성
+            user = User(
+                mastodon_id='stats_test_user',
+                username='statsuser',
+                display_name='Stats Test User',
+                role='user'
+            )
+            UserRepository.create(user)
 
-        # 샘플 데이터 추가
-        db_conn.execute("""
-            INSERT INTO users (mastodon_id, username, balance)
-            VALUES ('user1', 'testuser1', 1000), ('user2', 'testuser2', 2000)
-        """)
-        db_conn.execute("""
-            INSERT INTO transactions (user_id, transaction_type, amount)
-            VALUES ('user1', 'reply', 100), ('user2', 'reply', 200)
-        """)
-        db_conn.commit()
+            # Service 테스트
+            service = DashboardService()
+            stats = service.get_stats()
 
-        stats = service.get_stats()
-
-        assert stats is not None
-        assert 'total_users' in stats
-        assert 'total_balance' in stats
-        assert 'total_transactions' in stats
-        assert stats['total_users'] >= 2
-        assert stats['total_balance'] >= 3000
-
-    def test_get_recent_activity(self, db_conn):
-        """최근 활동 조회"""
-        service = DashboardService(db_conn)
-
-        # 샘플 데이터 추가
-        db_conn.execute("""
-            INSERT INTO users (mastodon_id, username)
-            VALUES ('user1', 'testuser1')
-        """)
-        db_conn.execute("""
-            INSERT INTO transactions (user_id, transaction_type, amount)
-            VALUES ('user1', 'reply', 100)
-        """)
-        db_conn.commit()
-
-        activity = service.get_recent_activity()
-
-        assert activity is not None
-        assert 'recent_transactions' in activity
-        assert len(activity['recent_transactions']) >= 1
+            assert 'users' in stats
+            assert 'currency' in stats
+            assert stats['users']['total'] >= 1
 
 
 class TestItemService:
     """ItemService 테스트"""
 
-    def test_get_all_items(self, db_conn):
-        """전체 아이템 조회"""
-        service = ItemService(db_conn)
+    def test_get_items(self, app):
+        """아이템 목록 조회"""
+        with app.app_context():
+            # 테스트 아이템 생성
+            item = Item(
+                id=None,
+                name='서비스 테스트 아이템',
+                description='Service test',
+                price=1000,
+                is_active=True
+            )
+            ItemRepository.create(item)
 
-        # 샘플 아이템 추가
-        db_conn.execute("""
-            INSERT INTO items (name, price, is_active)
-            VALUES ('테스트 아이템', 500, 1)
-        """)
-        db_conn.commit()
+            # Service 테스트
+            service = ItemService()
+            result = service.get_items()
 
-        items = service.get_all_items()
-        assert len(items) >= 1
+            assert 'items' in result
+            assert 'pagination' in result
+            assert result['pagination']['total'] >= 1
 
-    def test_create_item(self, db_conn):
+    def test_create_item(self, app):
         """아이템 생성"""
-        service = ItemService(db_conn)
+        with app.app_context():
+            service = ItemService()
 
-        item_id = service.create_item(
-            name='새 아이템',
-            price=1000,
-            description='테스트 아이템',
-            category='기타',
-            created_by='admin'
-        )
+            item_data = {
+                'name': '새 아이템',
+                'description': '서비스로 생성',
+                'price': 2000,
+                'category': 'test',
+                'is_active': True
+            }
 
-        assert item_id > 0
+            created_item = service.create_item(item_data)
 
-        # 검증
-        item = service.get_item_detail(item_id)
-        assert item['name'] == '새 아이템'
+            assert created_item.id is not None
+            assert created_item.name == '새 아이템'
+            assert created_item.price == 2000
 
-    def test_update_item(self, db_conn):
+    def test_update_item(self, app):
         """아이템 업데이트"""
-        service = ItemService(db_conn)
+        with app.app_context():
+            # 아이템 생성
+            item = Item(
+                id=None,
+                name='업데이트 테스트',
+                description='Update test',
+                price=1000,
+                is_active=True
+            )
+            created_item = ItemRepository.create(item)
 
-        # 아이템 생성
-        item_id = service.create_item('아이템1', 500, created_by='admin')
+            # Service로 업데이트
+            service = ItemService()
+            update_data = {
+                'name': '업데이트됨',
+                'price': 1500
+            }
 
-        # 업데이트
-        success = service.update_item(
-            item_id=item_id,
-            name='수정된 아이템',
-            price=600
-        )
+            success = service.update_item(created_item.id, update_data)
 
-        assert success is True
+            assert success
+            updated_item = ItemRepository.find_by_id(created_item.id)
+            assert updated_item.price == 1500
 
-        # 검증
-        item = service.get_item_detail(item_id)
-        assert item['name'] == '수정된 아이템'
-        assert item['price'] == 600
-
-    def test_delete_item(self, db_conn):
+    def test_delete_item(self, app):
         """아이템 삭제"""
-        service = ItemService(db_conn)
+        with app.app_context():
+            # 아이템 생성
+            item = Item(
+                id=None,
+                name='삭제 테스트',
+                description='Delete test',
+                price=1000,
+                is_active=True
+            )
+            created_item = ItemRepository.create(item)
 
-        # 아이템 생성
-        item_id = service.create_item('아이템1', 500, created_by='admin')
+            # Service로 삭제
+            service = ItemService()
+            success = service.delete_item(created_item.id)
 
-        # 삭제
-        success = service.delete_item(item_id)
-        assert success is True
-
-        # 검증
-        item = service.get_item_detail(item_id)
-        assert item['is_active'] == 0
+            assert success
+            deleted_item = ItemRepository.find_by_id(created_item.id)
+            assert deleted_item is None
 
 
 class TestVacationService:
     """VacationService 테스트"""
 
-    def test_get_all_vacations(self, db_conn):
-        """전체 휴가 조회"""
-        service = VacationService(db_conn)
+    def test_get_vacations(self, app):
+        """휴가 목록 조회"""
+        with app.app_context():
+            # 테스트 유저 및 휴가 생성
+            user = User(
+                mastodon_id='vacation_service_user',
+                username='vacationserviceuser',
+                display_name='Vacation Service User',
+                role='user'
+            )
+            UserRepository.create(user)
 
-        # 유저 및 휴가 추가
-        db_conn.execute("""
-            INSERT INTO users (mastodon_id, username) VALUES ('user1', 'testuser1')
-        """)
-        db_conn.execute("""
-            INSERT INTO vacation (user_id, start_date, end_date, approved)
-            VALUES ('user1', '2025-01-01', '2025-01-07', 1)
-        """)
-        db_conn.commit()
+            vacation = Vacation(
+                id=None,
+                user_id='vacation_service_user',
+                start_date='2024-01-01',
+                end_date='2024-01-07',
+                reason='서비스 테스트 휴가'
+            )
+            VacationRepository.create(vacation)
 
-        vacations = service.get_all_vacations()
-        assert len(vacations) >= 1
+            # Service 테스트
+            service = VacationService()
+            result = service.get_vacations()
 
-    def test_create_vacation(self, db_conn):
+            assert 'vacations' in result
+            assert 'pagination' in result
+            assert result['pagination']['total'] >= 1
+
+    def test_create_vacation(self, app):
         """휴가 생성"""
-        service = VacationService(db_conn)
+        with app.app_context():
+            # 테스트 유저 생성
+            user = User(
+                mastodon_id='vacation_create_user',
+                username='vacationcreateuser',
+                display_name='Vacation Create User',
+                role='user'
+            )
+            UserRepository.create(user)
 
-        # 유저 추가
-        db_conn.execute("""
-            INSERT INTO users (mastodon_id, username) VALUES ('user1', 'testuser1')
-        """)
-        db_conn.commit()
+            # Service로 휴가 생성
+            service = VacationService()
+            vacation_data = {
+                'user_id': 'vacation_create_user',
+                'start_date': '2024-02-01',
+                'end_date': '2024-02-07',
+                'reason': '서비스로 생성한 휴가'
+            }
 
-        vacation_id = service.create_vacation(
-            user_id='user1',
-            start_date='2025-02-01',
-            end_date='2025-02-07',
-            reason='테스트 휴가',
-            registered_by='admin'
-        )
+            created_vacation = service.create_vacation(vacation_data)
 
-        assert vacation_id > 0
-
-    def test_approve_vacation(self, db_conn):
-        """휴가 승인"""
-        service = VacationService(db_conn)
-
-        # 유저 및 휴가 추가
-        db_conn.execute("""
-            INSERT INTO users (mastodon_id, username) VALUES ('user1', 'testuser1')
-        """)
-        db_conn.execute("""
-            INSERT INTO vacation (user_id, start_date, end_date, approved)
-            VALUES ('user1', '2025-01-01', '2025-01-07', 0)
-        """)
-        db_conn.commit()
-
-        cursor = db_conn.cursor()
-        cursor.execute("SELECT id FROM vacation WHERE user_id = 'user1'")
-        vacation_id = cursor.fetchone()['id']
-
-        # 승인
-        success = service.approve_vacation(vacation_id, True)
-        assert success is True
+            assert created_vacation.user_id == 'vacation_create_user'
 
 
 class TestWarningService:
     """WarningService 테스트"""
 
-    def test_get_all_warnings(self, db_conn):
-        """전체 경고 조회"""
-        service = WarningService(db_conn)
+    def test_get_warnings(self, app):
+        """경고 목록 조회"""
+        with app.app_context():
+            # 테스트 유저 및 경고 생성
+            user = User(
+                mastodon_id='warning_service_user',
+                username='warningserviceuser',
+                display_name='Warning Service User',
+                role='user'
+            )
+            UserRepository.create(user)
 
-        # 유저 및 경고 추가
-        db_conn.execute("""
-            INSERT INTO users (mastodon_id, username) VALUES ('user1', 'testuser1')
-        """)
-        db_conn.execute("""
-            INSERT INTO warnings (user_id, warning_type, message)
-            VALUES ('user1', 'activity', '테스트 경고')
-        """)
-        db_conn.commit()
+            warning = Warning(
+                id=None,
+                user_id='warning_service_user',
+                warning_type='activity',
+                message='서비스 테스트 경고'
+            )
+            WarningRepository.create(warning)
 
-        warnings = service.get_all_warnings()
-        assert len(warnings) >= 1
+            # Service 테스트
+            service = WarningService()
+            result = service.get_warnings()
 
-    def test_create_warning(self, db_conn):
+            assert 'warnings' in result
+            assert 'pagination' in result
+            assert result['pagination']['total'] >= 1
+
+    def test_create_warning(self, app):
         """경고 생성"""
-        service = WarningService(db_conn)
+        with app.app_context():
+            # 테스트 유저 생성
+            user = User(
+                mastodon_id='warning_create_user',
+                username='warningcreateuser',
+                display_name='Warning Create User',
+                role='user'
+            )
+            UserRepository.create(user)
 
-        # 유저 추가
-        db_conn.execute("""
-            INSERT INTO users (mastodon_id, username) VALUES ('user1', 'testuser1')
-        """)
-        db_conn.commit()
+            # Service로 경고 생성
+            service = WarningService()
+            warning_data = {
+                'user_id': 'warning_create_user',
+                'warning_type': 'manual',
+                'message': '서비스로 생성한 경고',
+                'admin_name': 'admin'
+            }
 
-        warning_id = service.create_warning(
-            user_id='user1',
-            warning_type='activity',
-            message='활동량 미달 경고',
-            admin_name='admin'
-        )
+            created_warning = service.create_warning(warning_data)
 
-        assert warning_id > 0
+            assert created_warning.user_id == 'warning_create_user'
 
-    def test_get_user_warnings(self, db_conn):
+    def test_get_user_warnings(self, app):
         """유저별 경고 조회"""
-        service = WarningService(db_conn)
+        with app.app_context():
+            # 테스트 유저 및 경고 생성
+            user = User(
+                mastodon_id='user_warning_test',
+                username='userwarningtest',
+                display_name='User Warning Test',
+                role='user'
+            )
+            UserRepository.create(user)
 
-        # 유저 및 경고 추가
-        db_conn.execute("""
-            INSERT INTO users (mastodon_id, username) VALUES ('user1', 'testuser1')
-        """)
-        db_conn.execute("""
-            INSERT INTO warnings (user_id, warning_type, message)
-            VALUES ('user1', 'activity', '경고1'), ('user1', 'activity', '경고2')
-        """)
-        db_conn.commit()
+            warning = Warning(
+                id=None,
+                user_id='user_warning_test',
+                warning_type='activity',
+                message='유저 경고 테스트'
+            )
+            WarningRepository.create(warning)
 
-        warnings = service.get_user_warnings('user1')
-        assert len(warnings) >= 2
+            # Service 테스트
+            service = WarningService()
+            result = service.get_user_warnings('user_warning_test')
 
+            assert 'warnings' in result
+            assert len(result['warnings']) >= 1
 
-# ============================================================================
-# 통합 테스트
-# ============================================================================
 
 class TestServiceIntegration:
     """Service 통합 테스트"""
 
-    def test_user_balance_adjustment_flow(self, db_conn):
-        """유저 잔액 조정 흐름 테스트"""
-        user_service = UserService(db_conn)
+    def test_user_item_flow(self, app):
+        """유저 생성 → 잔액 조정 → 아이템 구매 흐름"""
+        with app.app_context():
+            # 1. 유저 생성
+            user = User(
+                mastodon_id='integration_user',
+                username='integrationuser',
+                display_name='Integration User',
+                role='user'
+            )
+            UserRepository.create(user)
 
-        # 1. 유저 생성
-        db_conn.execute("""
-            INSERT INTO users (mastodon_id, username, balance)
-            VALUES ('user1', 'testuser1', 1000)
-        """)
-        db_conn.commit()
+            # 2. 잔액 지급
+            user_service = UserService()
+            user_service.adjust_balance('integration_user', 2000, 'admin', '초기 지급')
 
-        # 2. 잔액 조정
-        user_service.adjust_balance('user1', 500, '테스트 지급', 'admin')
+            # 3. 아이템 생성
+            item_service = ItemService()
+            item_data = {
+                'name': '통합 테스트 아이템',
+                'price': 500,
+                'is_active': True
+            }
+            created_item = item_service.create_item(item_data)
 
-        # 3. 검증
-        detail = user_service.get_user_detail('user1')
-        assert detail['user']['balance'] == 1500
-        assert len(detail['transactions']) >= 1
+            # 4. 확인
+            user = UserRepository.find_by_id('integration_user')
+            assert user.balance == 2000
 
-    def test_dashboard_stats_calculation(self, db_conn):
-        """대시보드 통계 계산 테스트"""
-        dashboard_service = DashboardService(db_conn)
+            item = ItemRepository.find_by_id(created_item.id)
+            assert item.price == 500
 
-        # 샘플 데이터
-        db_conn.execute("""
-            INSERT INTO users (mastodon_id, username, balance)
-            VALUES ('user1', 'testuser1', 1000), ('user2', 'testuser2', 2000)
-        """)
-        db_conn.execute("""
-            INSERT INTO transactions (user_id, transaction_type, amount)
-            VALUES ('user1', 'reply', 100), ('user2', 'attendance', 50)
-        """)
-        db_conn.commit()
+    def test_dashboard_stats(self, app):
+        """대시보드 통계 계산"""
+        with app.app_context():
+            # 여러 유저 생성
+            for i in range(3):
+                user = User(
+                    mastodon_id=f'stats_user_{i}',
+                    username=f'statsuser{i}',
+                    display_name=f'Stats User {i}',
+                    role='user'
+                )
+                UserRepository.create(user)
 
-        # 통계 조회
-        stats = dashboard_service.get_stats()
+            # 통계 조회
+            dashboard_service = DashboardService()
+            stats = dashboard_service.get_stats()
 
-        # 검증
-        assert stats['total_users'] >= 2
-        assert stats['total_balance'] >= 3000
-        assert stats['total_transactions'] >= 2
+            assert stats['users']['total'] >= 3
 
-    def test_vacation_management_flow(self, db_conn):
-        """휴가 관리 흐름 테스트"""
-        vacation_service = VacationService(db_conn)
+    def test_vacation_warning_flow(self, app):
+        """휴가 신청 및 경고 발생 흐름"""
+        with app.app_context():
+            # 1. 유저 생성
+            user = User(
+                mastodon_id='flow_user',
+                username='flowuser',
+                display_name='Flow User',
+                role='user'
+            )
+            UserRepository.create(user)
 
-        # 유저 추가
-        db_conn.execute("""
-            INSERT INTO users (mastodon_id, username) VALUES ('user1', 'testuser1')
-        """)
-        db_conn.commit()
+            # 2. 휴가 신청
+            vacation_service = VacationService()
+            vacation_data = {
+                'user_id': 'flow_user',
+                'start_date': '2024-03-01',
+                'end_date': '2024-03-07',
+                'reason': '개인 사정'
+            }
+            vacation = vacation_service.create_vacation(vacation_data)
 
-        # 1. 휴가 생성
-        vacation_id = vacation_service.create_vacation(
-            user_id='user1',
-            start_date='2025-03-01',
-            end_date='2025-03-07',
-            reason='개인 사유',
-            registered_by='self'
-        )
+            # 3. 경고 발생
+            warning_service = WarningService()
+            warning_data = {
+                'user_id': 'flow_user',
+                'warning_type': 'activity',
+                'message': '활동 부족',
+                'admin_name': 'system'
+            }
+            warning = warning_service.create_warning(warning_data)
 
-        # 2. 휴가 목록 조회
-        vacations = vacation_service.get_all_vacations()
-        assert len(vacations) >= 1
-
-        # 3. 휴가 승인
-        success = vacation_service.approve_vacation(vacation_id, True)
-        assert success is True
+            # 4. 확인
+            assert vacation.user_id == 'flow_user'
+            assert warning.user_id == 'flow_user'

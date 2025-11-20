@@ -7,7 +7,7 @@ from typing import Optional
 @dataclass
 class Transaction:
     """거래 내역 모델"""
-    id: int
+    id: Optional[int]
     user_id: str
     transaction_type: str  # earn_reply, earn_attendance, spend_item, admin_adjust
     amount: int
@@ -28,5 +28,5 @@ class Transaction:
             'item_id': self.item_id,
             'description': self.description,
             'admin_name': self.admin_name,
-            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'timestamp': self.timestamp.isoformat() if (self.timestamp and isinstance(self.timestamp, datetime)) else self.timestamp,
         }

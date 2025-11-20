@@ -224,10 +224,10 @@
             <div class="log-viewer">
                 {% if logs %}
                     {% for log in logs %}
-                    <div class="log-line" data-action="{{ log.action }}">
+                    <div class="log-line" data-action="{{ log.action_type }}">
                         <span class="log-timestamp">{{ log.timestamp }}</span>
                         <span class="log-admin">{{ log.admin_name }}</span>
-                        <span class="log-action {{ log.action }}">{{ log.action }}</span>
+                        <span class="log-action {{ log.action_type }}">{{ log.action_type }}</span>
                         {% if log.target_user %}
                         <span class="log-target">→ {{ log.target_user }}</span>
                         {% endif %}

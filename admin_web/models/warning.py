@@ -9,8 +9,12 @@ class Warning:
     """경고 모델"""
     id: Optional[int]
     user_id: str
-    reason: str
-    count: int = 1
+    warning_type: str = 'auto'
+    check_period_hours: Optional[int] = None
+    required_replies: Optional[int] = None
+    actual_replies: Optional[int] = None
+    message: Optional[str] = None
+    dm_sent: bool = False
     admin_name: Optional[str] = None
     timestamp: Optional[datetime] = None
 
@@ -19,8 +23,12 @@ class Warning:
         return {
             'id': self.id,
             'user_id': self.user_id,
-            'reason': self.reason,
-            'count': self.count,
+            'warning_type': self.warning_type,
+            'check_period_hours': self.check_period_hours,
+            'required_replies': self.required_replies,
+            'actual_replies': self.actual_replies,
+            'message': self.message,
+            'dm_sent': self.dm_sent,
             'admin_name': self.admin_name,
-            'timestamp': self.timestamp.isoformat() if self.timestamp else None,
+            'timestamp': self.timestamp.isoformat() if (self.timestamp and isinstance(self.timestamp, datetime)) else self.timestamp,
         }
