@@ -3,7 +3,6 @@ WarningService
 
 Warning 관련 비즈니스 로직을 처리하는 서비스 계층
 """
-import sqlite3
 from typing import List, Optional, Dict, Any
 
 from admin_web.models.warning import Warning
@@ -83,30 +82,19 @@ class WarningService:
             admin_name=admin_name
         )
 
-        # DB 연결 (트랜잭션 처리)
-        conn = sqlite3.connect(self.db_path)
-        try:
-            # Warning 생성
-            created_warning = self.warning_repo.create(warning)
+        # Warning 생성 (Repository 계층 사용)
+        created_warning = self.warning_repo.create(warning)
 
-            # User의 warning_count 증가
-            cursor = conn.cursor()
-            cursor.execute("""
-                UPDATE users
-                SET warning_count = warning_count + 1
-                WHERE mastodon_id = ?
-            """, (user_id,))
-            conn.commit()
+        # User의 warning_count 증가 (Repository 계층 사용)
+        self.user_repo.increment_warning_count(user_id)
 
-            # 업데이트된 유저 조회
-            updated_user = self.user_repo.find_by_id(user_id)
+        # 업데이트된 유저 조회
+        updated_user = self.user_repo.find_by_id(user_id)
 
-            return {
-                'warning': created_warning,
-                'user': updated_user
-            }
-        finally:
-            conn.close()
+        return {
+            'warning': created_warning,
+            'user': updated_user
+        }
 
     def get_warning(self, warning_id: int) -> Optional[Warning]:
         """
@@ -155,17 +143,8 @@ class WarningService:
         Returns:
             업데이트된 Warning, 찾지 못한 경우 None
         """
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            UPDATE warnings
-            SET dm_sent = ?
-            WHERE id = ?
-        """, (1 if dm_sent else 0, warning_id))
-
-        conn.commit()
-        conn.close()
+        # Repository 계층을 통해 업데이트
+        self.warning_repo.update_dm_sent(warning_id, dm_sent)
 
         return self.warning_repo.find_by_id(warning_id)
 

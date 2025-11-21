@@ -230,3 +230,23 @@ class WarningRepository:
         conn.close()
 
         return row['count']
+
+    def update_dm_sent(self, warning_id: int, dm_sent: bool) -> None:
+        """
+        경고의 DM 전송 상태를 업데이트합니다.
+
+        Args:
+            warning_id: 경고 ID
+            dm_sent: DM 전송 여부
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE warnings
+            SET dm_sent = ?
+            WHERE id = ?
+        """, (1 if dm_sent else 0, warning_id))
+
+        conn.commit()
+        conn.close()
