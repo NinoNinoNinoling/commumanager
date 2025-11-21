@@ -502,3 +502,68 @@ def test_should_log_admin_action_when_setting_key_member(user_service, temp_db):
     assert log[2] == 'key_member_change'  # action_type
     assert log[3] == 'user@example.com'  # target_user
     assert 'True' in log[4] or 'true' in log[4].lower()  # details should contain new status
+
+
+def test_should_auto_ban_user_when_warning_count_reaches_three(user_service, temp_db):
+    """
+    경고 횟수가 3회에 도달하면 자동으로 ban_records에 기록해야 한다 (RED)
+    """
+    # Given: 경고 2회인 유저
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO users (mastodon_id, username, role, warning_count)
+        VALUES (?, ?, ?, ?)
+    """, ('user@example.com', 'user', 'user', 2))
+    conn.commit()
+    conn.close()
+
+    # When: 3번째 경고 추가
+    user_service.add_warning('user@example.com', 'admin_user')
+
+    # Then: ban_records에 기록 확인
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM ban_records
+        WHERE user_id = ? AND is_active = 1
+    """, ('user@example.com',))
+    ban = cursor.fetchone()
+    conn.close()
+
+    assert ban is not None
+    assert ban[1] == 'user@example.com'  # user_id
+    assert ban[3] == 'system'  # banned_by (auto-ban)
+    assert '자동' in ban[4] or 'auto' in ban[4].lower()  # reason should mention auto-ban
+    assert ban[5] == 3  # warning_count
+    assert ban[7] == 1  # is_active = True
+
+
+def test_should_not_auto_ban_when_warning_count_below_three(user_service, temp_db):
+    """
+    경고 횟수가 3회 미만이면 ban_records에 기록하지 않아야 한다
+    """
+    # Given: 경고 1회인 유저
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO users (mastodon_id, username, role, warning_count)
+        VALUES (?, ?, ?, ?)
+    """, ('user@example.com', 'user', 'user', 1))
+    conn.commit()
+    conn.close()
+
+    # When: 2번째 경고 추가
+    user_service.add_warning('user@example.com', 'admin_user')
+
+    # Then: ban_records에 기록 없음
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM ban_records
+        WHERE user_id = ? AND is_active = 1
+    """, ('user@example.com',))
+    ban = cursor.fetchone()
+    conn.close()
+
+    assert ban is None

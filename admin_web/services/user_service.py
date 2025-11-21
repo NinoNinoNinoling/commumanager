@@ -227,10 +227,14 @@ class UserService:
         """
         유저 경고 횟수를 증가시킵니다.
 
+        경고 횟수가 3회에 도달하면 자동으로 ban_records에 기록합니다.
+
         Args:
             mastodon_id: 유저의 Mastodon ID
             admin_name: 경고를 발행하는 관리자
         """
+        import sqlite3
+
         self.user_repo.increment_warning_count(mastodon_id)
 
         # Log admin action
@@ -241,7 +245,33 @@ class UserService:
             details='경고 추가'
         )
 
-        # TODO: Check if user should be auto-banned (warning_count >= 3)
+        # Check if user should be auto-banned (warning_count >= 3)
+        user = self.user_repo.find_by_id(mastodon_id)
+        if user and user.warning_count >= 3:
+            # Auto-ban: create ban record
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            cursor.execute("""
+                INSERT INTO ban_records (
+                    user_id, banned_by, reason, warning_count, is_active
+                ) VALUES (?, ?, ?, ?, ?)
+            """, (
+                mastodon_id,
+                'system',
+                f'자동 아웃: 경고 {user.warning_count}회 누적',
+                user.warning_count,
+                1
+            ))
+            conn.commit()
+            conn.close()
+
+            # Log auto-ban
+            self.admin_log_repo.create_log(
+                admin_name='system',
+                action_type='auto_ban',
+                target_user=mastodon_id,
+                details=f'자동 아웃 처리: 경고 {user.warning_count}회'
+            )
 
     def set_key_member(
         self,
