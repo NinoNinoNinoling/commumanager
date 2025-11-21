@@ -70,9 +70,36 @@ graph TB
 
 ### 1.4 감독봇
 
-**역할**: 백그라운드 관리
+**역할**: 백그라운드 관리 및 다각도 위험 감지
 
-**기능**:
+**소셜 분석 시스템 (4가지 위험 유형)**:
+
+시스템은 단순 답글 수 체크를 넘어 **4가지 위험 유형**으로 유저 활동을 분석합니다:
+
+#### 1. 고립 위험
+- **기준**: 대화 상대가 접속 중인 인원의 절반 미만
+- **로직**: PostgreSQL에서 48시간 내 유저별 대화 상대 수 조회 → 접속 중인 전체 인원과 비교
+
+#### 2. 편향 위험
+- **기준**: 특정 1인과의 대화가 전체의 10% 이상
+- **로직**: 유저별 대화 상대 분포 분석 → 최대 비율 계산
+
+#### 3. 회피 패턴
+- **기준**: 활동은 활발하지만 특정 주요 멤버를 회피
+- **중요**: 상대방도 활동 중일 때만 감지 (접속하지 않은 경우 제외)
+- **조건**:
+  1. 유저 본인 활동 중 (48시간 내 답글 5개 이상)
+  2. 회피 대상 유저도 활동 중 (48시간 내 접속 3회 이상)
+  3. 두 유저 간 교류 부재
+  4. 대상 유저가 주요 멤버(is_key_member=1)로 지정되어 있음
+
+#### 4. 답글 미달
+- **기준**: 48시간 내 답글 5개 미만
+- **로직**: 기존 활동량 체크와 동일
+
+**복합 위험**: 한 유저가 여러 위험 유형에 동시 해당 가능
+
+**기타 기능**:
 - 소셜 분석 실행 (매일 4시)
 - 경고 발송 (관리자 판단 후 수동)
 - 운영진 알림 (admin_notice, private)
@@ -111,10 +138,10 @@ flowchart TD
         A -.-> A3
     end
 
-    subgraph "Economy Bot (Python, systemd)"
+    subgraph "Economy Bot (Python, Docker Compose)"
         B
         B1["실시간 감시 모듈<br/>stream_local 타임라인 감시<br/>답글 감지 및 즉시 재화 지급<br/>status_id로 중복 방지<br/>멘션 명령어 처리"]
-        B2["활동량 체크 모듈<br/>오전 5시: 벌크 체크<br/>오후 12시: 중간 체크<br/>PostgreSQL 벌크 조회<br/>역할 및 휴식 필터링"]
+        B2["활동량 체크 모듈<br/>오전 4시: 재화 정산 + 소셜 분석 + 활동량 벌크 체크<br/>오후 4시(16시): 재화 정산 + 활동량 체크<br/>PostgreSQL 벌크 조회<br/>역할 및 휴식 필터링"]
         B -.-> B1
         B -.-> B2
     end
@@ -173,10 +200,13 @@ flowchart TD
     B --> C[Economy Bot 실시간 감지<br/>stream_local 리스너]
     C --> D{답글 여부 확인<br/>in_reply_to_id?}
     D -->|NO| Z[무시]
-    D -->|YES| E{중복 체크<br/>status_id 처리됨?}
+    D -->|YES| D1{휴식 중 체크<br/>vacation 테이블}
+    D1 -->|휴식 중| Z1[재화 지급 제외]
+    D1 -->|활동 중| E{중복 체크<br/>status_id 처리됨?}
     E -->|YES| Z
-    E -->|NO - 새 답글| F[재화 지급 계산<br/>settings 조회]
+    E -->|NO - 새 답글| F[재화 지급 계산<br/>settings 조회<br/>기본값: 100개당 10갈레온]
     F --> G[SQLite 업데이트]
+    Z1 --> Z
     G --> G1[users.balance += amount]
     G1 --> G2[users.reply_count += 1]
     G2 --> G3[users.total_earned += amount]
@@ -192,7 +222,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[오전 5시 크론 실행] --> B[설정 로드 SQLite settings<br/>check_period_hours=48<br/>min_replies_48h=5]
+    A[오전 4시 크론 실행] --> B[설정 로드 SQLite settings<br/>check_period_hours=48<br/>min_replies_48h=5]
     B --> C[PostgreSQL 벌크 쿼리<br/>48시간 내 답글 수 조회]
     C --> D[SQLite users와 매칭<br/>role, vacation 확인]
     D --> E{유저별 판정 루프}
@@ -247,6 +277,40 @@ flowchart TD
     style Z fill:#f0f0f0
 ```
 
+### 3.4 휴식 시스템 효과
+
+유저가 휴식 기간에 있을 경우 다음 효과가 적용됩니다:
+
+**제외되는 항목** (✅):
+- 활동량 체크 (4가지 위험 유형 모두)
+- 경고 발송 대상
+- 소셜 분석 대상
+
+**중단되는 항목** (❌):
+- 재화 지급 (답글을 작성해도 지급되지 않음)
+- 출석 트윗 참여 (출석 체크에서 제외)
+
+**로직**:
+```python
+def should_process_user(user_id):
+    # vacation 테이블에서 현재 휴식 중인지 확인
+    query = """
+    SELECT id FROM vacation
+    WHERE user_id = ?
+    AND start_date <= date('now')
+    AND end_date >= date('now')
+    LIMIT 1
+    """
+    if is_on_vacation(user_id):
+        return False
+    return True
+```
+
+**리뉴얼 기간 (is_global_vacation=1)**:
+- 출석 트윗 발행 자체를 중단
+- 모든 유저 활동량 체크 중단
+- 재화 지급은 정상 작동
+
 ---
 
 ## 4. 기술 스택
@@ -271,8 +335,9 @@ flowchart TD
   - Mastodon.py (마스토돈 API)
   - psycopg2 (PostgreSQL 연결)
   - sqlite3 (내장)
-서비스 관리: systemd
-스케줄링: cron
+  - celery (스케줄링 - TODO)
+서비스 관리: Docker Compose
+스케줄링: Celery Beat (TODO: 현재는 cron 사용)
 ```
 
 **주요 모듈**:
@@ -487,7 +552,7 @@ DB_POOL=25
 
 **벌크 처리 전략**:
 ```python
-# 오전 5시 - 심야 시간 활용
+# 오전 4시 - 심야 시간 활용
 # PostgreSQL 한 번에 쿼리
 query = """
 SELECT
@@ -506,24 +571,42 @@ GROUP BY u.id
 
 **크론 스케줄**:
 ```bash
-# 오전 5시 - 무거운 벌크 처리
-0 5 * * * python3 /path/to/bulk_activity_check.py
+# 오전 4시 - 무거운 벌크 처리 (재화 정산 + 소셜 분석 + 활동량 체크)
+0 4 * * * python3 /path/to/bulk_activity_check.py
 
-# 오후 12시 - 중간 체크
-0 12 * * * python3 /path/to/activity_check.py
+# 오후 4시 (16시) - 재화 정산 + 활동량 체크
+0 16 * * * python3 /path/to/activity_check.py
 ```
 
-### 6.3 백업 전략
+### 6.3 백업 및 자동 유지보수 스케줄
 
-**자동 백업 (크론)**:
+**자동 백업 및 유지보수 (크론)**:
 ```bash
-# 매일 새벽 3시 - SQLite 백업
-0 3 * * * sqlite3 /path/to/economy.db ".backup '/backups/economy_$(date +\%Y\%m\%d).db'"
+# 02:00 - 데이터베이스 백업
+0 2 * * * sqlite3 /path/to/economy.db ".backup '/backups/economy_$(date +\%Y\%m\%d).db'"
 
-# 주 1회 일요일 - PostgreSQL 백업
+# 03:00 - 데이터베이스 최적화 (VACUUM, ANALYZE)
+0 3 * * * python3 /path/to/optimize_database.py
+
+# 04:00 - 재화 정산 + 소셜 분석 + 활동량 체크
+0 4 * * * python3 /path/to/bulk_activity_check.py
+
+# 05:00 - 로그 정리 (30일 이상 삭제, 7일 이상 압축)
+0 5 * * * python3 /path/to/cleanup_logs.py
+
+# 05:30 - 시스템 헬스체크 (SQLite, PostgreSQL, Redis, 디스크, API)
+30 5 * * * python3 /path/to/health_check.py
+
+# 10:00 - 출석 트윗 발행
+0 10 * * * python3 /path/to/attendance_tweet.py
+
+# 16:00 - 재화 정산 + 활동량 체크
+0 16 * * * python3 /path/to/activity_check.py
+
+# 주 1회 일요일 04:00 - PostgreSQL 백업
 0 4 * * 0 docker exec mastodon_db_1 pg_dump -Fc -U postgres mastodon_production > /backups/mastodon_$(date +\%Y\%m\%d).dump
 
-# 주 1회 - 미디어 파일 백업
+# 주 1회 일요일 05:00 - 미디어 파일 백업
 0 5 * * 0 tar -czf /backups/media_$(date +\%Y\%m\%d).tar.gz /path/to/mastodon/public/system
 
 # 30일 지난 백업 자동 삭제
@@ -584,15 +667,28 @@ class RewardListener(StreamListener):
         give_reward(user_id, amount)
 ```
 
-**실행**: systemd 서비스로 24시간 구동
+**실행**: Docker Compose 서비스로 24시간 구동
+
+```yaml
+# docker-compose.yml
+reward-bot:
+  build: ./economy_bot
+  command: python reward_bot.py
+  restart: always
+  volumes:
+    - ./data:/data
+  depends_on:
+    - db
+    - redis
+```
 
 ### 7.2 활동량 체크 봇 (activity_checker.py)
 
 **역할**: 하루 2회 벌크 체크
 
 **실행 시간**:
-- 오전 5시: 메인 체크 (벌크)
-- 오후 12시: 중간 체크
+- 오전 4시: 메인 체크 (재화 정산 + 소셜 분석 + 활동량 벌크 체크)
+- 오후 4시 (16시): 재화 정산 + 활동량 체크
 
 **주요 로직**:
 ```python

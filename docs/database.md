@@ -34,6 +34,8 @@ erDiagram
         int total_earned
         int total_spent
         int reply_count
+        int warning_count
+        bool is_key_member
         timestamp last_active
         timestamp last_check
     }
@@ -57,6 +59,7 @@ erDiagram
         int amount
         text status_id
         int item_id FK
+        text category
         text description
         text admin_name
         timestamp timestamp
@@ -92,6 +95,12 @@ erDiagram
         text category
         text image_url
         bool is_active
+        int initial_stock
+        int current_stock
+        int sold_count
+        bool is_unlimited_stock
+        int max_purchase_per_user
+        int total_sales
     }
 
     inventory {
@@ -176,13 +185,25 @@ CREATE TABLE users (
     total_earned INTEGER DEFAULT 0,
     total_spent INTEGER DEFAULT 0,
     reply_count INTEGER DEFAULT 0,
+    warning_count INTEGER DEFAULT 0,
+    is_key_member BOOLEAN DEFAULT 0,
     last_active TIMESTAMP,
     last_check TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_users_balance ON users(balance DESC);
 CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_users_warning_count ON users(warning_count);
+CREATE INDEX idx_users_key_member ON users(is_key_member);
 ```
+
+**경고 시스템**:
+- `warning_count`: 누적 경고 횟수 (3회 도달 시 자동 아웃)
+- 경고 발생 시 warnings 테이블에 기록되며 warning_count가 1 증가
+
+**주요 멤버**:
+- `is_key_member`: 주요 멤버 여부 (1이면 회피 패턴 감지 대상)
+- 관리자가 수동으로 지정하는 필드
 
 ### transactions
 ```sql
@@ -193,6 +214,7 @@ CREATE TABLE transactions (
     amount INTEGER NOT NULL,
     status_id TEXT,
     item_id INTEGER,
+    category TEXT,
     description TEXT,
     admin_name TEXT,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -200,7 +222,12 @@ CREATE TABLE transactions (
 );
 CREATE INDEX idx_transactions_user ON transactions(user_id, timestamp DESC);
 CREATE INDEX idx_transactions_status ON transactions(status_id);
+CREATE INDEX idx_transactions_category ON transactions(category);
 ```
+
+**거래 유형 및 카테고리**:
+- `transaction_type`: 거래 타입 (reward_settlement, manual_adjust, attendance, shop_purchase 등)
+- `category`: 거래 분류 (보상, 구매, 정산, 수동조정 등) - 필터링 및 통계 분석용
 
 ### warnings
 ```sql
@@ -281,9 +308,23 @@ CREATE TABLE items (
     category TEXT,
     image_url TEXT,
     is_active BOOLEAN DEFAULT 1,
+    initial_stock INTEGER DEFAULT 0,
+    current_stock INTEGER DEFAULT 0,
+    sold_count INTEGER DEFAULT 0,
+    is_unlimited_stock BOOLEAN DEFAULT 0,
+    max_purchase_per_user INTEGER,
+    total_sales INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
+
+**재고 관리**:
+- `initial_stock`: 초기 재고 수량
+- `current_stock`: 현재 남은 재고
+- `sold_count`: 판매된 개수 (구매 시 증가)
+- `is_unlimited_stock`: 무제한 재고 여부 (1이면 재고 무관)
+- `max_purchase_per_user`: 1인당 최대 구매 개수 (NULL이면 제한 없음)
+- `total_sales`: 총 매출액 (price × sold_count)
 
 ### inventory
 ```sql
@@ -436,11 +477,14 @@ CREATE TABLE user_stats (
     is_isolated BOOLEAN DEFAULT 0,
     is_inactive BOOLEAN DEFAULT 0,
     is_biased BOOLEAN DEFAULT 0,
+    is_avoiding BOOLEAN DEFAULT 0,
+    avoided_users TEXT,
     FOREIGN KEY(user_id) REFERENCES users(mastodon_id)
 );
 CREATE INDEX idx_user_stats_user ON user_stats(user_id, analyzed_at DESC);
 CREATE INDEX idx_user_stats_isolated ON user_stats(is_isolated);
 CREATE INDEX idx_user_stats_biased ON user_stats(is_biased);
+CREATE INDEX idx_user_stats_avoiding ON user_stats(is_avoiding);
 ```
 
 **분석 기준**:
@@ -448,6 +492,9 @@ CREATE INDEX idx_user_stats_biased ON user_stats(is_biased);
 - 고립: 대화 상대 < 7명 (48h)
 - 비활동: 접속률 < 50% (7d)
 - 편향: 특정 1명과 > 10%
+- 회피: 주요 멤버(is_key_member=1)를 의도적으로 회피
+  - `is_avoiding`: 회피 패턴 감지 여부
+  - `avoided_users`: 회피 중인 유저 목록 (JSON 배열, 예: `["user1", "user2"]`)
 
 ### warning_templates
 ```sql
