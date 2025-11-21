@@ -1,4 +1,5 @@
 """웹 UI 라우트"""
+import os
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import check_password_hash, generate_password_hash
 from admin_web.services.user_service import UserService
@@ -8,11 +9,17 @@ from admin_web.services.warning_service import WarningService
 web_bp = Blueprint('web', __name__)
 
 # 간단한 인메모리 인증 (실제로는 DB 사용)
-# 비밀번호는 해시화되어 저장됨
-# 기본 비밀번호: admin123 (프로덕션에서는 반드시 변경)
-ADMIN_USERS = {
-    'admin': generate_password_hash('admin123')
-}
+# 비밀번호는 환경 변수에서 가져옴 (기본값: admin123)
+def _get_admin_users():
+    """환경 변수에서 관리자 사용자 정보를 가져옵니다."""
+    admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
+    if admin_password == 'admin123':
+        print("경고: ADMIN_PASSWORD 환경 변수가 설정되지 않았습니다. 기본 비밀번호를 사용 중입니다!")
+    return {
+        'admin': generate_password_hash(admin_password)
+    }
+
+ADMIN_USERS = _get_admin_users()
 
 
 @web_bp.route('/login', methods=['GET', 'POST'])

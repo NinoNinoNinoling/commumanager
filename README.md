@@ -8,9 +8,10 @@
 # 1. 환경 변수 설정
 cp .env.example .env
 
-# 2. SECRET_KEY 생성 및 설정
+# 2. SECRET_KEY 및 ADMIN_PASSWORD 설정
 python -c "import secrets; print(secrets.token_hex(32))"
 # 출력된 값을 .env 파일의 SECRET_KEY에 설정
+# ADMIN_PASSWORD도 .env 파일에서 변경하세요 (기본값: admin123)
 
 # 3. Docker Compose로 실행
 docker-compose up -d
@@ -27,6 +28,7 @@ pip install -r requirements.txt
 
 # 2. 환경 변수 설정
 export SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))")
+export ADMIN_PASSWORD="your-secure-password"  # 기본값: admin123
 
 # 3. 데이터베이스 초기화
 python init_db.py
@@ -38,9 +40,13 @@ python admin_web/app.py
 ## 🔐 기본 로그인 정보
 
 - **사용자명**: admin
-- **비밀번호**: admin123
+- **비밀번호**: admin123 (기본값)
 
-⚠️ **보안 경고**: 프로덕션 환경에서는 반드시 비밀번호를 변경하세요!
+⚠️ **보안 경고**: 프로덕션 환경에서는 반드시 `ADMIN_PASSWORD` 환경 변수를 설정하여 비밀번호를 변경하세요!
+
+**비밀번호 변경 방법:**
+- **Docker Compose**: `.env` 파일에서 `ADMIN_PASSWORD=your-secure-password` 설정
+- **로컬 실행**: `export ADMIN_PASSWORD="your-secure-password"` 명령 실행
 
 ## 📋 주요 기능
 
