@@ -26,7 +26,7 @@
 
 ---
 
-## Phase 0: 프로젝트 초기화
+## ✅ Phase 0: 프로젝트 초기화 (완료)
 
 ### 🎯 목표
 - 테스트 환경 구축
@@ -35,6 +35,14 @@
 
 ### 📦 의존성
 - 없음 (시작점)
+
+### ✅ 완료 상태
+- [x] 테스트 디렉토리 구조 생성
+- [x] pytest 설정 (conftest.py)
+- [x] DB 스키마 테스트 (6개 테스트)
+- [x] init_db.py 업데이트 (missing columns 추가)
+- **Commit**: 4d513d7 - "기능 추가: Phase 0 TDD 완료"
+- **Tests**: 6 passed
 
 ### 🛠️ 작업 항목
 
@@ -104,7 +112,7 @@ class Config:
 
 ---
 
-## Phase 1: 코어 도메인 - User & Transaction
+## ✅ Phase 1: 코어 도메인 - User & Transaction (완료)
 
 ### 🎯 목표
 - 유저 CRUD 완성
@@ -113,6 +121,28 @@ class Config:
 
 ### 📦 의존성
 - Phase 0 완료 (DB 스키마)
+
+### ✅ 완료 상태
+**Phase 1.1-1.4: Models (19개 테스트)**
+- [x] User 모델 (warning_count, is_key_member 필드)
+- [x] Transaction 모델 (category 필드)
+- **Commit**: f1c5d26 - "기능 추가: Phase 1 (Part 1/3)"
+
+**Phase 1.5-1.7: Repositories (21개 테스트)**
+- [x] UserRepository (14개 테스트)
+- [x] TransactionRepository (7개 테스트)
+- **Commit**: 1b95e2b - "기능 추가: Phase 1 (Part 2/3)"
+
+**Phase 1.8: Services (15개 테스트)**
+- [x] UserService (핵심 비즈니스 로직: adjust_balance)
+- **Commit**: a0af305 - "기능 추가: Phase 1 (Part 3/3)"
+
+**Phase 1.9: Controllers (연기됨)**
+- [ ] UserController → **Phase 7로 연기**
+- [ ] TransactionController → **Phase 7로 연기**
+- **이유**: 도메인 로직 우선 완성, Controller는 통합 단계에서 구현
+
+**총 테스트**: 61 passed (6 DB + 19 Models + 21 Repositories + 15 Services)
 
 ### 🧱 구현할 모델
 
@@ -354,15 +384,49 @@ def test_should_return_none_when_user_not_found():
 
 ---
 
-## Phase 2: 활동량 관리 - Warning & Vacation
+## 🔄 Phase 2: 활동량 관리 - Warning & Vacation (진행 중)
 
 ### 🎯 목표
-- 경고 시스템 구현
-- 휴식 관리 구현
+- 경고 시스템 구현 (Warning)
+- 휴식 관리 구현 (Vacation)
 - 활동량 체크 로직
 
 ### 📦 의존성
-- Phase 1 완료 (User)
+- Phase 1 완료 (User, Transaction)
+
+### 🔄 진행 계획
+**Phase 2는 도메인 로직(Models/Repositories/Services)만 구현합니다.**
+**Controllers는 Phase 7(통합)에서 구현합니다.**
+
+**Phase 2.1: Warning 모델 (TDD)**
+- [ ] tests/models/test_warning.py 작성 (RED)
+- [ ] admin_web/models/warning.py 구현 (GREEN)
+
+**Phase 2.2: Warning Repository (TDD)**
+- [ ] tests/repositories/test_warning_repository.py 작성 (RED)
+- [ ] admin_web/repositories/warning_repository.py 구현 (GREEN)
+
+**Phase 2.3: Vacation 모델 (TDD)**
+- [ ] tests/models/test_vacation.py 작성 (RED)
+- [ ] admin_web/models/vacation.py 구현 (GREEN)
+
+**Phase 2.4: Vacation Repository (TDD)**
+- [ ] tests/repositories/test_vacation_repository.py 작성 (RED)
+- [ ] admin_web/repositories/vacation_repository.py 구현 (GREEN)
+
+**Phase 2.5: Warning Service (TDD)**
+- [ ] tests/services/test_warning_service.py 작성 (RED)
+- [ ] admin_web/services/warning_service.py 구현 (GREEN)
+- [ ] 활동량 체크 로직 구현
+
+**Phase 2.6: Vacation Service (TDD)**
+- [ ] tests/services/test_vacation_service.py 작성 (RED)
+- [ ] admin_web/services/vacation_service.py 구현 (GREEN)
+
+**Phase 2.7: Controllers (연기)**
+- [ ] WarningController → **Phase 7로 연기**
+- [ ] VacationController → **Phase 7로 연기**
+- [ ] ActivityController → **Phase 7로 연기**
 
 ### 🧱 구현할 모델
 
@@ -1218,14 +1282,44 @@ GET    /api/v1/admin-logs                 # 관리자 로그 조회
 
 ---
 
-## Phase 7: 대시보드 & 통합
+## Phase 7: Controller 통합 & 대시보드
 
 ### 🎯 목표
+- **모든 Controller 구현 (Phase 1-6에서 연기된 항목)**
 - 대시보드 통계 API
 - 전체 시스템 통합 테스트
 
 ### 📦 의존성
-- 모든 Phase 완료
+- Phase 1-6 도메인 로직 완료 (Models, Repositories, Services)
+
+### 🎮 Controller 통합 구현 (TDD)
+
+**Phase 1 Controllers:**
+- [ ] UserController (tests/controllers/test_user_controller.py)
+- [ ] TransactionController
+
+**Phase 2 Controllers:**
+- [ ] WarningController
+- [ ] VacationController
+- [ ] ActivityController
+
+**Phase 3 Controllers:**
+- [ ] ItemController
+- [ ] ShopController
+
+**Phase 4 Controllers:**
+- [ ] CalendarController
+
+**Phase 5 Controllers:**
+- [ ] StoryEventController
+- [ ] ScheduledAnnouncementController
+
+**Phase 6 Controllers:**
+- [ ] SettingsController
+- [ ] AdminLogController
+
+**Phase 7 새 Controllers:**
+- [ ] DashboardController
 
 ### 🧠 Service 로직
 
