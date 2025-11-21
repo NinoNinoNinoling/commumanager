@@ -1,7 +1,7 @@
 """
 TransactionRepository
 
-Data access layer for transactions table
+transactions 테이블에 대한 데이터 접근 계층
 """
 import sqlite3
 from typing import List, Optional, Dict
@@ -12,26 +12,26 @@ from admin_web.models.transaction import Transaction
 
 class TransactionRepository:
     """
-    Repository for Transaction data access
+    Transaction 데이터 접근을 위한 Repository
 
-    Handles all CRUD operations for transactions table
+    transactions 테이블에 대한 모든 CRUD 작업을 처리합니다.
     """
 
     def __init__(self, db_path: str = 'economy.db'):
         """
-        Initialize TransactionRepository
+        TransactionRepository를 초기화합니다.
 
         Args:
-            db_path: Path to SQLite database file
+            db_path: SQLite 데이터베이스 파일 경로
         """
         self.db_path = db_path
 
     def _get_connection(self) -> sqlite3.Connection:
         """
-        Get database connection with row factory
+        Row factory가 설정된 데이터베이스 연결을 가져옵니다.
 
         Returns:
-            SQLite connection
+            SQLite 연결 객체
         """
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
@@ -39,13 +39,13 @@ class TransactionRepository:
 
     def _row_to_transaction(self, row: sqlite3.Row) -> Transaction:
         """
-        Convert database row to Transaction model
+        데이터베이스 row를 Transaction 모델로 변환합니다.
 
         Args:
-            row: SQLite row object
+            row: SQLite row 객체
 
         Returns:
-            Transaction instance
+            Transaction 인스턴스
         """
         return Transaction(
             id=row['id'],
@@ -62,13 +62,13 @@ class TransactionRepository:
 
     def create(self, transaction: Transaction) -> Transaction:
         """
-        Create new transaction
+        새 거래를 생성합니다.
 
         Args:
-            transaction: Transaction instance to create
+            transaction: 생성할 Transaction 인스턴스
 
         Returns:
-            Created transaction with ID
+            ID가 포함된 생성된 거래
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -98,13 +98,13 @@ class TransactionRepository:
 
     def find_by_id(self, transaction_id: int) -> Optional[Transaction]:
         """
-        Find transaction by ID
+        ID로 거래를 조회합니다.
 
         Args:
-            transaction_id: Transaction ID
+            transaction_id: 거래 ID
 
         Returns:
-            Transaction if found, None otherwise
+            찾은 경우 Transaction, 아니면 None
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -123,10 +123,10 @@ class TransactionRepository:
 
     def find_all(self) -> List[Transaction]:
         """
-        Find all transactions
+        모든 거래를 조회합니다.
 
         Returns:
-            List of all transactions
+            모든 거래의 리스트
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -143,13 +143,13 @@ class TransactionRepository:
 
     def find_by_user(self, user_id: str) -> List[Transaction]:
         """
-        Find all transactions for a specific user
+        특정 유저의 모든 거래를 조회합니다.
 
         Args:
-            user_id: User's Mastodon ID
+            user_id: 유저의 Mastodon ID
 
         Returns:
-            List of user's transactions
+            유저의 거래 리스트
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -167,13 +167,13 @@ class TransactionRepository:
 
     def find_by_type(self, transaction_type: str) -> List[Transaction]:
         """
-        Find transactions by type
+        유형별로 거래를 조회합니다.
 
         Args:
-            transaction_type: Transaction type
+            transaction_type: 거래 유형
 
         Returns:
-            List of transactions with specified type
+            지정된 유형의 거래 리스트
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -191,13 +191,13 @@ class TransactionRepository:
 
     def find_by_category(self, category: str) -> List[Transaction]:
         """
-        Find transactions by category
+        카테고리별로 거래를 조회합니다.
 
         Args:
-            category: Transaction category
+            category: 거래 카테고리
 
         Returns:
-            List of transactions with specified category
+            지정된 카테고리의 거래 리스트
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -215,10 +215,10 @@ class TransactionRepository:
 
     def count(self) -> int:
         """
-        Count total number of transactions
+        전체 거래 수를 계산합니다.
 
         Returns:
-            Total transaction count
+            전체 거래 개수
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -234,13 +234,13 @@ class TransactionRepository:
 
     def get_user_summary(self, user_id: str) -> Dict[str, int]:
         """
-        Get transaction summary for a user
+        유저의 거래 요약을 조회합니다.
 
         Args:
-            user_id: User's Mastodon ID
+            user_id: 유저의 Mastodon ID
 
         Returns:
-            Dictionary with total_credit, total_debit, net_amount
+            total_credit, total_debit, net_amount를 담은 딕셔너리
         """
         conn = self._get_connection()
         cursor = conn.cursor()

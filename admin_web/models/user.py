@@ -1,7 +1,7 @@
 """
-User model
+User 모델
 
-Represents a user in the community management system.
+커뮤니티 관리 시스템의 사용자를 나타냅니다.
 """
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -11,23 +11,23 @@ from typing import Optional
 @dataclass
 class User:
     """
-    User model with economy and activity tracking
+    경제 및 활동 추적 기능을 가진 User 모델
 
     Attributes:
-        mastodon_id: Primary key, unique Mastodon account ID
-        username: Mastodon username (@username)
-        display_name: Display name (optional)
-        role: User role (user, admin, moderator)
-        dormitory: Dormitory assignment (optional)
-        balance: Current balance in Galleons
-        total_earned: Cumulative earned amount
-        total_spent: Cumulative spent amount
-        reply_count: Total reply count
-        warning_count: Cumulative warning count (auto-ban at 3)
-        is_key_member: Key member flag (for avoidance pattern detection)
-        last_active: Last activity timestamp
-        last_check: Last check timestamp
-        created_at: Account creation timestamp
+        mastodon_id: Primary key, Mastodon 계정 ID (고유값)
+        username: Mastodon 유저명 (@username)
+        display_name: 표시 이름 (선택)
+        role: 사용자 역할 (user, admin, moderator)
+        dormitory: 기숙사 배정 (선택)
+        balance: 현재 잔액 (갈레온)
+        total_earned: 누적 획득 금액
+        total_spent: 누적 지출 금액
+        reply_count: 총 답글 수
+        warning_count: 누적 경고 횟수 (3회 도달 시 자동 아웃)
+        is_key_member: 주요 멤버 플래그 (회피 패턴 감지용)
+        last_active: 마지막 활동 시각
+        last_check: 마지막 체크 시각
+        created_at: 계정 생성 시각
     """
     mastodon_id: str
     username: str
@@ -46,10 +46,10 @@ class User:
 
     def to_dict(self) -> dict:
         """
-        Convert User to dictionary for JSON serialization
+        User를 JSON 직렬화를 위한 딕셔너리로 변환합니다.
 
         Returns:
-            Dictionary representation of User
+            User의 딕셔너리 표현
         """
         return {
             'mastodon_id': self.mastodon_id,
@@ -71,13 +71,13 @@ class User:
     @classmethod
     def from_dict(cls, data: dict) -> 'User':
         """
-        Create User from dictionary
+        딕셔너리로부터 User를 생성합니다.
 
         Args:
-            data: Dictionary containing user data
+            data: 사용자 데이터를 담은 딕셔너리
 
         Returns:
-            User instance
+            User 인스턴스
         """
         # Parse datetime fields if present
         last_active = None
@@ -120,20 +120,20 @@ class User:
 
     def has_warnings(self) -> bool:
         """
-        Check if user has received any warnings
+        사용자가 경고를 받은 적이 있는지 확인합니다.
 
         Returns:
-            True if warning_count > 0, False otherwise
+            warning_count > 0이면 True, 아니면 False
         """
         return self.warning_count > 0
 
     def is_at_risk_of_ban(self) -> bool:
         """
-        Check if user is at risk of automatic ban
+        사용자가 자동 아웃 위험에 처했는지 확인합니다.
 
-        User is auto-banned at 3 warnings, so at risk when warning_count == 2
+        경고 3회 도달 시 자동 아웃되므로, warning_count == 2일 때 위험 상태입니다.
 
         Returns:
-            True if warning_count == 2, False otherwise
+            warning_count == 2이면 True, 아니면 False
         """
         return self.warning_count == 2

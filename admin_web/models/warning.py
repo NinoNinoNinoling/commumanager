@@ -1,7 +1,7 @@
 """
-Warning model
+Warning 모델
 
-Represents a warning issued to a user for activity/isolation/bias/avoidance.
+활동량/고립/편향/회피에 대한 유저 경고를 나타냅니다.
 """
 from dataclasses import dataclass
 from datetime import datetime
@@ -11,19 +11,19 @@ from typing import Optional
 @dataclass
 class Warning:
     """
-    Warning model for user activity monitoring
+    사용자 활동 모니터링을 위한 Warning 모델
 
     Attributes:
-        id: Primary key (optional, set by database)
-        user_id: Foreign key to users.mastodon_id
-        warning_type: Type of warning (activity, isolation, bias, avoidance)
-        check_period_hours: Period checked in hours (e.g., 48)
-        required_replies: Required number of replies
-        actual_replies: Actual number of replies found
-        message: Warning message sent to user
-        dm_sent: Whether DM was successfully sent
-        admin_name: Admin who issued the warning (or 'system' for auto)
-        timestamp: Warning timestamp (optional, set by database)
+        id: Primary key (선택, 데이터베이스에서 설정)
+        user_id: users.mastodon_id에 대한 Foreign key
+        warning_type: 경고 유형 (activity, isolation, bias, avoidance)
+        check_period_hours: 체크 기간 (시간 단위, 예: 48)
+        required_replies: 필요한 답글 수
+        actual_replies: 실제 발견된 답글 수
+        message: 유저에게 전송된 경고 메시지
+        dm_sent: DM 전송 성공 여부
+        admin_name: 경고를 발행한 관리자 (자동의 경우 'system')
+        timestamp: 경고 시각 (선택, 데이터베이스에서 설정)
     """
     user_id: str
     warning_type: str
@@ -38,10 +38,10 @@ class Warning:
 
     def to_dict(self) -> dict:
         """
-        Convert Warning to dictionary for JSON serialization
+        Warning을 JSON 직렬화를 위한 딕셔너리로 변환합니다.
 
         Returns:
-            Dictionary representation of Warning
+            Warning의 딕셔너리 표현
         """
         return {
             'id': self.id,
@@ -59,13 +59,13 @@ class Warning:
     @classmethod
     def from_dict(cls, data: dict) -> 'Warning':
         """
-        Create Warning from dictionary
+        딕셔너리로부터 Warning을 생성합니다.
 
         Args:
-            data: Dictionary containing warning data
+            data: 경고 데이터를 담은 딕셔너리
 
         Returns:
-            Warning instance
+            Warning 인스턴스
         """
         # Parse timestamp if present
         timestamp = None
@@ -90,27 +90,27 @@ class Warning:
 
     def is_activity_warning(self) -> bool:
         """
-        Check if this is an activity warning
+        활동량 부족 경고인지 확인합니다.
 
         Returns:
-            True if warning_type == 'activity', False otherwise
+            warning_type == 'activity'이면 True, 아니면 False
         """
         return self.warning_type == 'activity'
 
     def is_isolation_warning(self) -> bool:
         """
-        Check if this is an isolation warning
+        고립 위험 경고인지 확인합니다.
 
         Returns:
-            True if warning_type == 'isolation', False otherwise
+            warning_type == 'isolation'이면 True, 아니면 False
         """
         return self.warning_type == 'isolation'
 
     def has_dm_sent(self) -> bool:
         """
-        Check if DM was successfully sent
+        DM 전송 성공 여부를 확인합니다.
 
         Returns:
-            True if dm_sent is True, False otherwise
+            dm_sent가 True이면 True, 아니면 False
         """
         return self.dm_sent

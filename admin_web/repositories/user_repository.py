@@ -1,7 +1,7 @@
 """
 UserRepository
 
-Data access layer for users table
+users 테이블에 대한 데이터 접근 계층
 """
 import sqlite3
 from typing import List, Optional
@@ -12,26 +12,26 @@ from admin_web.models.user import User
 
 class UserRepository:
     """
-    Repository for User data access
+    User 데이터 접근을 위한 Repository
 
-    Handles all CRUD operations for users table
+    users 테이블에 대한 모든 CRUD 작업을 처리합니다.
     """
 
     def __init__(self, db_path: str = 'economy.db'):
         """
-        Initialize UserRepository
+        UserRepository를 초기화합니다.
 
         Args:
-            db_path: Path to SQLite database file
+            db_path: SQLite 데이터베이스 파일 경로
         """
         self.db_path = db_path
 
     def _get_connection(self) -> sqlite3.Connection:
         """
-        Get database connection with row factory
+        Row factory가 설정된 데이터베이스 연결을 가져옵니다.
 
         Returns:
-            SQLite connection
+            SQLite 연결 객체
         """
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
@@ -39,13 +39,13 @@ class UserRepository:
 
     def _row_to_user(self, row: sqlite3.Row) -> User:
         """
-        Convert database row to User model
+        데이터베이스 row를 User 모델로 변환합니다.
 
         Args:
-            row: SQLite row object
+            row: SQLite row 객체
 
         Returns:
-            User instance
+            User 인스턴스
         """
         return User(
             mastodon_id=row['mastodon_id'],
@@ -66,13 +66,13 @@ class UserRepository:
 
     def find_by_id(self, mastodon_id: str) -> Optional[User]:
         """
-        Find user by mastodon ID
+        Mastodon ID로 유저를 조회합니다.
 
         Args:
-            mastodon_id: User's Mastodon ID
+            mastodon_id: 유저의 Mastodon ID
 
         Returns:
-            User if found, None otherwise
+            찾은 경우 User, 아니면 None
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -91,10 +91,10 @@ class UserRepository:
 
     def find_all(self) -> List[User]:
         """
-        Find all users
+        모든 유저를 조회합니다.
 
         Returns:
-            List of all users
+            모든 유저의 리스트
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -111,13 +111,13 @@ class UserRepository:
 
     def find_by_role(self, role: str) -> List[User]:
         """
-        Find users by role
+        역할별로 유저를 조회합니다.
 
         Args:
-            role: User role (user, admin, moderator)
+            role: 유저 역할 (user, admin, moderator)
 
         Returns:
-            List of users with specified role
+            지정된 역할을 가진 유저의 리스트
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -135,13 +135,13 @@ class UserRepository:
 
     def search_by_username(self, query: str) -> List[User]:
         """
-        Search users by username (partial match)
+        유저명으로 유저를 검색합니다 (부분 일치).
 
         Args:
-            query: Search query
+            query: 검색 쿼리
 
         Returns:
-            List of matching users
+            일치하는 유저의 리스트
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -159,16 +159,16 @@ class UserRepository:
 
     def create(self, user: User) -> User:
         """
-        Create new user
+        새 유저를 생성합니다.
 
         Args:
-            user: User instance to create
+            user: 생성할 User 인스턴스
 
         Returns:
-            Created user
+            생성된 유저
 
         Raises:
-            sqlite3.IntegrityError: If user with same mastodon_id already exists
+            sqlite3.IntegrityError: 동일한 mastodon_id를 가진 유저가 이미 존재하는 경우
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -203,11 +203,11 @@ class UserRepository:
 
     def update_balance(self, mastodon_id: str, new_balance: int) -> None:
         """
-        Update user balance
+        유저 잔액을 업데이트합니다.
 
         Args:
-            mastodon_id: User's Mastodon ID
-            new_balance: New balance value
+            mastodon_id: 유저의 Mastodon ID
+            new_balance: 새 잔액 값
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -223,14 +223,14 @@ class UserRepository:
 
     def adjust_balance(self, mastodon_id: str, amount: int) -> None:
         """
-        Adjust user balance and update total_earned or total_spent
+        유저 잔액을 조정하고 total_earned 또는 total_spent를 업데이트합니다.
 
         Args:
-            mastodon_id: User's Mastodon ID
-            amount: Amount to adjust (positive for credit, negative for debit)
+            mastodon_id: 유저의 Mastodon ID
+            amount: 조정할 금액 (양수: 입금, 음수: 출금)
 
         Raises:
-            ValueError: If balance would become negative
+            ValueError: 잔액이 음수가 되는 경우
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -277,11 +277,11 @@ class UserRepository:
 
     def update_role(self, mastodon_id: str, role: str) -> None:
         """
-        Update user role
+        유저 역할을 업데이트합니다.
 
         Args:
-            mastodon_id: User's Mastodon ID
-            role: New role
+            mastodon_id: 유저의 Mastodon ID
+            role: 새 역할
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -297,10 +297,10 @@ class UserRepository:
 
     def increment_warning_count(self, mastodon_id: str) -> None:
         """
-        Increment user warning count by 1
+        유저 경고 횟수를 1 증가시킵니다.
 
         Args:
-            mastodon_id: User's Mastodon ID
+            mastodon_id: 유저의 Mastodon ID
         """
         conn = self._get_connection()
         cursor = conn.cursor()
@@ -316,11 +316,11 @@ class UserRepository:
 
     def update_key_member(self, mastodon_id: str, is_key_member: bool) -> None:
         """
-        Update key member flag
+        주요 멤버 플래그를 업데이트합니다.
 
         Args:
-            mastodon_id: User's Mastodon ID
-            is_key_member: Key member flag
+            mastodon_id: 유저의 Mastodon ID
+            is_key_member: 주요 멤버 플래그
         """
         conn = self._get_connection()
         cursor = conn.cursor()

@@ -1,7 +1,7 @@
 """
 UserService
 
-Business logic layer for user management
+사용자 관리를 위한 비즈니스 로직 계층
 """
 from typing import List, Optional, Dict, Any
 from datetime import datetime
@@ -14,23 +14,23 @@ from admin_web.repositories.transaction_repository import TransactionRepository
 
 class UserService:
     """
-    Service for user management business logic
+    사용자 관리 비즈니스 로직을 위한 Service
 
-    Handles:
-    - User CRUD operations
-    - Role management with validation
-    - Balance adjustments with transaction creation
-    - User statistics
+    처리 내용:
+    - User CRUD 작업
+    - 검증을 포함한 역할 관리
+    - 거래 생성을 포함한 잔액 조정
+    - 사용자 통계
     """
 
     VALID_ROLES = {'user', 'admin', 'moderator'}
 
     def __init__(self, db_path: str = 'economy.db'):
         """
-        Initialize UserService
+        UserService를 초기화합니다.
 
         Args:
-            db_path: Path to SQLite database file
+            db_path: SQLite 데이터베이스 파일 경로
         """
         self.user_repo = UserRepository(db_path)
         self.transaction_repo = TransactionRepository(db_path)
@@ -38,22 +38,22 @@ class UserService:
 
     def get_user(self, mastodon_id: str) -> Optional[User]:
         """
-        Get user by Mastodon ID
+        Mastodon ID로 유저를 조회합니다.
 
         Args:
-            mastodon_id: User's Mastodon ID
+            mastodon_id: 유저의 Mastodon ID
 
         Returns:
-            User if found, None otherwise
+            찾은 경우 User, 아니면 None
         """
         return self.user_repo.find_by_id(mastodon_id)
 
     def get_all_users(self) -> List[User]:
         """
-        Get all users
+        모든 유저를 조회합니다.
 
         Returns:
-            List of all users
+            모든 유저의 리스트
         """
         return self.user_repo.find_all()
 
@@ -65,19 +65,19 @@ class UserService:
         role: str = 'user'
     ) -> User:
         """
-        Create new user
+        새 유저를 생성합니다.
 
         Args:
-            mastodon_id: User's Mastodon ID
-            username: Username
-            display_name: Display name (optional)
-            role: User role (default: 'user')
+            mastodon_id: 유저의 Mastodon ID
+            username: 유저명
+            display_name: 표시 이름 (선택)
+            role: 유저 역할 (기본값: 'user')
 
         Returns:
-            Created user
+            생성된 유저
 
         Raises:
-            ValueError: If role is invalid
+            ValueError: 역할이 유효하지 않은 경우
         """
         if role not in self.VALID_ROLES:
             raise ValueError(f'Invalid role: {role}. Must be one of {self.VALID_ROLES}')
@@ -99,13 +99,13 @@ class UserService:
 
     def search_users(self, query: str) -> List[User]:
         """
-        Search users by username
+        유저명으로 유저를 검색합니다.
 
         Args:
-            query: Search query
+            query: 검색 쿼리
 
         Returns:
-            List of matching users
+            일치하는 유저의 리스트
         """
         return self.user_repo.search_by_username(query)
 
@@ -116,15 +116,15 @@ class UserService:
         admin_name: str
     ) -> None:
         """
-        Change user role with validation
+        검증을 포함하여 유저 역할을 변경합니다.
 
         Args:
-            mastodon_id: User's Mastodon ID
-            new_role: New role
-            admin_name: Admin making the change
+            mastodon_id: 유저의 Mastodon ID
+            new_role: 새 역할
+            admin_name: 변경을 수행하는 관리자
 
         Raises:
-            ValueError: If new_role is invalid
+            ValueError: new_role이 유효하지 않은 경우
         """
         if new_role not in self.VALID_ROLES:
             raise ValueError(f'Invalid role: {new_role}. Must be one of {self.VALID_ROLES}')
@@ -143,26 +143,26 @@ class UserService:
         category: Optional[str] = None
     ) -> Dict[str, Any]:
         """
-        Adjust user balance and create transaction record
+        유저 잔액을 조정하고 거래 기록을 생성합니다.
 
-        This is the core business logic that ensures atomicity:
-        - Balance is adjusted in users table
-        - Transaction record is created in transactions table
-        - If either fails, both should rollback (handled by repository)
+        원자성을 보장하는 핵심 비즈니스 로직:
+        - users 테이블에서 잔액 조정
+        - transactions 테이블에 거래 기록 생성
+        - 둘 중 하나라도 실패하면 모두 롤백 (repository에서 처리)
 
         Args:
-            user_id: User's Mastodon ID
-            amount: Amount to adjust (positive for credit, negative for debit)
-            transaction_type: Type of transaction
-            admin_name: Admin making the adjustment
-            description: Transaction description (optional)
-            category: Transaction category (optional)
+            user_id: 유저의 Mastodon ID
+            amount: 조정할 금액 (양수: 입금, 음수: 출금)
+            transaction_type: 거래 유형
+            admin_name: 조정을 수행하는 관리자
+            description: 거래 설명 (선택)
+            category: 거래 카테고리 (선택)
 
         Returns:
-            Dictionary with updated user and created transaction
+            업데이트된 유저와 생성된 거래를 담은 딕셔너리
 
         Raises:
-            ValueError: If balance would become negative
+            ValueError: 잔액이 음수가 되는 경우
         """
         # 1. Adjust balance (this also updates total_earned/total_spent)
         self.user_repo.adjust_balance(user_id, amount)
@@ -188,13 +188,13 @@ class UserService:
 
     def get_user_statistics(self, user_id: str) -> Dict[str, Any]:
         """
-        Get comprehensive user statistics
+        포괄적인 유저 통계를 조회합니다.
 
         Args:
-            user_id: User's Mastodon ID
+            user_id: 유저의 Mastodon ID
 
         Returns:
-            Dictionary with user data and statistics
+            유저 데이터와 통계를 담은 딕셔너리
         """
         user = self.user_repo.find_by_id(user_id)
         if not user:
@@ -217,11 +217,11 @@ class UserService:
 
     def add_warning(self, mastodon_id: str, admin_name: str) -> None:
         """
-        Increment user warning count
+        유저 경고 횟수를 증가시킵니다.
 
         Args:
-            mastodon_id: User's Mastodon ID
-            admin_name: Admin issuing the warning
+            mastodon_id: 유저의 Mastodon ID
+            admin_name: 경고를 발행하는 관리자
         """
         self.user_repo.increment_warning_count(mastodon_id)
 
@@ -235,12 +235,12 @@ class UserService:
         admin_name: str
     ) -> None:
         """
-        Set user's key member status
+        유저의 주요 멤버 상태를 설정합니다.
 
         Args:
-            mastodon_id: User's Mastodon ID
-            is_key_member: Key member flag
-            admin_name: Admin making the change
+            mastodon_id: 유저의 Mastodon ID
+            is_key_member: 주요 멤버 플래그
+            admin_name: 변경을 수행하는 관리자
         """
         self.user_repo.update_key_member(mastodon_id, is_key_member)
 
