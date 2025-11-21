@@ -3,7 +3,6 @@ VacationService
 
 Vacation 관련 비즈니스 로직을 처리하는 서비스 계층
 """
-import sqlite3
 from typing import List, Optional, Dict, Any
 from datetime import date, time
 
@@ -115,18 +114,8 @@ class VacationService:
         if not vacation:
             return None
 
-        # 승인 상태 업데이트
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            UPDATE vacation
-            SET approved = 1
-            WHERE id = ?
-        """, (vacation_id,))
-
-        conn.commit()
-        conn.close()
+        # 승인 상태 업데이트 (Repository 사용)
+        self.vacation_repo.update_approved(vacation_id, True)
 
         return self.vacation_repo.find_by_id(vacation_id)
 
@@ -146,18 +135,8 @@ class VacationService:
         if not vacation:
             return None
 
-        # 거부 상태 업데이트
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            UPDATE vacation
-            SET approved = 0
-            WHERE id = ?
-        """, (vacation_id,))
-
-        conn.commit()
-        conn.close()
+        # 거부 상태 업데이트 (Repository 사용)
+        self.vacation_repo.update_approved(vacation_id, False)
 
         return self.vacation_repo.find_by_id(vacation_id)
 
@@ -225,16 +204,5 @@ class VacationService:
         if not vacation:
             return False
 
-        # 삭제
-        conn = sqlite3.connect(self.db_path)
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            DELETE FROM vacation
-            WHERE id = ?
-        """, (vacation_id,))
-
-        conn.commit()
-        conn.close()
-
-        return True
+        # 삭제 (Repository 사용)
+        return self.vacation_repo.delete(vacation_id)

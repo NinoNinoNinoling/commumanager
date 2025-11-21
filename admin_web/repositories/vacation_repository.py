@@ -274,3 +274,47 @@ class VacationRepository:
         conn.close()
 
         return row['count']
+
+    def update_approved(self, vacation_id: int, approved: bool) -> None:
+        """
+        휴가의 승인 상태를 업데이트합니다.
+
+        Args:
+            vacation_id: 휴가 ID
+            approved: 승인 여부 (True: 승인, False: 거부)
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE vacation
+            SET approved = ?
+            WHERE id = ?
+        """, (1 if approved else 0, vacation_id))
+
+        conn.commit()
+        conn.close()
+
+    def delete(self, vacation_id: int) -> bool:
+        """
+        휴가를 삭제합니다.
+
+        Args:
+            vacation_id: 휴가 ID
+
+        Returns:
+            삭제 성공 시 True, 실패 시 False
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            DELETE FROM vacation
+            WHERE id = ?
+        """, (vacation_id,))
+
+        rows_affected = cursor.rowcount
+        conn.commit()
+        conn.close()
+
+        return rows_affected > 0
