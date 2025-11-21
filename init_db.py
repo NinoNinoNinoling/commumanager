@@ -31,6 +31,8 @@ def init_database(db_path='economy.db'):
             total_earned INTEGER DEFAULT 0,
             total_spent INTEGER DEFAULT 0,
             reply_count INTEGER DEFAULT 0,
+            warning_count INTEGER DEFAULT 0,
+            is_key_member BOOLEAN DEFAULT 0,
             last_active TIMESTAMP,
             last_check TIMESTAMP,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -38,6 +40,8 @@ def init_database(db_path='economy.db'):
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_balance ON users(balance DESC)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_warning_count ON users(warning_count)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_key_member ON users(is_key_member)")
     print("✓ users")
 
     # 2. transactions
@@ -49,6 +53,7 @@ def init_database(db_path='economy.db'):
             amount INTEGER NOT NULL,
             status_id TEXT,
             item_id INTEGER,
+            category TEXT,
             description TEXT,
             admin_name TEXT,
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -57,6 +62,7 @@ def init_database(db_path='economy.db'):
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_transactions_user ON transactions(user_id, timestamp DESC)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_transactions_status ON transactions(status_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_transactions_category ON transactions(category)")
     print("✓ transactions")
 
     # 3. warnings
@@ -119,6 +125,12 @@ def init_database(db_path='economy.db'):
             category TEXT,
             image_url TEXT,
             is_active BOOLEAN DEFAULT 1,
+            initial_stock INTEGER DEFAULT 0,
+            current_stock INTEGER DEFAULT 0,
+            sold_count INTEGER DEFAULT 0,
+            is_unlimited_stock BOOLEAN DEFAULT 0,
+            max_purchase_per_user INTEGER,
+            total_sales INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -243,12 +255,15 @@ def init_database(db_path='economy.db'):
             is_isolated BOOLEAN DEFAULT 0,
             is_inactive BOOLEAN DEFAULT 0,
             is_biased BOOLEAN DEFAULT 0,
+            is_avoiding BOOLEAN DEFAULT 0,
+            avoided_users TEXT,
             FOREIGN KEY(user_id) REFERENCES users(mastodon_id)
         )
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_stats_user ON user_stats(user_id, analyzed_at DESC)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_stats_isolated ON user_stats(is_isolated)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_stats_biased ON user_stats(is_biased)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_user_stats_avoiding ON user_stats(is_avoiding)")
     print("✓ user_stats")
 
     # 14. warning_templates
@@ -408,6 +423,13 @@ def init_database(db_path='economy.db'):
     print(f"📊 테이블: 18개")
     print(f"⚙️  설정: {len(settings_data)}개")
     print(f"📋 템플릿: {len(templates_data)}개")
+
+
+def initialize_database(db_path='economy.db'):
+    """
+    Alias for init_database to match test expectations
+    """
+    return init_database(db_path)
 
 
 if __name__ == '__main__':
