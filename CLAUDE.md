@@ -558,6 +558,271 @@ git commit -m "기능 수정: 공통 검증 유틸 적용"
 
 ---
 
+## 📐 코드 품질 가이드라인
+
+### Python 표준 준수
+
+**PEP 8 컨벤션 필수 준수:**
+```python
+# ✅ 좋은 예시
+class UserRepository:
+    """유저 데이터 접근 계층"""
+
+    def find_by_id(self, user_id: str) -> Optional[User]:
+        """
+        ID로 유저를 조회합니다.
+
+        Args:
+            user_id: 유저의 Mastodon ID
+
+        Returns:
+            찾은 유저 객체, 없으면 None
+        """
+        # 구현...
+
+# ❌ 나쁜 예시
+class userRepository:  # 클래스명은 PascalCase
+    def FindById(self, userId):  # 메서드명은 snake_case
+        pass
+```
+
+### Docstring 작성 규칙
+
+**Python Docstring 스타일: Google Style 사용**
+
+이 프로젝트는 **Google 스타일 docstring**을 사용합니다 (Sphinx napoleon 확장 지원).
+
+```python
+# ✅ 좋은 예시: Google 스타일 한글 docstring
+@dataclass
+class User:
+    """
+    유저 모델
+
+    커뮤니티 관리 시스템의 유저를 나타냅니다.
+    재화 관리, 경고 횟수, 활동량 추적 기능을 제공합니다.
+
+    Attributes:
+        mastodon_id: 유저의 Mastodon ID (Primary Key)
+        username: 유저명
+        balance: 현재 잔액 (갈레온)
+    """
+    mastodon_id: str
+    username: str
+    balance: int
+
+# ✅ 좋은 예시: 메서드 docstring (Args, Returns, Raises)
+def adjust_balance(self, user_id: str, amount: int) -> Dict[str, Any]:
+    """
+    유저 잔액을 조정하고 거래 기록을 생성합니다.
+
+    잔액 조정과 거래 생성은 원자적으로 처리됩니다.
+    음수 잔액은 허용되지 않습니다.
+
+    Args:
+        user_id: 유저의 Mastodon ID
+        amount: 조정할 금액 (양수: 입금, 음수: 출금)
+
+    Returns:
+        업데이트된 유저와 생성된 거래 정보를 담은 딕셔너리
+        {'user': User, 'transaction': Transaction}
+
+    Raises:
+        ValueError: 잔액이 음수가 되는 경우
+
+    Note:
+        이 메서드는 UserRepository와 TransactionRepository를 함께 사용합니다.
+    """
+    # 구현...
+
+# ❌ 나쁜 예시: 영어 docstring
+def adjust_balance(self, user_id: str, amount: int):
+    """Adjusts user balance and creates transaction"""  # 한글로 작성
+    pass
+
+# ❌ 나쁜 예시: Sphinx 스타일 혼용 금지 (Google 스타일로 통일)
+def some_method(self, user_id: str) -> User:
+    """
+    유저를 조회합니다.
+
+    :param user_id: 유저 ID  # ❌ Sphinx 스타일 금지
+    :returns: 유저 객체      # ❌ Google 스타일로 통일
+    """
+    pass
+
+# 올바른 형식:
+def some_method(self, user_id: str) -> User:
+    """
+    유저를 조회합니다.
+
+    Args:
+        user_id: 유저 ID
+
+    Returns:
+        유저 객체
+    """
+    pass
+```
+
+**Docstring 스타일 가이드:**
+- **일관성**: 모든 파일에서 Google 스타일 사용
+- **한글 작성**: 모든 설명은 한글로 작성
+- **작성자 태그 금지**: `@author`, `:author:` 등 사용 금지
+- **섹션 순서**: 설명 → Args → Returns → Raises → Note/Example
+- **타입 힌트 활용**: docstring에 타입 중복 기재 불필요 (함수 시그니처에 이미 있음)
+
+### 주석 사용 원칙
+
+**주석은 최소화, 의미 있는 주석만 작성:**
+
+```python
+# ✅ 좋은 예시: 왜(Why)를 설명
+# SQLite의 AUTOINCREMENT는 성능 이슈가 있으므로 사용하지 않음
+cursor.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, ...)")
+
+# 잔액이 음수가 되는 것을 방지 (비즈니스 규칙)
+if new_balance < 0:
+    raise ValueError('Insufficient balance')
+
+# ❌ 나쁜 예시: 무엇(What)을 중복 설명
+# 유저 ID를 가져옴
+user_id = data.get('user_id')
+
+# 잔액을 100으로 설정
+balance = 100
+
+# ❌ 절대 금지: 구역 구분용 의미 없는 주석
+# ==========================================
+# User Management Section
+# ==========================================
+def create_user():
+    pass
+
+# ---------- Helper Functions ----------
+def validate_user():
+    pass
+
+# ========================================
+# End of User Management
+# ========================================
+```
+
+### 디버깅 코드 제거
+
+**운영 코드에서 디버깅용 출력문 절대 금지:**
+
+```python
+# ❌ 금지: print 디버깅
+def create_user(self, user_data):
+    print(f"Creating user: {user_data}")  # 삭제할 것
+    print(f"Debug: user_id = {user_data['id']}")  # 삭제할 것
+    user = self.user_repo.create(user_data)
+    print(f"Created: {user}")  # 삭제할 것
+    return user
+
+# ✅ 허용: 로깅 (프로덕션 로깅 시스템 사용)
+import logging
+logger = logging.getLogger(__name__)
+
+def create_user(self, user_data):
+    logger.info(f"Creating user: {user_data['username']}")
+    user = self.user_repo.create(user_data)
+    logger.info(f"User created successfully: {user.mastodon_id}")
+    return user
+```
+
+### 변수/매개변수 명명 규칙
+
+**명확하고 의미 있는 이름 사용:**
+
+```python
+# ✅ 좋은 예시: 명확한 이름
+def calculate_user_activity_score(
+    user_id: str,
+    check_period_hours: int,
+    minimum_replies: int
+) -> float:
+    """활동량 점수를 계산합니다."""
+    # 구현...
+
+# ❌ 나쁜 예시: 불명확한 이름
+def calc(uid, h, m):  # 무엇을 계산? uid가 뭐지? h와 m은?
+    pass
+
+# ✅ 단, 일반적인 관례는 허용
+for i in range(10):  # i는 인덱스로 널리 사용
+    pass
+
+for user in users:  # 복수형을 단수형으로 순회
+    pass
+```
+
+### 공개 API 보호
+
+**다른 모듈에서 사용하는 메서드명/클래스명 절대 변경 금지:**
+
+```python
+# ✅ 좋은 예시: 내부 구현만 변경
+class UserRepository:
+    def find_by_id(self, user_id: str):  # 공개 API - 변경 금지
+        return self._fetch_from_db(user_id)  # 내부 메서드 - 변경 가능
+
+    def _fetch_from_db(self, user_id: str):  # private 메서드 (언더스코어)
+        # 내부 구현 변경 가능
+        pass
+
+# ❌ 나쁜 예시: 공개 API 변경
+# 기존: find_by_id() → 새로 변경: get_user_by_id()
+# 다른 파일에서 find_by_id()를 사용 중이라면 모두 깨짐!
+```
+
+### BOM 문자 금지
+
+**파일 인코딩은 UTF-8 (BOM 없음):**
+
+```python
+# ✅ 모든 Python 파일 첫 줄
+# -*- coding: utf-8 -*-  # 또는 생략 (Python 3는 기본 UTF-8)
+
+# ❌ BOM (Byte Order Mark) 사용 금지
+# 파일을 UTF-8 with BOM으로 저장하지 말 것
+# BOM 문자(﻿)가 있으면 구문 오류 발생 가능
+```
+
+### 코드 정리 체크리스트
+
+코드 작성 후 다음을 확인:
+
+- [ ] PEP 8 컨벤션 준수 (snake_case, PascalCase, 들여쓰기 4칸)
+- [ ] 모든 공개 클래스/메서드에 한글 docstring 작성
+- [ ] 작성자 태그 없음 (`@author` 금지)
+- [ ] 의미 없는 구역 구분 주석 제거
+- [ ] 디버깅용 `print()` 문 제거
+- [ ] 변수/매개변수명이 명확함
+- [ ] 공개 API (메서드명) 변경하지 않음
+- [ ] UTF-8 인코딩 (BOM 없음)
+- [ ] 불필요한 빈 줄 제거 (함수 사이 2줄, 클래스 사이 2줄)
+
+### 자동 검사 도구
+
+**코드 품질 검사 명령어:**
+
+```bash
+# PEP 8 검사
+flake8 admin_web/ tests/
+
+# 타입 힌트 검사
+mypy admin_web/
+
+# import 정렬
+isort admin_web/ tests/
+
+# 자동 포매팅
+black admin_web/ tests/
+```
+
+---
+
 ## 📚 관련 문서
 
 개발 중 참고할 문서:

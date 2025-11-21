@@ -6,6 +6,7 @@ REST API 기반 관리자 웹 백엔드
 **Base URL**: `/api/v1`
 **인증**: Session-based (OAuth)
 **응답 형식**: JSON
+**통화 단위**: 갈레온(Galleon) - 모든 금액은 갈레온 단위로 표기
 
 ## 인증 (Authentication)
 
@@ -70,6 +71,10 @@ OAuth 콜백 처리
   "warnings": {
     "total": 23,
     "this_week": 3
+  },
+  "scheduled_content": {
+    "pending_story_events": 3,
+    "pending_announcements": 5
   }
 }
 ```
@@ -102,7 +107,8 @@ OAuth 콜백 처리
       "total_spent": 1500,
       "last_active": "2025-11-18T10:30:00Z",
       "status": "active",
-      "warning_count": 0
+      "warning_count": 0,
+      "is_key_member": false
     }
   ],
   "pagination": {
@@ -133,7 +139,8 @@ OAuth 콜백 처리
   "created_at": "2025-01-01T00:00:00Z",
   "activity_48h": 25,
   "is_on_vacation": false,
-  "warning_count": 0
+  "warning_count": 0,
+  "is_key_member": false
 }
 ```
 
@@ -144,6 +151,18 @@ OAuth 콜백 처리
 ```json
 {
   "role": "admin"
+}
+```
+
+**Response**: 200 OK
+
+### PATCH /api/v1/users/{mastodon_id}/key-member
+주요 멤버 설정 (회피 패턴 감지용)
+
+**Request**:
+```json
+{
+  "is_key_member": true
 }
 ```
 
@@ -162,6 +181,7 @@ OAuth 콜백 처리
     {
       "id": 1,
       "transaction_type": "earn_reply",
+      "category": "활동량 정산",
       "amount": 10,
       "description": "답글 작성",
       "timestamp": "2025-11-18T10:00:00Z"
@@ -180,13 +200,30 @@ OAuth 콜백 처리
   "warnings": [
     {
       "id": 1,
-      "warning_type": "activity",
-      "required_replies": 20,
-      "actual_replies": 15,
-      "message": "활동량 미달",
+      "warning_type": "low_activity",
+      "risk_details": {
+        "required_replies": 20,
+        "actual_replies": 15,
+        "period_hours": 48
+      },
+      "message": "활동량 미달 경고: 48시간 내 답글이 15개로 기준(20개)에 미달했습니다.",
       "dm_sent": true,
       "admin_name": "admin",
       "timestamp": "2025-11-18T04:00:00Z"
+    },
+    {
+      "id": 2,
+      "warning_type": "bias",
+      "risk_details": {
+        "target_user_id": "789012",
+        "target_username": "user2",
+        "conversation_ratio": 0.15,
+        "threshold": 0.10
+      },
+      "message": "편향 경고: @user2와의 대화가 15%입니다.",
+      "dm_sent": true,
+      "admin_name": "admin",
+      "timestamp": "2025-11-17T04:00:00Z"
     }
   ]
 }
@@ -209,6 +246,193 @@ OAuth 콜백 처리
 }
 ```
 
+## 아웃 관리 (Ban Management)
+
+### GET /api/v1/users/{mastodon_id}/ban-status
+유저의 현재 아웃 상태 조회
+
+**Response**:
+```json
+{
+  "is_banned": true,
+  "ban_record": {
+    "id": 1,
+    "user_id": "123456",
+    "banned_at": "2025-11-18T10:00:00Z",
+    "banned_by": "system",
+    "reason": "자동 아웃: 경고 3회 누적",
+    "warning_count": 3,
+    "evidence_snapshot": null,
+    "is_active": true,
+    "unbanned_at": null,
+    "unbanned_by": null,
+    "unban_reason": null
+  }
+}
+```
+
+**참고**: is_banned가 false인 경우 ban_record는 null입니다.
+
+### GET /api/v1/users/{mastodon_id}/ban-history
+유저의 전체 아웃 이력 조회
+
+**Response**:
+```json
+{
+  "ban_records": [
+    {
+      "id": 2,
+      "user_id": "123456",
+      "banned_at": "2025-11-18T10:00:00Z",
+      "banned_by": "system",
+      "reason": "자동 아웃: 경고 3회 누적",
+      "warning_count": 3,
+      "is_active": true,
+      "unbanned_at": null,
+      "unbanned_by": null,
+      "unban_reason": null
+    },
+    {
+      "id": 1,
+      "user_id": "123456",
+      "banned_at": "2025-10-15T08:00:00Z",
+      "banned_by": "admin",
+      "reason": "스팸 행위",
+      "warning_count": 2,
+      "is_active": false,
+      "unbanned_at": "2025-10-20T10:00:00Z",
+      "unbanned_by": "admin",
+      "unban_reason": "경고 후 개선 확인"
+    }
+  ],
+  "total_bans": 2,
+  "active_ban_count": 1
+}
+```
+
+### POST /api/v1/users/{mastodon_id}/ban
+유저를 수동으로 아웃 처리
+
+**Request**:
+```json
+{
+  "reason": "스팸 행위",
+  "admin_name": "admin",
+  "evidence_snapshot": "증거 스냅샷 (선택사항)"
+}
+```
+
+**Response**: 201 Created
+```json
+{
+  "id": 3,
+  "user_id": "123456",
+  "banned_at": "2025-11-21T10:30:00Z",
+  "banned_by": "admin",
+  "reason": "스팸 행위",
+  "warning_count": 2,
+  "evidence_snapshot": "증거 스냅샷 (선택사항)",
+  "is_active": true
+}
+```
+
+**참고**:
+- 이미 활성 아웃 상태인 유저에게는 아웃 처리 불가 (400 에러)
+- 아웃 처리 시 admin_logs에 자동 기록됨
+
+### DELETE /api/v1/users/{mastodon_id}/ban
+유저의 아웃 해제 (언아웃)
+
+**Request**:
+```json
+{
+  "unban_reason": "경고 후 개선 확인됨",
+  "admin_name": "admin",
+  "reset_warning_count": false
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "id": 3,
+  "user_id": "123456",
+  "banned_at": "2025-11-21T10:30:00Z",
+  "banned_by": "admin",
+  "reason": "스팸 행위",
+  "warning_count": 2,
+  "is_active": false,
+  "unbanned_at": "2025-11-21T15:00:00Z",
+  "unbanned_by": "admin",
+  "unban_reason": "경고 후 개선 확인됨"
+}
+```
+
+**참고**:
+- `reset_warning_count`가 true인 경우 유저의 warning_count를 0으로 초기화합니다
+- 활성 아웃이 없는 유저에게는 언아웃 처리 불가 (400 에러)
+- 언아웃 처리 시 admin_logs에 자동 기록됨
+
+### GET /api/v1/bans
+전체 아웃 기록 조회
+
+**Query Params**:
+- `page`: int (default: 1)
+- `limit`: int (default: 50)
+- `is_active`: boolean (활성 아웃만 조회)
+- `banned_by`: string (아웃 처리자 필터)
+- `start_date`: string (아웃 시작일 필터)
+- `end_date`: string (아웃 종료일 필터)
+
+**Response**:
+```json
+{
+  "bans": [
+    {
+      "id": 5,
+      "user_id": "789012",
+      "username": "user2",
+      "banned_at": "2025-11-20T14:00:00Z",
+      "banned_by": "system",
+      "reason": "자동 아웃: 경고 3회 누적",
+      "warning_count": 3,
+      "is_active": true,
+      "unbanned_at": null
+    },
+    {
+      "id": 4,
+      "user_id": "123456",
+      "username": "user1",
+      "banned_at": "2025-11-18T10:00:00Z",
+      "banned_by": "admin",
+      "reason": "스팸 행위",
+      "warning_count": 1,
+      "is_active": false,
+      "unbanned_at": "2025-11-19T16:00:00Z",
+      "unbanned_by": "admin",
+      "unban_reason": "개선 확인"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 50,
+    "total": 15,
+    "total_pages": 1
+  },
+  "summary": {
+    "total_bans": 15,
+    "active_bans": 3,
+    "auto_bans": 10,
+    "manual_bans": 5
+  }
+}
+```
+
+**참고**: 자동 아웃 로직
+- 유저의 warning_count가 3 이상이 되면 시스템이 자동으로 아웃 처리
+- banned_by='system', reason='자동 아웃: 경고 N회 누적'로 기록됨
+- UserService.add_warning() 메서드에서 자동 실행
+
 ## 재화 관리 (Transactions)
 
 ### GET /api/v1/transactions
@@ -227,9 +451,12 @@ OAuth 콜백 처리
 {
   "user_id": "123456",
   "amount": 100,
-  "description": "이벤트 보상"
+  "category": "이벤트 보상",
+  "description": "출석 이벤트 참여"
 }
 ```
+
+**참고**: 카테고리 옵션 - [이벤트 보상], [상점 구매], [활동량 정산], [오류 수정]
 
 **Response**: 201 Created
 
@@ -241,6 +468,7 @@ OAuth 콜백 처리
 **Query Params**:
 - `period_hours`: int (default: 48)
 - `min_replies`: int (default: 5)
+- `risk_types`: array (isolation, bias, avoidance, low_activity) - 필터링할 위험 유형
 
 **Response**:
 ```json
@@ -259,6 +487,129 @@ OAuth 콜백 처리
 }
 ```
 
+### GET /api/v1/users/at-risk
+위험 감지 유저 목록 조회
+
+**Query Params**:
+- `risk_types`: array (isolation, bias, avoidance, low_activity) - 조회할 위험 유형 (기본: 전체)
+
+**Response**:
+```json
+{
+  "total_at_risk": 8,
+  "by_risk_type": {
+    "isolation": 2,
+    "bias": 3,
+    "avoidance": 1,
+    "low_activity": 5
+  },
+  "users": [
+    {
+      "mastodon_id": "123456",
+      "username": "user1",
+      "display_name": "유저1",
+      "risk_types": ["bias", "low_activity"],
+      "risk_details": {
+        "bias": {
+          "target_user_id": "789012",
+          "target_username": "user2",
+          "conversation_ratio": 0.15,
+          "threshold": 0.10
+        },
+        "low_activity": {
+          "reply_count": 3,
+          "threshold": 5,
+          "period_hours": 48
+        }
+      },
+      "warning_count": 1
+    }
+  ]
+}
+```
+
+### GET /api/v1/users/{mastodon_id}/social-analysis
+소셜 네트워크 분석 (대화 상대, 편향도, 회피 패턴)
+
+**Query Params**:
+- `period_hours`: int (default: 48)
+
+**Response**:
+```json
+{
+  "analyzed_at": "2025-11-18T04:00:00Z",
+  "period_hours": 48,
+  "conversation_partners": [
+    {
+      "user_id": "789012",
+      "username": "user2",
+      "interaction_count": 15,
+      "ratio": 0.15
+    },
+    {
+      "user_id": "345678",
+      "username": "user3",
+      "interaction_count": 10,
+      "ratio": 0.10
+    }
+  ],
+  "total_interactions": 100,
+  "unique_partners": 5,
+  "active_users_in_period": 12,
+  "isolation_risk": {
+    "detected": true,
+    "partner_count": 5,
+    "active_users": 12,
+    "threshold_ratio": 0.5
+  },
+  "bias_risk": {
+    "detected": true,
+    "target_user_id": "789012",
+    "target_username": "user2",
+    "ratio": 0.15,
+    "threshold": 0.10
+  },
+  "avoidance_risk": {
+    "detected": false,
+    "avoided_key_members": []
+  }
+}
+```
+
+### GET /api/v1/users/{mastodon_id}/avoidance-detection
+회피 패턴 감지
+
+**Response**:
+```json
+{
+  "detected_at": "2025-11-18T04:00:00Z",
+  "user_activity": {
+    "is_active": true,
+    "reply_count_48h": 25
+  },
+  "key_members": [
+    {
+      "user_id": "111222",
+      "username": "key_member1",
+      "is_key_member": true,
+      "was_active_in_period": true,
+      "interactions_with_target": 0,
+      "avoidance_detected": true
+    },
+    {
+      "user_id": "333444",
+      "username": "key_member2",
+      "is_key_member": true,
+      "was_active_in_period": false,
+      "interactions_with_target": 0,
+      "avoidance_detected": false
+    }
+  ],
+  "avoided_key_members": ["111222"],
+  "avoidance_detected": true
+}
+```
+
 ### GET /api/v1/warnings
 경고 내역 조회
 
@@ -274,13 +625,44 @@ OAuth 콜백 처리
 ```json
 {
   "user_id": "123456",
-  "warning_type": "activity",
+  "warning_type": "low_activity",
   "message": "활동량 미달 경고",
   "send_dm": true
 }
 ```
 
+**참고**: warning_type 옵션 - isolation (고립 위험), bias (편향 위험), avoidance (회피 패턴), low_activity (답글 미달), manual (기타)
+
 **Response**: 201 Created
+
+### POST /api/v1/warnings/bulk
+경고 일괄 발송
+
+**Request**:
+```json
+{
+  "user_ids": ["123456", "789012", "345678"],
+  "warning_type": "low_activity",
+  "send_dm": true,
+  "admin_name": "admin"
+}
+```
+
+**Response**:
+```json
+{
+  "sent": ["123456", "789012"],
+  "failed": [
+    {
+      "user_id": "345678",
+      "reason": "DM 발송 실패"
+    }
+  ],
+  "total": 3,
+  "success": 2,
+  "failed_count": 1
+}
+```
 
 ## 휴식 관리 (Vacation)
 
@@ -303,6 +685,7 @@ OAuth 콜백 처리
       "end_date": "2025-11-20",
       "end_time": null,
       "reason": "개인 사정",
+      "description": "가족 행사로 인한 휴식",
       "registered_by": "user",
       "created_at": "2025-11-17T10:00:00Z"
     }
@@ -321,7 +704,8 @@ OAuth 콜백 처리
   "start_time": "14:00",
   "end_date": "2025-11-20",
   "end_time": "18:00",
-  "reason": "병가"
+  "reason": "병가",
+  "description": "병원 치료 및 회복 기간"
 }
 ```
 
@@ -338,7 +722,7 @@ OAuth 콜백 처리
 일정 목록
 
 **Query Params**:
-- `start_date`, `end_date`, `event_type` (event, holiday, notice), `is_global_vacation`
+- `start_date`, `end_date`, `event_type` (general, holiday, community), `is_global_vacation`
 
 **Response**:
 ```json
@@ -373,7 +757,7 @@ OAuth 콜백 처리
   "start_time": "19:00",
   "end_date": "2025-12-01",
   "end_time": "22:00",
-  "event_type": "event",
+  "event_type": "general",
   "is_global_vacation": false
 }
 ```
@@ -412,6 +796,12 @@ OAuth 콜백 처리
       "category": "collectible",
       "image_url": "https://...",
       "is_active": true,
+      "initial_stock": 100,
+      "current_stock": 85,
+      "sold_count": 15,
+      "is_unlimited_stock": false,
+      "max_purchase_per_user": 1,
+      "total_sales": 1500,
       "created_at": "2025-01-01T00:00:00Z"
     }
   ]
@@ -428,7 +818,10 @@ OAuth 콜백 처리
   "description": "한정판 배지",
   "price": 100,
   "category": "collectible",
-  "image_url": "https://..."
+  "image_url": "https://...",
+  "initial_stock": 100,
+  "is_unlimited_stock": false,
+  "max_purchase_per_user": 1
 }
 ```
 

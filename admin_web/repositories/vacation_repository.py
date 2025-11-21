@@ -1,101 +1,320 @@
-"""Vacation repository"""
+"""
+VacationRepository
+
+vacation 테이블에 대한 데이터 접근 계층
+"""
+import sqlite3
 from typing import List, Optional
+from datetime import date, time, datetime
+
 from admin_web.models.vacation import Vacation
-from admin_web.repositories.database import get_economy_db
 
 
 class VacationRepository:
-    """휴가 데이터 저장소"""
+    """
+    Vacation 데이터 접근을 위한 Repository
 
-    @staticmethod
-    def find_all(page: int = 1, limit: int = 50) -> tuple[List[Vacation], int]:
-        """휴가 목록 조회"""
-        with get_economy_db() as conn:
-            cursor = conn.cursor()
+    vacation 테이블에 대한 모든 CRUD 작업을 처리합니다.
+    """
 
-            # 전체 개수
-            cursor.execute("SELECT COUNT(*) FROM vacation")
-            total = cursor.fetchone()[0]
+    def __init__(self, db_path: str = 'economy.db'):
+        """
+        VacationRepository를 초기화합니다.
 
-            # 페이징
-            offset = (page - 1) * limit
-            cursor.execute("""
-                SELECT * FROM vacation
-                ORDER BY start_date DESC
-                LIMIT ? OFFSET ?
-            """, (limit, offset))
+        Args:
+            db_path: SQLite 데이터베이스 파일 경로
+        """
+        self.db_path = db_path
 
-            vacation = [Vacation(**dict(row)) for row in cursor.fetchall()]
-            return vacation, total
+    def _get_connection(self) -> sqlite3.Connection:
+        """
+        Row factory가 설정된 데이터베이스 연결을 가져옵니다.
 
-    @staticmethod
-    def find_by_user(user_id: str) -> List[Vacation]:
-        """유저별 휴가 조회"""
-        with get_economy_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT * FROM vacation
-                WHERE user_id = ?
-                ORDER BY start_date DESC
-            """, (user_id,))
-            return [Vacation(**dict(row)) for row in cursor.fetchall()]
+        Returns:
+            SQLite 연결 객체
+        """
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
 
-    @staticmethod
-    def create(vacation: Vacation) -> Vacation:
-        """휴가 생성"""
-        with get_economy_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                INSERT INTO vacation (user_id, start_date, end_date, start_time, end_time, reason)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (vacation.user_id, vacation.start_date, vacation.end_date,
-                  vacation.start_time, vacation.end_time, vacation.reason))
-            conn.commit()
+    def _row_to_vacation(self, row: sqlite3.Row) -> Vacation:
+        """
+        데이터베이스 row를 Vacation 모델로 변환합니다.
 
-            # 생성된 ID로 조회
-            vacation_id = cursor.lastrowid
-            cursor.execute("SELECT * FROM vacation WHERE id = ?", (vacation_id,))
-            row = cursor.fetchone()
-            return Vacation(**dict(row))
+        Args:
+            row: SQLite row 객체
 
-    @staticmethod
-    def delete(vacation_id: int) -> bool:
-        """휴가 삭제"""
-        with get_economy_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM vacation WHERE id = ?", (vacation_id,))
-            conn.commit()
-            return cursor.rowcount > 0
+        Returns:
+            Vacation 인스턴스
+        """
+        # Parse dates
+        start_date = date.fromisoformat(row['start_date']) if row['start_date'] else None
+        end_date = date.fromisoformat(row['end_date']) if row['end_date'] else None
 
-    @staticmethod
-    def is_on_vacation(user_id: str) -> bool:
-        """휴가 중인지 확인"""
-        with get_economy_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT COUNT(*) FROM vacation
-                WHERE user_id = ?
-                AND date('now') BETWEEN date(start_date) AND date(end_date)
-            """, (user_id,))
-            return cursor.fetchone()[0] > 0
+        # Parse times
+        start_time = time.fromisoformat(row['start_time']) if row['start_time'] else None
+        end_time = time.fromisoformat(row['end_time']) if row['end_time'] else None
 
-    @staticmethod
-    def count_active() -> int:
-        """현재 휴가 중인 유저 수"""
-        with get_economy_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT COUNT(DISTINCT user_id) FROM vacation
-                WHERE date('now') BETWEEN date(start_date) AND date(end_date)
-            """)
-            return cursor.fetchone()[0]
+        # Parse created_at
+        created_at = datetime.fromisoformat(row['created_at']) if row['created_at'] else None
 
-    @staticmethod
-    def count_active_vacation() -> int:
-        """현재 휴가 중인 유저 수 (alias for count_active)"""
-        return VacationRepository.count_active()
+        return Vacation(
+            id=row['id'],
+            user_id=row['user_id'],
+            start_date=start_date,
+            start_time=start_time,
+            end_date=end_date,
+            end_time=end_time,
+            reason=row['reason'],
+            approved=bool(row['approved']),
+            registered_by=row['registered_by'],
+            created_at=created_at
+        )
 
-    @staticmethod
-    def is_user_on_vacation(mastodon_id: str) -> bool:
-        """휴가 중인지 확인 (alias for is_on_vacation)"""
-        return VacationRepository.is_on_vacation(mastodon_id)
+    def create(self, vacation: Vacation) -> Vacation:
+        """
+        새 휴가를 생성합니다.
+
+        Args:
+            vacation: 생성할 Vacation 인스턴스
+
+        Returns:
+            ID가 포함된 생성된 휴가
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO vacation (
+                user_id, start_date, start_time,
+                end_date, end_time, reason,
+                approved, registered_by, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        """, (
+            vacation.user_id,
+            vacation.start_date.isoformat() if vacation.start_date else None,
+            vacation.start_time.isoformat() if vacation.start_time else None,
+            vacation.end_date.isoformat() if vacation.end_date else None,
+            vacation.end_time.isoformat() if vacation.end_time else None,
+            vacation.reason,
+            1 if vacation.approved else 0,
+            vacation.registered_by
+        ))
+
+        vacation_id = cursor.lastrowid
+        conn.commit()
+        conn.close()
+
+        return self.find_by_id(vacation_id)
+
+    def find_by_id(self, vacation_id: int) -> Optional[Vacation]:
+        """
+        ID로 휴가를 조회합니다.
+
+        Args:
+            vacation_id: 휴가 ID
+
+        Returns:
+            찾은 경우 Vacation, 아니면 None
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT * FROM vacation
+            WHERE id = ?
+        """, (vacation_id,))
+
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            return self._row_to_vacation(row)
+        return None
+
+    def find_all(self) -> List[Vacation]:
+        """
+        모든 휴가를 조회합니다.
+
+        Returns:
+            모든 휴가의 리스트
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT * FROM vacation
+            ORDER BY start_date DESC
+        """)
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [self._row_to_vacation(row) for row in rows]
+
+    def find_by_user(self, user_id: str) -> List[Vacation]:
+        """
+        특정 유저의 모든 휴가를 조회합니다.
+
+        Args:
+            user_id: 유저의 Mastodon ID
+
+        Returns:
+            유저의 휴가 리스트
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT * FROM vacation
+            WHERE user_id = ?
+            ORDER BY start_date DESC
+        """, (user_id,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [self._row_to_vacation(row) for row in rows]
+
+    def find_by_approved(self, approved: bool) -> List[Vacation]:
+        """
+        승인 여부별로 휴가를 조회합니다.
+
+        Args:
+            approved: 승인 여부
+
+        Returns:
+            지정된 승인 상태의 휴가 리스트
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT * FROM vacation
+            WHERE approved = ?
+            ORDER BY start_date DESC
+        """, (1 if approved else 0,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [self._row_to_vacation(row) for row in rows]
+
+    def find_by_date_range(self, start: date, end: date) -> List[Vacation]:
+        """
+        날짜 범위로 휴가를 조회합니다.
+
+        시작일 또는 종료일이 주어진 범위에 포함되는 휴가를 모두 조회합니다.
+
+        Args:
+            start: 검색 시작일
+            end: 검색 종료일
+
+        Returns:
+            날짜 범위 내의 휴가 리스트
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT * FROM vacation
+            WHERE (start_date >= ? AND start_date <= ?)
+               OR (end_date >= ? AND end_date <= ?)
+               OR (start_date <= ? AND end_date >= ?)
+            ORDER BY start_date
+        """, (
+            start.isoformat(), end.isoformat(),
+            start.isoformat(), end.isoformat(),
+            start.isoformat(), end.isoformat()
+        ))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [self._row_to_vacation(row) for row in rows]
+
+    def count(self) -> int:
+        """
+        전체 휴가 수를 계산합니다.
+
+        Returns:
+            전체 휴가 개수
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT COUNT(*) as count FROM vacation
+        """)
+
+        row = cursor.fetchone()
+        conn.close()
+
+        return row['count']
+
+    def get_user_vacation_count(self, user_id: str) -> int:
+        """
+        특정 유저의 휴가 수를 조회합니다.
+
+        Args:
+            user_id: 유저의 Mastodon ID
+
+        Returns:
+            유저의 휴가 개수
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT COUNT(*) as count FROM vacation
+            WHERE user_id = ?
+        """, (user_id,))
+
+        row = cursor.fetchone()
+        conn.close()
+
+        return row['count']
+
+    def update_approved(self, vacation_id: int, approved: bool) -> None:
+        """
+        휴가의 승인 상태를 업데이트합니다.
+
+        Args:
+            vacation_id: 휴가 ID
+            approved: 승인 여부 (True: 승인, False: 거부)
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE vacation
+            SET approved = ?
+            WHERE id = ?
+        """, (1 if approved else 0, vacation_id))
+
+        conn.commit()
+        conn.close()
+
+    def delete(self, vacation_id: int) -> bool:
+        """
+        휴가를 삭제합니다.
+
+        Args:
+            vacation_id: 휴가 ID
+
+        Returns:
+            삭제 성공 시 True, 실패 시 False
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            DELETE FROM vacation
+            WHERE id = ?
+        """, (vacation_id,))
+
+        rows_affected = cursor.rowcount
+        conn.commit()
+        conn.close()
+
+        return rows_affected > 0

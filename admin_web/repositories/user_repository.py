@@ -1,146 +1,335 @@
-"""User repository"""
+"""
+UserRepository
+
+users 테이블에 대한 데이터 접근 계층
+"""
+import sqlite3
 from typing import List, Optional
+from datetime import datetime
+
 from admin_web.models.user import User
-from admin_web.repositories.database import get_economy_db, get_mastodon_db
 
 
 class UserRepository:
-    """유저 데이터 저장소"""
+    """
+    User 데이터 접근을 위한 Repository
 
-    @staticmethod
-    def find_by_id(mastodon_id: str) -> Optional[User]:
-        """ID로 유저 조회"""
-        with get_economy_db() as conn:
-            cursor = conn.cursor()
+    users 테이블에 대한 모든 CRUD 작업을 처리합니다.
+    """
+
+    def __init__(self, db_path: str = 'economy.db'):
+        """
+        UserRepository를 초기화합니다.
+
+        Args:
+            db_path: SQLite 데이터베이스 파일 경로
+        """
+        self.db_path = db_path
+
+    def _get_connection(self) -> sqlite3.Connection:
+        """
+        Row factory가 설정된 데이터베이스 연결을 가져옵니다.
+
+        Returns:
+            SQLite 연결 객체
+        """
+        conn = sqlite3.connect(self.db_path)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+    def _row_to_user(self, row: sqlite3.Row) -> User:
+        """
+        데이터베이스 row를 User 모델로 변환합니다.
+
+        Args:
+            row: SQLite row 객체
+
+        Returns:
+            User 인스턴스
+        """
+        return User(
+            mastodon_id=row['mastodon_id'],
+            username=row['username'],
+            display_name=row['display_name'],
+            role=row['role'],
+            dormitory=row['dormitory'],
+            balance=row['balance'],
+            total_earned=row['total_earned'],
+            total_spent=row['total_spent'],
+            reply_count=row['reply_count'],
+            warning_count=row['warning_count'],
+            is_key_member=bool(row['is_key_member']),
+            last_active=datetime.fromisoformat(row['last_active']) if row['last_active'] else None,
+            last_check=datetime.fromisoformat(row['last_check']) if row['last_check'] else None,
+            created_at=datetime.fromisoformat(row['created_at']) if row['created_at'] else None
+        )
+
+    def find_by_id(self, mastodon_id: str) -> Optional[User]:
+        """
+        Mastodon ID로 유저를 조회합니다.
+
+        Args:
+            mastodon_id: 유저의 Mastodon ID
+
+        Returns:
+            찾은 경우 User, 아니면 None
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT * FROM users
+            WHERE mastodon_id = ?
+        """, (mastodon_id,))
+
+        row = cursor.fetchone()
+        conn.close()
+
+        if row:
+            return self._row_to_user(row)
+        return None
+
+    def find_all(self) -> List[User]:
+        """
+        모든 유저를 조회합니다.
+
+        Returns:
+            모든 유저의 리스트
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT * FROM users
+            ORDER BY created_at DESC
+        """)
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [self._row_to_user(row) for row in rows]
+
+    def find_by_role(self, role: str) -> List[User]:
+        """
+        역할별로 유저를 조회합니다.
+
+        Args:
+            role: 유저 역할 (user, admin, moderator)
+
+        Returns:
+            지정된 역할을 가진 유저의 리스트
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT * FROM users
+            WHERE role = ?
+            ORDER BY username
+        """, (role,))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [self._row_to_user(row) for row in rows]
+
+    def search_by_username(self, query: str) -> List[User]:
+        """
+        유저명으로 유저를 검색합니다 (부분 일치).
+
+        Args:
+            query: 검색 쿼리
+
+        Returns:
+            일치하는 유저의 리스트
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT * FROM users
+            WHERE username LIKE ?
+            ORDER BY username
+        """, (f'%{query}%',))
+
+        rows = cursor.fetchall()
+        conn.close()
+
+        return [self._row_to_user(row) for row in rows]
+
+    def create(self, user: User) -> User:
+        """
+        새 유저를 생성합니다.
+
+        Args:
+            user: 생성할 User 인스턴스
+
+        Returns:
+            생성된 유저
+
+        Raises:
+            sqlite3.IntegrityError: 동일한 mastodon_id를 가진 유저가 이미 존재하는 경우
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            INSERT INTO users (
+                mastodon_id, username, display_name, role, dormitory,
+                balance, total_earned, total_spent, reply_count,
+                warning_count, is_key_member,
+                last_active, last_check, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        """, (
+            user.mastodon_id,
+            user.username,
+            user.display_name,
+            user.role,
+            user.dormitory,
+            user.balance,
+            user.total_earned,
+            user.total_spent,
+            user.reply_count,
+            user.warning_count,
+            1 if user.is_key_member else 0,
+            user.last_active.isoformat() if user.last_active else None,
+            user.last_check.isoformat() if user.last_check else None
+        ))
+
+        conn.commit()
+        conn.close()
+
+        return self.find_by_id(user.mastodon_id)
+
+    def update_balance(self, mastodon_id: str, new_balance: int) -> None:
+        """
+        유저 잔액을 업데이트합니다.
+
+        Args:
+            mastodon_id: 유저의 Mastodon ID
+            new_balance: 새 잔액 값
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE users
+            SET balance = ?
+            WHERE mastodon_id = ?
+        """, (new_balance, mastodon_id))
+
+        conn.commit()
+        conn.close()
+
+    def adjust_balance(self, mastodon_id: str, amount: int) -> None:
+        """
+        유저 잔액을 조정하고 total_earned 또는 total_spent를 업데이트합니다.
+
+        Args:
+            mastodon_id: 유저의 Mastodon ID
+            amount: 조정할 금액 (양수: 입금, 음수: 출금)
+
+        Raises:
+            ValueError: 잔액이 음수가 되는 경우
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        # Get current balance
+        cursor.execute("""
+            SELECT balance FROM users
+            WHERE mastodon_id = ?
+        """, (mastodon_id,))
+
+        row = cursor.fetchone()
+        if not row:
+            conn.close()
+            raise ValueError(f'User not found: {mastodon_id}')
+
+        current_balance = row['balance']
+        new_balance = current_balance + amount
+
+        # Check for negative balance
+        if new_balance < 0:
+            conn.close()
+            raise ValueError('Insufficient balance')
+
+        # Update balance and totals
+        if amount > 0:
+            # Credit: increase total_earned
             cursor.execute("""
-                SELECT * FROM users WHERE mastodon_id = ?
-            """, (mastodon_id,))
-            row = cursor.fetchone()
-            if row:
-                return User(**dict(row))
-            return None
-
-    @staticmethod
-    def find_all(page: int = 1, limit: int = 50, search: str = None,
-                 role: str = None, sort: str = 'created_desc') -> tuple[List[User], int]:
-        """유저 목록 조회"""
-        with get_economy_db() as conn:
-            cursor = conn.cursor()
-
-            # WHERE 조건
-            conditions = []
-            params = []
-
-            if search:
-                conditions.append("(username LIKE ? OR display_name LIKE ?)")
-                params.extend([f"%{search}%", f"%{search}%"])
-
-            if role:
-                conditions.append("role = ?")
-                params.append(role)
-
-            where_clause = " AND ".join(conditions) if conditions else "1=1"
-
-            # 정렬
-            sort_map = {
-                'balance_desc': 'balance DESC',
-                'balance_asc': 'balance ASC',
-                'created_desc': 'created_at DESC',
-                'created_asc': 'created_at ASC',
-            }
-            order_by = sort_map.get(sort, 'created_at DESC')
-
-            # 전체 개수
-            cursor.execute(f"SELECT COUNT(*) FROM users WHERE {where_clause}", params)
-            total = cursor.fetchone()[0]
-
-            # 페이징
-            offset = (page - 1) * limit
-            cursor.execute(f"""
-                SELECT * FROM users
-                WHERE {where_clause}
-                ORDER BY {order_by}
-                LIMIT ? OFFSET ?
-            """, params + [limit, offset])
-
-            users = [User(**dict(row)) for row in cursor.fetchall()]
-            return users, total
-
-    @staticmethod
-    def create(user: User) -> User:
-        """유저 생성"""
-        with get_economy_db() as conn:
-            cursor = conn.cursor()
+                UPDATE users
+                SET balance = balance + ?,
+                    total_earned = total_earned + ?
+                WHERE mastodon_id = ?
+            """, (amount, amount, mastodon_id))
+        else:
+            # Debit: increase total_spent
             cursor.execute("""
-                INSERT INTO users (mastodon_id, username, display_name, role, dormitory)
-                VALUES (?, ?, ?, ?, ?)
-            """, (user.mastodon_id, user.username, user.display_name, user.role, user.dormitory))
-            conn.commit()
-            return UserRepository.find_by_id(user.mastodon_id)
+                UPDATE users
+                SET balance = balance + ?,
+                    total_spent = total_spent + ?
+                WHERE mastodon_id = ?
+            """, (amount, abs(amount), mastodon_id))
 
-    @staticmethod
-    def update_role(mastodon_id: str, role: str) -> bool:
-        """역할 변경"""
-        with get_economy_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                UPDATE users SET role = ? WHERE mastodon_id = ?
-            """, (role, mastodon_id))
-            conn.commit()
-            return cursor.rowcount > 0
+        conn.commit()
+        conn.close()
 
-    @staticmethod
-    def update_balance(mastodon_id: str, amount: int) -> bool:
-        """재화 조정"""
-        with get_economy_db() as conn:
-            cursor = conn.cursor()
-            if amount > 0:
-                cursor.execute("""
-                    UPDATE users
-                    SET balance = balance + ?, total_earned = total_earned + ?
-                    WHERE mastodon_id = ?
-                """, (amount, amount, mastodon_id))
-            else:
-                cursor.execute("""
-                    UPDATE users
-                    SET balance = balance + ?, total_spent = total_spent + ?
-                    WHERE mastodon_id = ?
-                """, (amount, abs(amount), mastodon_id))
-            conn.commit()
-            return cursor.rowcount > 0
+    def update_role(self, mastodon_id: str, role: str) -> None:
+        """
+        유저 역할을 업데이트합니다.
 
-    @staticmethod
-    def get_activity_48h(mastodon_id: str) -> int:
-        """48시간 답글 수 조회 (PostgreSQL)"""
-        try:
-            with get_mastodon_db() as conn:
-                cursor = conn.cursor()
-                cursor.execute("""
-                    SELECT COUNT(*)
-                    FROM statuses
-                    WHERE account_id = %s
-                    AND in_reply_to_id IS NOT NULL
-                    AND created_at > NOW() - INTERVAL '48 hours'
-                """, (mastodon_id,))
-                return cursor.fetchone()[0]
-        except Exception:
-            return 0
+        Args:
+            mastodon_id: 유저의 Mastodon ID
+            role: 새 역할
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
 
-    @staticmethod
-    def count_all() -> int:
-        """전체 사용자 수 조회"""
-        with get_economy_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM users")
-            return cursor.fetchone()[0]
+        cursor.execute("""
+            UPDATE users
+            SET role = ?
+            WHERE mastodon_id = ?
+        """, (role, mastodon_id))
 
-    @staticmethod
-    def count_active_since(since_datetime) -> int:
-        """특정 시간 이후 활동한 사용자 수 조회"""
-        with get_economy_db() as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                SELECT COUNT(*) FROM users
-                WHERE last_active > ?
-            """, (since_datetime.isoformat(),))
-            return cursor.fetchone()[0]
+        conn.commit()
+        conn.close()
+
+    def increment_warning_count(self, mastodon_id: str) -> None:
+        """
+        유저 경고 횟수를 1 증가시킵니다.
+
+        Args:
+            mastodon_id: 유저의 Mastodon ID
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE users
+            SET warning_count = warning_count + 1
+            WHERE mastodon_id = ?
+        """, (mastodon_id,))
+
+        conn.commit()
+        conn.close()
+
+    def update_key_member(self, mastodon_id: str, is_key_member: bool) -> None:
+        """
+        주요 멤버 플래그를 업데이트합니다.
+
+        Args:
+            mastodon_id: 유저의 Mastodon ID
+            is_key_member: 주요 멤버 플래그
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE users
+            SET is_key_member = ?
+            WHERE mastodon_id = ?
+        """, (1 if is_key_member else 0, mastodon_id))
+
+        conn.commit()
+        conn.close()

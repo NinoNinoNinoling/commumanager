@@ -1,118 +1,50 @@
-"""Item controller"""
+"""ItemController"""
 from flask import request, jsonify
 from admin_web.services.item_service import ItemService
+from admin_web.services.shop_service import ShopService
+from admin_web.models.item import Item
+from admin_web.utils.auth import admin_required
 
 
 class ItemController:
-    """아이템 API 컨트롤러"""
+    """
+    아이템 및 상점 API 요청을 처리하는 Controller
 
-    def __init__(self):
-        self.item_service = ItemService()
+    아이템 조회 및 생성, 아이템 구매 등 상점 관련 API 엔드포인트의 요청을 처리하고
+    ItemService와 ShopService를 호출하여 비즈니스 로직을 실행합니다.
+    """
 
+    def __init__(self, db_path: str = 'economy.db'):
+        self.item_service = ItemService(db_path)
+        self.shop_service = ShopService(db_path)
+
+    @admin_required
     def get_items(self):
-        """아이템 목록 조회 API"""
-        try:
-            page = int(request.args.get('page', 1))
-            limit = int(request.args.get('limit', 50))
-            is_active_str = request.args.get('is_active')
-            is_active = None
-            if is_active_str is not None:
-                is_active = is_active_str.lower() == 'true'
+        """GET /api/v1/items - 아이템 목록"""
+        items = self.item_service.get_active_items()
+        return jsonify({'items': [i.to_dict() for i in items]})
 
-            result = self.item_service.get_items(page, limit, is_active)
-            return jsonify(result), 200
-        except Exception as e:
-            return jsonify({
-                'error': {
-                    'code': 'INTERNAL_ERROR',
-                    'message': str(e)
-                }
-            }), 500
-
+    @admin_required
     def create_item(self):
-        """아이템 생성 API"""
+        """POST /api/v1/items - 아이템 생성"""
+        data = request.get_json()
+        item = Item.from_dict(data)
+        
         try:
-            data = request.get_json()
-            name = data.get('name')
-            description = data.get('description')
-            price = data.get('price', 0)
-            is_active = data.get('is_active', True)
-            admin_name = data.get('admin_name')
+            result = self.item_service.create_item(item)
+            return jsonify(result), 201
+        except ValueError as e:
+            return jsonify({'error': str(e)}), 400
 
-            if not name:
-                return jsonify({
-                    'error': {
-                        'code': 'INVALID_REQUEST',
-                        'message': 'name is required'
-                    }
-                }), 400
-
-            item = self.item_service.create_item(name, description, price, is_active, admin_name)
-            return jsonify(item.to_dict()), 201
-        except Exception as e:
-            return jsonify({
-                'error': {
-                    'code': 'INTERNAL_ERROR',
-                    'message': str(e)
-                }
-            }), 500
-
-    def update_item(self, item_id):
-        """아이템 수정 API"""
-        try:
-            data = request.get_json()
-            name = data.get('name')
-            description = data.get('description')
-            price = data.get('price', 0)
-            is_active = data.get('is_active', True)
-            admin_name = data.get('admin_name')
-
-            if not name:
-                return jsonify({
-                    'error': {
-                        'code': 'INVALID_REQUEST',
-                        'message': 'name is required'
-                    }
-                }), 400
-
-            success = self.item_service.update_item(item_id, name, description, price, is_active, admin_name)
-            if success:
-                return jsonify({'message': 'Item updated'}), 200
-            else:
-                return jsonify({
-                    'error': {
-                        'code': 'NOT_FOUND',
-                        'message': 'Item not found'
-                    }
-                }), 404
-        except Exception as e:
-            return jsonify({
-                'error': {
-                    'code': 'INTERNAL_ERROR',
-                    'message': str(e)
-                }
-            }), 500
-
-    def delete_item(self, item_id):
-        """아이템 삭제 API"""
-        try:
-            data = request.get_json() or {}
-            admin_name = data.get('admin_name')
-
-            success = self.item_service.delete_item(item_id, admin_name)
-            if success:
-                return jsonify({'message': 'Item deleted'}), 200
-            else:
-                return jsonify({
-                    'error': {
-                        'code': 'NOT_FOUND',
-                        'message': 'Item not found'
-                    }
-                }), 404
-        except Exception as e:
-            return jsonify({
-                'error': {
-                    'code': 'INTERNAL_ERROR',
-                    'message': str(e)
-                }
-            }), 500
+    def purchase_item(self):
+        """POST /api/v1/shop/purchase - 아이템 구매"""
+        data = request.get_json()
+        user_id = data.get('user_id')
+        item_id = data.get('item_id')
+        quantity = data.get('quantity', 1)
+        
+        result = self.shop_service.purchase_item(user_id, item_id, quantity)
+        if result['success']:
+            return jsonify(result)
+        else:
+            return jsonify(result), 400

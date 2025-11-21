@@ -1,37 +1,32 @@
-"""
-Dashboard Controller
-대시보드 관련 비즈니스 로직
-"""
-from flask import render_template, redirect, url_for, session
+"""DashboardController"""
+from flask import jsonify
 from admin_web.services.user_service import UserService
+from admin_web.services.item_service import ItemService
+from admin_web.utils.auth import admin_required
 
 
 class DashboardController:
-    """대시보드 컨트롤러"""
+    """
+    대시보드 API 요청을 처리하는 Controller
 
-    def __init__(self):
-        """
-        Args:
-            config: Flask app config
-        """
-        self.user_service = UserService()
+    대시보드 통계 데이터 조회 등 관리자 대시보드 관련 API 엔드포인트의 요청을 처리하고
+    각종 Service를 호출하여 집계 데이터를 제공합니다.
+    """
 
-    def show_dashboard(self):
-        """
-        대시보드 표시 (로그인 필수)
+    def __init__(self, db_path: str = 'economy.db'):
+        self.user_service = UserService(db_path)
+        self.item_service = ItemService(db_path)
 
-        Returns:
-            렌더링된 템플릿 또는 redirect
-        """
-        # 로그인 확인
-        if 'user_id' not in session:
-            return redirect(url_for('auth.login'))
-
-        # 관리자 권한 확인
-        if not session.get('is_admin', False):
-            return "관리자 권한이 필요합니다.", 403
-
-        # 기본 통계 조회
-        stats = self.user_service.get_user_statistics()
-
-        return render_template('dashboard.html', stats=stats)
+    @admin_required
+    def get_dashboard_stats(self):
+        """GET /api/v1/dashboard/stats - 대시보드 통계"""
+        # 간단한 통계
+        users = self.user_service.get_all_users()
+        items = self.item_service.get_active_items()
+        
+        stats = {
+            'total_users': len(users),
+            'total_items': len(items),
+            'total_balance': sum(u.balance for u in users),
+        }
+        return jsonify({'stats': stats})

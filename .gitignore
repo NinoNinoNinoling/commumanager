@@ -223,3 +223,4 @@ config_local.py
 economy.db*
 mastodon_credentials.secret
 client_secret.json
+admin_web.old/

@@ -1,109 +1,33 @@
-"""Scheduled Announcement service"""
-from typing import Optional
+"""ScheduledAnnouncementService"""
+from typing import Dict, Any
 from datetime import datetime
 from admin_web.models.scheduled_announcement import ScheduledAnnouncement
 from admin_web.repositories.scheduled_announcement_repository import ScheduledAnnouncementRepository
-from admin_web.repositories.admin_log_repository import AdminLogRepository
-from admin_web.models.admin_log import AdminLog
 
 
 class ScheduledAnnouncementService:
-    """공지 예약 비즈니스 로직"""
+    """
+    예약 공지 관리 비즈니스 로직을 위한 Service
 
-    def __init__(self):
-        self.announcement_repo = ScheduledAnnouncementRepository()
-        self.admin_log_repo = AdminLogRepository()
+    특정 시각에 자동 발송될 공지사항의 생성 및 관리를 처리합니다.
+    """
 
-    def get_announcements(self, page: int = 1, limit: int = 50, status: str = None,
-                         post_type: str = None) -> dict:
-        """공지 목록 조회"""
-        announcements, total = self.announcement_repo.find_all(page, limit, status, post_type)
-        total_pages = (total + limit - 1) // limit
+    def __init__(self, db_path: str = 'economy.db'):
+        self.announcement_repo = ScheduledAnnouncementRepository(db_path)
 
-        return {
-            'announcements': [a.to_dict() for a in announcements],
-            'pagination': {
-                'page': page,
-                'limit': limit,
-                'total': total,
-                'total_pages': total_pages,
-            }
-        }
+    def create_announcement(self, post_type: str, content: str, scheduled_at: datetime, created_by: str) -> Dict[str, Any]:
+        """
+        예약 공지를 생성합니다.
 
-    def get_announcement(self, announcement_id: int) -> Optional[ScheduledAnnouncement]:
-        """공지 조회"""
-        return self.announcement_repo.find_by_id(announcement_id)
+        Args:
+            post_type: 포스트 유형 (announcement 등)
+            content: 공지 내용
+            scheduled_at: 예약 발송 시각
+            created_by: 공지 생성자 (관리자명)
 
-    def create_announcement(self, post_type: str, content: str, scheduled_at: str,
-                          visibility: str = 'public', is_public: bool = True,
-                          admin_name: str = None) -> ScheduledAnnouncement:
-        """공지 생성"""
-        # 1. 공지 생성
-        announcement = ScheduledAnnouncement(
-            id=None,
-            post_type=post_type,
-            content=content,
-            scheduled_at=datetime.fromisoformat(scheduled_at.replace('Z', '+00:00')),
-            visibility=visibility,
-            is_public=is_public,
-            status='pending',
-            created_by=admin_name or 'admin',
-        )
-        created_announcement = self.announcement_repo.create(announcement)
-
-        # 2. 관리자 로그 생성
-        if admin_name:
-            log = AdminLog(
-                id=None,
-                admin_name=admin_name,
-                action_type='create_scheduled_announcement',
-                details=f"{post_type} - Scheduled at {scheduled_at}",
-            )
-            self.admin_log_repo.create(log)
-
-        return created_announcement
-
-    def update_announcement(self, announcement_id: int, post_type: str, content: str,
-                          scheduled_at: str, visibility: str = 'public',
-                          is_public: bool = True, status: str = 'pending',
-                          admin_name: str = None) -> bool:
-        """공지 수정"""
-        announcement = ScheduledAnnouncement(
-            id=announcement_id,
-            post_type=post_type,
-            content=content,
-            scheduled_at=datetime.fromisoformat(scheduled_at.replace('Z', '+00:00')),
-            visibility=visibility,
-            is_public=is_public,
-            status=status,
-            created_by=admin_name or 'admin',
-        )
-        success = self.announcement_repo.update(announcement)
-
-        # 관리자 로그 생성
-        if success and admin_name:
-            log = AdminLog(
-                id=None,
-                admin_name=admin_name,
-                action_type='update_scheduled_announcement',
-                details=f"announcement_id: {announcement_id}",
-            )
-            self.admin_log_repo.create(log)
-
-        return success
-
-    def delete_announcement(self, announcement_id: int, admin_name: str = None) -> bool:
-        """공지 삭제"""
-        success = self.announcement_repo.delete(announcement_id)
-
-        # 관리자 로그 생성
-        if success and admin_name:
-            log = AdminLog(
-                id=None,
-                admin_name=admin_name,
-                action_type='delete_scheduled_announcement',
-                details=f"announcement_id: {announcement_id}",
-            )
-            self.admin_log_repo.create(log)
-
-        return success
+        Returns:
+            생성된 공지를 담은 딕셔너리 {'announcement': ScheduledAnnouncement}
+        """
+        announcement = ScheduledAnnouncement(post_type=post_type, content=content, scheduled_at=scheduled_at, created_by=created_by)
+        created = self.announcement_repo.create(announcement)
+        return {'announcement': created}

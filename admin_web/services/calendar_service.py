@@ -1,108 +1,72 @@
-"""Calendar service"""
-from typing import List, Optional
+"""CalendarService"""
+from typing import List, Dict, Any
+from datetime import date
+
 from admin_web.models.calendar_event import CalendarEvent
-from admin_web.repositories.calendar_event_repository import CalendarEventRepository
-from admin_web.repositories.admin_log_repository import AdminLogRepository
-from admin_web.models.admin_log import AdminLog
+from admin_web.repositories.calendar_repository import CalendarRepository
 
 
 class CalendarService:
-    """캘린더 비즈니스 로직"""
+    """
+    일정 관리 비즈니스 로직을 위한 Service
 
-    def __init__(self):
-        self.event_repo = CalendarEventRepository()
-        self.admin_log_repo = AdminLogRepository()
+    커뮤니티 일정, 공휴일, 리뉴얼 기간 등의 생성, 조회, 삭제를 처리합니다.
+    """
 
-    def get_events(self, page: int = 1, limit: int = 50, event_type: str = None) -> dict:
-        """이벤트 목록 조회"""
-        events, total = self.event_repo.find_all(page, limit, event_type)
-        total_pages = (total + limit - 1) // limit
+    def __init__(self, db_path: str = 'economy.db'):
+        self.db_path = db_path
+        self.calendar_repo = CalendarRepository(db_path)
 
-        return {
-            'events': [e.to_dict() for e in events],
-            'pagination': {
-                'page': page,
-                'limit': limit,
-                'total': total,
-                'total_pages': total_pages,
-            }
-        }
+    def create_event(self, event: CalendarEvent) -> Dict[str, Any]:
+        """
+        일정 이벤트를 생성합니다.
 
-    def get_event(self, event_id: int) -> Optional[CalendarEvent]:
-        """이벤트 조회"""
-        return self.event_repo.find_by_id(event_id)
+        Args:
+            event: 생성할 CalendarEvent 객체
 
-    def create_event(self, title: str, description: str = None, event_type: str = 'general',
-                     start_date: str = None, end_date: str = None,
-                     start_time: str = None, end_time: str = None,
-                     admin_name: str = None) -> CalendarEvent:
-        """이벤트 생성"""
-        # 1. 이벤트 생성
-        event = CalendarEvent(
-            id=None,
-            title=title,
-            description=description,
-            event_type=event_type,
-            start_date=start_date,
-            end_date=end_date,
-            start_time=start_time,
-            end_time=end_time,
-        )
-        created_event = self.event_repo.create(event)
+        Returns:
+            생성된 이벤트를 담은 딕셔너리 {'event': CalendarEvent}
+        """
+        created = self.calendar_repo.create(event)
+        return {'event': created}
 
-        # 2. 관리자 로그 생성
-        if admin_name:
-            log = AdminLog(
-                id=None,
-                admin_name=admin_name,
-                action_type='create_event',
-                details=f"{title} ({event_type})",
-            )
-            self.admin_log_repo.create(log)
+    def get_event(self, event_id: int) -> CalendarEvent:
+        """
+        ID로 일정 이벤트를 조회합니다.
 
-        return created_event
+        Args:
+            event_id: 조회할 이벤트 ID
 
-    def update_event(self, event_id: int, title: str, description: str = None,
-                     event_type: str = 'general', start_date: str = None, end_date: str = None,
-                     start_time: str = None, end_time: str = None,
-                     admin_name: str = None) -> bool:
-        """이벤트 수정"""
-        event = CalendarEvent(
-            id=event_id,
-            title=title,
-            description=description,
-            event_type=event_type,
-            start_date=start_date,
-            end_date=end_date,
-            start_time=start_time,
-            end_time=end_time,
-        )
-        success = self.event_repo.update(event)
+        Returns:
+            조회된 CalendarEvent 객체
+        """
+        return self.calendar_repo.find_by_id(event_id)
 
-        # 관리자 로그 생성
-        if success and admin_name:
-            log = AdminLog(
-                id=None,
-                admin_name=admin_name,
-                action_type='update_event',
-                details=f"{title} (id: {event_id})",
-            )
-            self.admin_log_repo.create(log)
+    def get_events_by_date_range(self, start: date, end: date) -> List[CalendarEvent]:
+        """
+        기간 내 일정 이벤트 목록을 조회합니다.
 
-        return success
+        Args:
+            start: 조회 시작 날짜
+            end: 조회 종료 날짜
 
-    def delete_event(self, event_id: int, admin_name: str = None) -> bool:
-        """이벤트 삭제"""
-        success = self.event_repo.delete(event_id)
+        Returns:
+            해당 기간의 CalendarEvent 목록
+        """
+        return self.calendar_repo.find_by_date_range(start, end)
 
-        # 관리자 로그 생성
-        if success and admin_name:
-            log = AdminLog(
-                id=None,
-                admin_name=admin_name,
-                action_type='delete_event',
-                details=f"event_id: {event_id}",
-            )
-            self.admin_log_repo.create(log)
+    def delete_event(self, event_id: int) -> bool:
+        """
+        일정 이벤트를 삭제합니다.
 
-        return success
+        Args:
+            event_id: 삭제할 이벤트 ID
+
+        Returns:
+            삭제 성공 시 True, 이벤트가 없으면 False
+        """
+        event = self.calendar_repo.find_by_id(event_id)
+        if not event:
+            return False
+        self.calendar_repo.delete(event_id)
+        return True
