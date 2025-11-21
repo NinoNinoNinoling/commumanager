@@ -3,7 +3,7 @@ UserService
 
 Business logic layer for user management
 """
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 from datetime import datetime
 
 from admin_web.models.user import User
@@ -141,7 +141,7 @@ class UserService:
         admin_name: str,
         description: Optional[str] = None,
         category: Optional[str] = None
-    ) -> Dict[str, any]:
+    ) -> Dict[str, Any]:
         """
         Adjust user balance and create transaction record
 
@@ -186,7 +186,7 @@ class UserService:
             'transaction': created_transaction
         }
 
-    def get_user_statistics(self, user_id: str) -> Dict[str, any]:
+    def get_user_statistics(self, user_id: str) -> Dict[str, Any]:
         """
         Get comprehensive user statistics
 
