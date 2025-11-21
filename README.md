@@ -67,7 +67,7 @@ pytest
 pytest --cov=admin_web --cov-report=html
 ```
 
-**총 164개 테스트 통과** ✅
+**총 169개 테스트 통과** ✅
 
 ## 🏗️ 아키텍처
 
