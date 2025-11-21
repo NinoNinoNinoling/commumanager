@@ -401,3 +401,104 @@ def test_should_toggle_key_member_status(user_service, temp_db):
     # Then
     user = user_service.get_user('user@example.com')
     assert user.is_key_member is True
+
+
+def test_should_log_admin_action_when_changing_role(user_service, temp_db):
+    """
+    역할 변경 시 관리자 로그를 기록해야 한다 (RED)
+    """
+    # Given: 유저 생성
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO users (mastodon_id, username, role)
+        VALUES (?, ?, ?)
+    """, ('user@example.com', 'user', 'user'))
+    conn.commit()
+    conn.close()
+
+    # When: 역할 변경
+    user_service.change_role('user@example.com', 'admin', 'admin_user')
+
+    # Then: 관리자 로그 확인
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM admin_logs
+        WHERE target_user = ? AND action_type = ?
+    """, ('user@example.com', 'role_change'))
+    log = cursor.fetchone()
+    conn.close()
+
+    assert log is not None
+    assert log[1] == 'admin_user'  # admin_name
+    assert log[2] == 'role_change'  # action_type
+    assert log[3] == 'user@example.com'  # target_user
+    assert 'admin' in log[4]  # details should contain new role
+
+
+def test_should_log_admin_action_when_adding_warning(user_service, temp_db):
+    """
+    경고 추가 시 관리자 로그를 기록해야 한다 (RED)
+    """
+    # Given: 유저 생성
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO users (mastodon_id, username, role, warning_count)
+        VALUES (?, ?, ?, ?)
+    """, ('user@example.com', 'user', 'user', 0))
+    conn.commit()
+    conn.close()
+
+    # When: 경고 추가
+    user_service.add_warning('user@example.com', 'admin_user')
+
+    # Then: 관리자 로그 확인
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM admin_logs
+        WHERE target_user = ? AND action_type = ?
+    """, ('user@example.com', 'warning_add'))
+    log = cursor.fetchone()
+    conn.close()
+
+    assert log is not None
+    assert log[1] == 'admin_user'  # admin_name
+    assert log[2] == 'warning_add'  # action_type
+    assert log[3] == 'user@example.com'  # target_user
+
+
+def test_should_log_admin_action_when_setting_key_member(user_service, temp_db):
+    """
+    주요 멤버 설정 시 관리자 로그를 기록해야 한다 (RED)
+    """
+    # Given: 유저 생성
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO users (mastodon_id, username, role, is_key_member)
+        VALUES (?, ?, ?, ?)
+    """, ('user@example.com', 'user', 'user', 0))
+    conn.commit()
+    conn.close()
+
+    # When: 주요 멤버로 설정
+    user_service.set_key_member('user@example.com', True, 'admin_user')
+
+    # Then: 관리자 로그 확인
+    conn = sqlite3.connect(temp_db)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT * FROM admin_logs
+        WHERE target_user = ? AND action_type = ?
+    """, ('user@example.com', 'key_member_change'))
+    log = cursor.fetchone()
+    conn.close()
+
+    assert log is not None
+    assert log[1] == 'admin_user'  # admin_name
+    assert log[2] == 'key_member_change'  # action_type
+    assert log[3] == 'user@example.com'  # target_user
+    assert 'True' in log[4] or 'true' in log[4].lower()  # details should contain new status

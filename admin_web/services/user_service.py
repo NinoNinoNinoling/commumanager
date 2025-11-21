@@ -10,6 +10,7 @@ from admin_web.models.user import User
 from admin_web.models.transaction import Transaction
 from admin_web.repositories.user_repository import UserRepository
 from admin_web.repositories.transaction_repository import TransactionRepository
+from admin_web.repositories.admin_log_repository import AdminLogRepository
 
 
 class UserService:
@@ -34,6 +35,7 @@ class UserService:
         """
         self.user_repo = UserRepository(db_path)
         self.transaction_repo = TransactionRepository(db_path)
+        self.admin_log_repo = AdminLogRepository(db_path)
         self.db_path = db_path
 
     def get_user(self, mastodon_id: str) -> Optional[User]:
@@ -131,7 +133,13 @@ class UserService:
 
         self.user_repo.update_role(mastodon_id, new_role)
 
-        # TODO: Log admin action
+        # Log admin action
+        self.admin_log_repo.create_log(
+            admin_name=admin_name,
+            action_type='role_change',
+            target_user=mastodon_id,
+            details=f'역할 변경: {new_role}'
+        )
 
     def adjust_balance(
         self,
@@ -225,7 +233,14 @@ class UserService:
         """
         self.user_repo.increment_warning_count(mastodon_id)
 
-        # TODO: Log admin action
+        # Log admin action
+        self.admin_log_repo.create_log(
+            admin_name=admin_name,
+            action_type='warning_add',
+            target_user=mastodon_id,
+            details='경고 추가'
+        )
+
         # TODO: Check if user should be auto-banned (warning_count >= 3)
 
     def set_key_member(
@@ -244,4 +259,10 @@ class UserService:
         """
         self.user_repo.update_key_member(mastodon_id, is_key_member)
 
-        # TODO: Log admin action
+        # Log admin action
+        self.admin_log_repo.create_log(
+            admin_name=admin_name,
+            action_type='key_member_change',
+            target_user=mastodon_id,
+            details=f'주요 멤버 상태 변경: {is_key_member}'
+        )
