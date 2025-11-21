@@ -123,3 +123,25 @@ class ItemRepository:
         row = cursor.fetchone()
         conn.close()
         return row['count']
+
+    def decrease_stock(self, item_id: int, quantity: int) -> None:
+        """
+        아이템 재고를 감소시키고 판매 수를 증가시킵니다.
+
+        Args:
+            item_id: 아이템 ID
+            quantity: 감소시킬 수량
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE items
+            SET current_stock = current_stock - ?,
+                sold_count = sold_count + ?,
+                total_sales = total_sales + (price * ?)
+            WHERE id = ?
+        """, (quantity, quantity, quantity, item_id))
+
+        conn.commit()
+        conn.close()
