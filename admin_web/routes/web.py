@@ -6,6 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from admin_web.services.user_service import UserService
 from admin_web.services.item_service import ItemService
 from admin_web.services.warning_service import WarningService
+from admin_web.utils.auth import login_required
 
 web_bp = Blueprint('web', __name__)
 logger = logging.getLogger(__name__)
@@ -53,58 +54,48 @@ def logout():
 
 
 @web_bp.route('/')
+@login_required
 def index():
-    if 'user_id' not in session:
-        return redirect(url_for('web.login'))
-    
     user_service = UserService()
     item_service = ItemService()
-    
+
     users = user_service.get_all_users()
     items = item_service.get_active_items()
-    
+
     stats = {
         'total_users': len(users),
         'total_items': len(items),
         'total_balance': sum(u.balance for u in users),
     }
-    
+
     return render_template('dashboard.html', stats=stats)
 
 
 @web_bp.route('/users')
+@login_required
 def users():
-    if 'user_id' not in session:
-        return redirect(url_for('web.login'))
-    
     user_service = UserService()
     all_users = user_service.get_all_users()
-    
+
     return render_template('users.html', users=all_users)
 
 
 @web_bp.route('/items')
+@login_required
 def items():
-    if 'user_id' not in session:
-        return redirect(url_for('web.login'))
-    
     item_service = ItemService()
     all_items = item_service.get_active_items()
-    
+
     return render_template('items.html', items=all_items)
 
 
 @web_bp.route('/warnings')
+@login_required
 def warnings():
-    if 'user_id' not in session:
-        return redirect(url_for('web.login'))
-    
     return render_template('dashboard.html', stats={'total_users': 0, 'total_items': 0, 'total_balance': 0})
 
 
 @web_bp.route('/calendar')
+@login_required
 def calendar():
-    if 'user_id' not in session:
-        return redirect(url_for('web.login'))
-    
     return render_template('dashboard.html', stats={'total_users': 0, 'total_items': 0, 'total_balance': 0})

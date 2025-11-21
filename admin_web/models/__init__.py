@@ -5,6 +5,7 @@ Models 패키지
 데이터 모델 정의를 포함합니다.
 """
 from admin_web.models.admin_log import AdminLog
+from admin_web.models.ban_record import BanRecord
 from admin_web.models.calendar_event import CalendarEvent
 from admin_web.models.inventory import Inventory
 from admin_web.models.item import Item
@@ -17,6 +18,7 @@ from admin_web.models.warning import Warning
 
 __all__ = [
     'AdminLog',
+    'BanRecord',
     'CalendarEvent',
     'Inventory',
     'Item',

@@ -5,6 +5,7 @@ Repositories 패키지
 데이터베이스 접근 계층을 포함합니다.
 """
 from admin_web.repositories.admin_log_repository import AdminLogRepository
+from admin_web.repositories.ban_record_repository import BanRecordRepository
 from admin_web.repositories.calendar_repository import CalendarRepository
 from admin_web.repositories.inventory_repository import InventoryRepository
 from admin_web.repositories.item_repository import ItemRepository
@@ -17,6 +18,7 @@ from admin_web.repositories.warning_repository import WarningRepository
 
 __all__ = [
     'AdminLogRepository',
+    'BanRecordRepository',
     'CalendarRepository',
     'InventoryRepository',
     'ItemRepository',
