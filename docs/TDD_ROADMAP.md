@@ -384,49 +384,64 @@ def test_should_return_none_when_user_not_found():
 
 ---
 
-## 🔄 Phase 2: 활동량 관리 - Warning & Vacation (진행 중)
+## ✅ Phase 2: 활동량 관리 - Warning & Vacation (완료)
 
 ### 🎯 목표
-- 경고 시스템 구현 (Warning)
-- 휴식 관리 구현 (Vacation)
-- 활동량 체크 로직
+- 경고 시스템 구현 (Warning) ✅
+- 휴식 관리 구현 (Vacation) ✅
+- 활동량 체크 로직 ✅
 
 ### 📦 의존성
 - Phase 1 완료 (User, Transaction)
 
-### 🔄 진행 계획
-**Phase 2는 도메인 로직(Models/Repositories/Services)만 구현합니다.**
+### ✅ 완료 상태
+**Phase 2는 도메인 로직(Models/Repositories/Services)만 구현했습니다.**
 **Controllers는 Phase 7(통합)에서 구현합니다.**
 
-**Phase 2.1: Warning 모델 (TDD)**
-- [ ] tests/models/test_warning.py 작성 (RED)
-- [ ] admin_web/models/warning.py 구현 (GREEN)
+- **Phase 2.1**: Warning 모델 ✅ (11 tests)
+  - Commit: 0185528 - "기능 추가: Phase 2.1 - Warning 모델 구현"
+  - tests/models/test_warning.py
+  - admin_web/models/warning.py
 
-**Phase 2.2: Warning Repository (TDD)**
-- [ ] tests/repositories/test_warning_repository.py 작성 (RED)
-- [ ] admin_web/repositories/warning_repository.py 구현 (GREEN)
+- **Phase 2.2**: Warning Repository ✅ (10 tests)
+  - Commit: 59c2b9b - "기능 추가: Phase 2.2 - Warning Repository 구현"
+  - tests/repositories/test_warning_repository.py
+  - admin_web/repositories/warning_repository.py
 
-**Phase 2.3: Vacation 모델 (TDD)**
-- [ ] tests/models/test_vacation.py 작성 (RED)
-- [ ] admin_web/models/vacation.py 구현 (GREEN)
+- **Phase 2.3**: Vacation 모델 ✅ (10 tests)
+  - Commit: 53289f7 - "기능 추가: Phase 2.3 - Vacation 모델 구현"
+  - tests/models/test_vacation.py
+  - admin_web/models/vacation.py
 
-**Phase 2.4: Vacation Repository (TDD)**
-- [ ] tests/repositories/test_vacation_repository.py 작성 (RED)
-- [ ] admin_web/repositories/vacation_repository.py 구현 (GREEN)
+- **Phase 2.4**: Vacation Repository ✅ (11 tests)
+  - Commit: 1b62f8d - "기능 추가: Phase 2.4 - Vacation Repository 구현"
+  - tests/repositories/test_vacation_repository.py
+  - admin_web/repositories/vacation_repository.py
 
-**Phase 2.5: Warning Service (TDD)**
-- [ ] tests/services/test_warning_service.py 작성 (RED)
-- [ ] admin_web/services/warning_service.py 구현 (GREEN)
-- [ ] 활동량 체크 로직 구현
+- **Phase 2.5**: Warning Service ✅ (11 tests)
+  - Commit: 6ccc4d8 - "기능 추가: Phase 2.5 - Warning Service 구현"
+  - tests/services/test_warning_service.py
+  - admin_web/services/warning_service.py
+  - 경고 발행 및 warning_count 자동 증가
+  - 경고 유형 검증 (activity, isolation, bias, avoidance)
+  - 자동 아웃 위험 판단 로직
 
-**Phase 2.6: Vacation Service (TDD)**
-- [ ] tests/services/test_vacation_service.py 작성 (RED)
-- [ ] admin_web/services/vacation_service.py 구현 (GREEN)
+- **Phase 2.6**: Vacation Service ✅ (11 tests)
+  - Commit: e5535b6 - "기능 추가: Phase 2.6 - Vacation Service 구현"
+  - tests/services/test_vacation_service.py
+  - admin_web/services/vacation_service.py
+  - 휴가 생성/조회/승인/거부/삭제
+  - 휴가 통계 (총 휴가 수, 승인/미승인, 총 일수)
 
-**Phase 2.7: Controllers (연기)**
-- [ ] WarningController → **Phase 7로 연기**
-- [ ] VacationController → **Phase 7로 연기**
-- [ ] ActivityController → **Phase 7로 연기**
+- **Phase 2.7**: Controllers (연기)
+  - WarningController → **Phase 7로 연기**
+  - VacationController → **Phase 7로 연기**
+  - ActivityController → **Phase 7로 연기**
+
+**총 테스트**: 64 passed (11 + 10 + 10 + 11 + 11 + 11)
+**누적 테스트**: 125 passed (Phase 0-2)
+
+### 🔄 원래 진행 계획 (참고용)
 
 ### 🧱 구현할 모델
 
