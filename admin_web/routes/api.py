@@ -1,4 +1,5 @@
 """REST API 라우트"""
+from functools import wraps
 from flask import Blueprint, request, jsonify, session
 from admin_web.services.user_service import UserService
 from admin_web.services.item_service import ItemService
@@ -7,30 +8,35 @@ from admin_web.models.item import Item
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 
 
-def require_auth():
-    """간단한 인증 체크"""
-    if 'user_id' not in session:
-        return jsonify({'error': 'Unauthorized'}), 401
-    return None
+def require_auth(f):
+    """
+    인증을 요구하는 라우트를 위한 데코레이터
+
+    Args:
+        f: 데코레이트할 함수
+
+    Returns:
+        인증 체크가 추가된 래퍼 함수
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({'error': 'Unauthorized'}), 401
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 @api_bp.route('/users', methods=['GET'])
+@require_auth
 def get_users():
-    auth_error = require_auth()
-    if auth_error:
-        return auth_error
-    
     user_service = UserService()
     users = user_service.get_all_users()
     return jsonify({'users': [u.to_dict() for u in users]})
 
 
 @api_bp.route('/users/<user_id>', methods=['GET'])
+@require_auth
 def get_user(user_id):
-    auth_error = require_auth()
-    if auth_error:
-        return auth_error
-    
     user_service = UserService()
     user = user_service.get_user(user_id)
     if not user:
@@ -39,15 +45,12 @@ def get_user(user_id):
 
 
 @api_bp.route('/users/<user_id>/balance', methods=['POST'])
+@require_auth
 def adjust_balance(user_id):
-    auth_error = require_auth()
-    if auth_error:
-        return auth_error
-    
     data = request.get_json()
     amount = data.get('amount')
     description = data.get('description', '관리자 조정')
-    
+
     user_service = UserService()
     try:
         result = user_service.adjust_balance(user_id, amount, 'adjustment', description, session.get('user_id'))
@@ -57,25 +60,19 @@ def adjust_balance(user_id):
 
 
 @api_bp.route('/items', methods=['GET'])
+@require_auth
 def get_items():
-    auth_error = require_auth()
-    if auth_error:
-        return auth_error
-    
     item_service = ItemService()
     items = item_service.get_active_items()
     return jsonify({'items': [i.to_dict() for i in items]})
 
 
 @api_bp.route('/items', methods=['POST'])
+@require_auth
 def create_item():
-    auth_error = require_auth()
-    if auth_error:
-        return auth_error
-    
     data = request.get_json()
     item = Item.from_dict(data)
-    
+
     item_service = ItemService()
     try:
         result = item_service.create_item(item)
@@ -85,17 +82,14 @@ def create_item():
 
 
 @api_bp.route('/dashboard/stats', methods=['GET'])
+@require_auth
 def get_stats():
-    auth_error = require_auth()
-    if auth_error:
-        return auth_error
-    
     user_service = UserService()
     item_service = ItemService()
-    
+
     users = user_service.get_all_users()
     items = item_service.get_active_items()
-    
+
     stats = {
         'total_users': len(users),
         'total_items': len(items),
