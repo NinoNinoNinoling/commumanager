@@ -5,6 +5,13 @@ from admin_web.utils.auth import admin_required
 
 
 class UserController:
+    """
+    유저 관리 API 요청을 처리하는 Controller
+
+    유저 조회, 잔액 조정 등 유저 관련 API 엔드포인트의 요청을 처리하고
+    UserService를 호출하여 비즈니스 로직을 실행합니다.
+    """
+
     def __init__(self, db_path: str = 'economy.db'):
         self.user_service = UserService(db_path)
 

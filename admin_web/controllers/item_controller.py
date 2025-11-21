@@ -7,6 +7,13 @@ from admin_web.utils.auth import admin_required
 
 
 class ItemController:
+    """
+    아이템 및 상점 API 요청을 처리하는 Controller
+
+    아이템 조회 및 생성, 아이템 구매 등 상점 관련 API 엔드포인트의 요청을 처리하고
+    ItemService와 ShopService를 호출하여 비즈니스 로직을 실행합니다.
+    """
+
     def __init__(self, db_path: str = 'economy.db'):
         self.item_service = ItemService(db_path)
         self.shop_service = ShopService(db_path)
