@@ -1,202 +1,95 @@
-# 마녀봇 (Witch Bot)
+# CommuManager - 마스토돈 커뮤니티 관리 시스템
 
-휘핑 에디션 마스토돈용 활동량 기반 자동 운영 관리 시스템
+## 🚀 빠른 시작
 
-## 개요
+### Docker Compose 사용 (권장)
 
-마스토돈 커뮤니티를 위한 활동량 기반 자동 관리 봇. 답글 감지로 재화를 지급하고, 활동량을 체크하여 경고를 발송합니다.
-
-## 핵심 기능
-1. 재화 지급 (하루 2회 정산, 오전 4시/오후 4시)
-2. 출석 체크 (매일 오전 10시, 자정까지 출석 가능)
-3. 활동량 체크 (소셜 분석, 경고 발송)
-4. 휴식 관리 (활동량 체크 제외)
-5. 일정 관리 (이벤트, 전역 휴식기간)
-6. 상점 시스템 (아이템 구매)
-
-## 기술 스택
-- 마스토돈: Ruby 3.2.2 (휘핑 에디션)
-- 봇: Python 3.9+
-- 웹: Flask 3.x + Bootstrap 5
-- DB: PostgreSQL (마스토돈, 읽기 전용) + SQLite (economy.db)
-- 캐시/큐: Redis + Celery
-- 인프라: GCP (Google Cloud Platform)
-
-## 프로젝트 구조
-
-```
-commumanager/
-├── admin_web/              # Flask 관리자 웹 애플리케이션
-│   ├── app.py             # 애플리케이션 진입점
-│   ├── config.py          # 설정 파일
-│   ├── models/            # 데이터 모델 (Model)
-│   ├── repositories/      # 데이터베이스 접근 (Repository)
-│   ├── services/          # 비즈니스 로직 (Service)
-│   ├── controllers/       # 비즈니스 로직 처리 (Controller)
-│   ├── routes/            # Flask Blueprint (Route)
-│   ├── templates/         # Jinja2 템플릿 (Bootstrap CDN 사용)
-│   └── utils/             # 유틸리티 함수
-│
-├── bot/                   # 관리 봇 시스템
-│   ├── reward_bot.py          # 재화 지급 및 출석 체크
-│   ├── activity_checker.py    # 활동량 분석 및 체크
-│   ├── command_handler.py     # 봇 명령어 처리
-│   ├── tasks.py               # Celery 백그라운드 태스크
-│   ├── database.py            # 데이터베이스 유틸
-│   ├── utils.py               # 봇 유틸리티
-│   └── celeryconfig.py        # Celery 설정
-│
-├── docs/                  # 프로젝트 문서
-│   ├── ADMIN_GUIDE.md         # 관리자 웹 가이드 (유지보수 포함)
-│   ├── DEPLOYMENT.md          # 배포 가이드 (서버 설정 + Docker)
-│   ├── ARCHITECTURE.md        # 시스템 아키텍처
-│   ├── features.md            # 기능 목록 및 유즈케이스
-│   ├── database.md            # 데이터베이스 설계
-│   ├── api_design.md          # API 설계
-│   ├── EMERGENCY.md           # 긴급 대응 절차
-│   └── images/                # UI 목업 (SVG)
-│
-├── .env.example           # 환경 변수 예시
-├── .gitignore             # Git 제외 파일 목록
-├── requirements.txt       # Python 의존성
-└── README.md              # 프로젝트 소개
-```
-
-## 백엔드 아키텍처
-
-Flask 관리자 웹은 **Model - Repository - Service - Controller - Route** 5계층 아키텍처를 사용합니다.
-
-```
-HTTP Request → Route → Controller → Service → Repository → Database
-```
-
-## 설치 및 실행
-
-### 🐳 Docker 사용 (권장)
-
-**빠른 시작:**
 ```bash
 # 1. 환경 변수 설정
 cp .env.example .env
-nano .env  # 실제 값 입력
+# .env 파일을 열어 SECRET_KEY 수정
 
-# 2. 실행
-./scripts/docker/start.sh
+# 2. Docker Compose로 실행
+docker-compose up -d
+
+# 3. 웹 브라우저에서 접속
+# http://localhost:5000
 ```
 
-**관리:**
+### 로컬 실행
+
 ```bash
-# 로그 확인
-./scripts/docker/logs.sh
-
-# 중지
-./scripts/docker/stop.sh
-
-# 재시작
-./scripts/docker/restart.sh
-```
-
-**자세한 내용:** [배포 가이드](docs/DEPLOYMENT.md)
-
----
-
-### 💻 로컬 개발 환경
-
-#### 1. 가상환경 생성 및 활성화
-```bash
-python3 -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or
-venv\Scripts\activate     # Windows
-```
-
-#### 2. 의존성 설치
-```bash
+# 1. 의존성 설치
 pip install -r requirements.txt
+
+# 2. 데이터베이스 초기화
+python init_db.py
+
+# 3. 앱 실행
+python admin_web/app.py
 ```
 
-#### 3. 환경 변수 설정
-```bash
-cp .env.example .env
-# .env 파일을 편집하여 실제 값 입력
-```
+## 🔐 기본 로그인 정보
 
-#### 4. 데이터베이스 초기화
-```bash
-python init_db.py economy.db
-```
+- **사용자명**: admin
+- **비밀번호**: admin123
 
-#### 5. Redis 실행
-```bash
-# macOS (Homebrew)
-brew install redis
-brew services start redis
+⚠️ **보안 경고**: 프로덕션 환경에서는 반드시 비밀번호를 변경하세요!
 
-# Ubuntu/Debian
-sudo apt-get install redis-server
-sudo systemctl start redis
+## 📋 주요 기능
 
-# Docker
-docker run -d -p 6379:6379 redis:7-alpine
-```
+- ✅ 유저 관리 (잔액 조정, 경고 관리)
+- ✅ 아이템 관리 (상점 시스템)
+- ✅ 경고 시스템 (활동량, 고립, 편향, 회피)
+- ✅ 휴가 관리
+- ✅ 일정 관리
+- ✅ 스토리 이벤트 & 공지 예약
 
-#### 6. Flask 개발 서버 실행
-```bash
-cd admin_web
-python app.py
-```
-
-#### 7. 봇 실행
-```bash
-# 새 터미널에서
-python -m bot.reward_bot
-```
-
-#### 8. Celery 실행
-```bash
-# 새 터미널에서 Worker 실행
-celery -A bot.tasks worker --loglevel=info
-
-# 새 터미널에서 Beat 실행 (스케줄러)
-celery -A bot.tasks beat --loglevel=info
-```
-
-## 문서
-
-### 🚀 시작하기
-- **[배포 가이드](docs/DEPLOYMENT.md)** ⭐ - Docker 및 서버 설정 완벽 가이드
-
-### 📖 시스템 이해
-- **[시스템 아키텍처](docs/ARCHITECTURE.md)** - 전체 시스템 구조 및 기술 스택
-- [기능 목록](docs/features.md) - 모든 기능 및 유즈케이스
-- [데이터베이스 설계](docs/database.md) - DB 스키마 및 설계
-- [API 설계](docs/api_design.md) - API 엔드포인트
-
-### 👨‍💼 관리자용
-- **[관리자 가이드](docs/ADMIN_GUIDE.md)** - 웹 인터페이스 사용법 및 시스템 유지보수
-- **[긴급 대응](docs/EMERGENCY.md)** 🚨 - 트러블슈팅
-- [UI 목업](docs/images/) - SVG 디자인 가이드
-
-### 📅 개발 계획
-- **[개발 로드맵](ROADMAP.md)** - 향후 개발 계획 및 버전 히스토리
-
-## 테스트
+## 🧪 테스트
 
 ```bash
-# pytest 실행
+# 전체 테스트 실행
 pytest
 
-# 커버리지와 함께 실행
-pytest --cov=admin_web --cov=bot
-
-# 특정 테스트만 실행
-pytest tests/test_repositories.py
-pytest tests/test_services.py
-pytest tests/test_api.py
+# 테스트 커버리지 확인
+pytest --cov=admin_web --cov-report=html
 ```
 
-## 디렉토리 구조
+**총 164개 테스트 통과** ✅
 
-- `admin_web/` - Flask 관리자 웹
-- `bot/` - 마스토돈 봇 시스템
-- `docs/` - 프로젝트 문서
+## 🏗️ 아키텍처
+
+```
+admin_web/
+├── models/          # 데이터 모델
+├── repositories/    # DB 접근 계층
+├── services/        # 비즈니스 로직
+├── controllers/     # API 컨트롤러
+├── routes/          # Flask 라우트
+├── templates/       # HTML 템플릿
+└── utils/           # 유틸리티
+```
+
+## 📖 문서
+
+- [관리자 가이드](docs/ADMIN_GUIDE.md)
+- [API 문서](docs/api_design.md)
+- [DB 스키마](docs/database.md)
+- [아키텍처](docs/ARCHITECTURE.md)
+
+## 🐳 Docker 배포
+
+```bash
+# 이미지 빌드
+docker build -t commumanager:latest .
+
+# 컨테이너 실행
+docker run -d -p 5000:5000 \
+  -v $(pwd)/economy.db:/app/economy.db \
+  --name commumanager \
+  commumanager:latest
+```
+
+## 📝 라이센스
+
+MIT License

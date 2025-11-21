@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}대시보드{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">대시보드</h2>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">총 유저 수</h5>
+                <h2 class="card-text">{{ stats.total_users }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">총 아이템 수</h5>
+                <h2 class="card-text">{{ stats.total_items }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-body">
+                <h5 class="card-title">총 재화</h5>
+                <h2 class="card-text">{{ stats.total_balance }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">경고 수</h5>
+                <h2 class="card-text">{{ stats.total_warnings|default(0) }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">최근 활동</div>
+            <div class="card-body">
+                <p>최근 유저 활동 로그가 여기에 표시됩니다.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">시스템 상태</div>
+            <div class="card-body">
+                <p class="text-success"><i class="bi bi-check-circle"></i> 모든 시스템 정상 작동 중</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,138 +1,20 @@
-# ============================================================================
-# 마녀봇 Docker Compose 설정
-# ============================================================================
 version: '3.8'
 
 services:
-  # ==========================================================================
-  # Redis (캐싱 및 Celery 브로커)
-  # ==========================================================================
-  redis:
-    image: redis:7-alpine
-    container_name: witch-bot-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ==========================================================================
-  # Flask 관리자 웹
-  # ==========================================================================
-  web:
-    build:
-      context: .
-      target: web
-    container_name: witch-bot-web
-    restart: unless-stopped
+  admin_web:
+    build: .
     ports:
       - "5000:5000"
-    env_file:
-      - .env
+    volumes:
+      - ./economy.db:/app/economy.db
+      - ./admin_web:/app/admin_web
     environment:
       - FLASK_ENV=production
-      - DATABASE_PATH=/data/economy.db
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    volumes:
-      - ./data:/data
-      - ./admin_web:/app/admin_web
-    depends_on:
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # ==========================================================================
-  # 봇 (Streaming API)
-  # ==========================================================================
-  bot:
-    build:
-      context: .
-      target: bot
-    container_name: witch-bot-streaming
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
     restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      - DATABASE_PATH=/data/economy.db
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-    volumes:
-      - ./data:/data
-      - ./bot:/app/bot
-    depends_on:
-      redis:
-        condition: service_healthy
+    networks:
+      - app_network
 
-  # ==========================================================================
-  # Celery Worker (백그라운드 작업)
-  # ==========================================================================
-  celery-worker:
-    build:
-      context: .
-      target: celery-worker
-    container_name: witch-bot-celery-worker
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      - DATABASE_PATH=/data/economy.db
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-    volumes:
-      - ./data:/data
-      - ./bot:/app/bot
-    depends_on:
-      redis:
-        condition: service_healthy
-
-  # ==========================================================================
-  # Celery Beat (스케줄러)
-  # ==========================================================================
-  celery-beat:
-    build:
-      context: .
-      target: celery-beat
-    container_name: witch-bot-celery-beat
-    restart: unless-stopped
-    env_file:
-      - .env
-    environment:
-      - DATABASE_PATH=/data/economy.db
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-    volumes:
-      - ./data:/data
-      - ./bot:/app/bot
-    depends_on:
-      redis:
-        condition: service_healthy
-
-# ============================================================================
-# Volumes
-# ============================================================================
-volumes:
-  redis-data:
-    driver: local
-  # data 디렉토리는 호스트에 ./data로 마운트됨 (economy.db 저장)
-
-# ============================================================================
-# Networks (기본 bridge 네트워크 사용)
-# ============================================================================
 networks:
-  default:
-    name: witch-bot-network
+  app_network:
+    driver: bridge

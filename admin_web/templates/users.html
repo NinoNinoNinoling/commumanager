@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}유저 관리{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">유저 관리</h2>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>사용자명</th>
+                    <th>Mastodon ID</th>
+                    <th>역할</th>
+                    <th>잔액</th>
+                    <th>경고 횟수</th>
+                    <th>작업</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.mastodon_id }}</td>
+                    <td><span class="badge bg-{{ 'danger' if user.role == 'admin' else 'primary' }}">{{ user.role }}</span></td>
+                    <td>{{ user.balance }}</td>
+                    <td>{{ user.warning_count }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="adjustBalance('{{ user.mastodon_id }}')">잔액 조정</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="balanceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">잔액 조정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="balanceForm">
+                    <input type="hidden" id="userId" name="userId">
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">금액 (양수: 추가, 음수: 차감)</label>
+                        <input type="number" class="form-control" id="amount" name="amount" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">사유</label>
+                        <input type="text" class="form-control" id="description" name="description" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" onclick="submitBalance()">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function adjustBalance(userId) {
+    document.getElementById('userId').value = userId;
+    new bootstrap.Modal(document.getElementById('balanceModal')).show();
+}
+
+function submitBalance() {
+    const userId = document.getElementById('userId').value;
+    const amount = document.getElementById('amount').value;
+    const description = document.getElementById('description').value;
+    
+    fetch(`/api/v1/users/${userId}/balance`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({amount: parseInt(amount), description: description})
+    })
+    .then(response => response.json())
+    .then(data => {
+        location.reload();
+    });
+}
+</script>
+{% endblock %}

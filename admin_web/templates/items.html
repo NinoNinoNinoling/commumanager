@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}아이템 관리{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">아이템 관리</h2>
+
+<button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#itemModal">+ 새 아이템 추가</button>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>이름</th>
+                    <th>가격</th>
+                    <th>카테고리</th>
+                    <th>재고</th>
+                    <th>상태</th>
+                    <th>판매 수량</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>{{ item.category|default('없음') }}</td>
+                    <td>{{ '무제한' if item.is_unlimited_stock else item.current_stock }}</td>
+                    <td><span class="badge bg-{{ 'success' if item.is_active else 'secondary' }}">{{ '활성' if item.is_active else '비활성' }}</span></td>
+                    <td>{{ item.sold_count }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="itemModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">새 아이템 추가</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="itemForm">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">아이템 이름</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">가격</label>
+                        <input type="number" class="form-control" id="price" name="price" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="category" class="form-label">카테고리</label>
+                        <input type="text" class="form-control" id="category" name="category">
+                    </div>
+                    <div class="mb-3">
+                        <label for="stock" class="form-label">초기 재고</label>
+                        <input type="number" class="form-control" id="stock" name="stock" value="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" onclick="submitItem()">추가</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function submitItem() {
+    const formData = new FormData(document.getElementById('itemForm'));
+    const data = {
+        name: formData.get('name'),
+        price: parseInt(formData.get('price')),
+        category: formData.get('category'),
+        initial_stock: parseInt(formData.get('stock')),
+        current_stock: parseInt(formData.get('stock'))
+    };
+    
+    fetch('/api/v1/items', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        location.reload();
+    });
+}
+</script>
+{% endblock %}
