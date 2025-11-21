@@ -8,9 +8,11 @@ from datetime import datetime
 
 from admin_web.models.user import User
 from admin_web.models.transaction import Transaction
+from admin_web.models.ban_record import BanRecord
 from admin_web.repositories.user_repository import UserRepository
 from admin_web.repositories.transaction_repository import TransactionRepository
 from admin_web.repositories.admin_log_repository import AdminLogRepository
+from admin_web.repositories.ban_record_repository import BanRecordRepository
 
 
 class UserService:
@@ -36,6 +38,7 @@ class UserService:
         self.user_repo = UserRepository(db_path)
         self.transaction_repo = TransactionRepository(db_path)
         self.admin_log_repo = AdminLogRepository(db_path)
+        self.ban_record_repo = BanRecordRepository(db_path)
         self.db_path = db_path
 
     def get_user(self, mastodon_id: str) -> Optional[User]:
@@ -233,8 +236,6 @@ class UserService:
             mastodon_id: 유저의 Mastodon ID
             admin_name: 경고를 발행하는 관리자
         """
-        import sqlite3
-
         self.user_repo.increment_warning_count(mastodon_id)
 
         # Log admin action
@@ -248,22 +249,15 @@ class UserService:
         # Check if user should be auto-banned (warning_count >= 3)
         user = self.user_repo.find_by_id(mastodon_id)
         if user and user.warning_count >= 3:
-            # Auto-ban: create ban record
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            cursor.execute("""
-                INSERT INTO ban_records (
-                    user_id, banned_by, reason, warning_count, is_active
-                ) VALUES (?, ?, ?, ?, ?)
-            """, (
-                mastodon_id,
-                'system',
-                f'자동 아웃: 경고 {user.warning_count}회 누적',
-                user.warning_count,
-                1
-            ))
-            conn.commit()
-            conn.close()
+            # Auto-ban: create ban record (Repository 사용)
+            ban_record = BanRecord(
+                user_id=mastodon_id,
+                banned_by='system',
+                reason=f'자동 아웃: 경고 {user.warning_count}회 누적',
+                warning_count=user.warning_count,
+                is_active=True
+            )
+            self.ban_record_repo.create(ban_record)
 
             # Log auto-ban
             self.admin_log_repo.create_log(
