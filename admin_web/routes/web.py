@@ -1,5 +1,6 @@
 """웹 UI 라우트"""
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from werkzeug.security import check_password_hash, generate_password_hash
 from admin_web.services.user_service import UserService
 from admin_web.services.item_service import ItemService
 from admin_web.services.warning_service import WarningService
@@ -7,8 +8,10 @@ from admin_web.services.warning_service import WarningService
 web_bp = Blueprint('web', __name__)
 
 # 간단한 인메모리 인증 (실제로는 DB 사용)
+# 비밀번호는 해시화되어 저장됨
+# 기본 비밀번호: admin123 (프로덕션에서는 반드시 변경)
 ADMIN_USERS = {
-    'admin': 'admin123'
+    'admin': generate_password_hash('admin123')
 }
 
 
@@ -17,15 +20,15 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
-        if username in ADMIN_USERS and ADMIN_USERS[username] == password:
+
+        if username in ADMIN_USERS and check_password_hash(ADMIN_USERS[username], password):
             session['user_id'] = username
             session['role'] = 'admin'
             flash('로그인 성공!', 'success')
             return redirect(url_for('web.index'))
         else:
             flash('잘못된 사용자명 또는 비밀번호', 'danger')
-    
+
     return render_template('login.html')
 
 

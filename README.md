@@ -7,12 +7,15 @@
 ```bash
 # 1. 환경 변수 설정
 cp .env.example .env
-# .env 파일을 열어 SECRET_KEY 수정
 
-# 2. Docker Compose로 실행
+# 2. SECRET_KEY 생성 및 설정
+python -c "import secrets; print(secrets.token_hex(32))"
+# 출력된 값을 .env 파일의 SECRET_KEY에 설정
+
+# 3. Docker Compose로 실행
 docker-compose up -d
 
-# 3. 웹 브라우저에서 접속
+# 4. 웹 브라우저에서 접속
 # http://localhost:5000
 ```
 
@@ -22,10 +25,13 @@ docker-compose up -d
 # 1. 의존성 설치
 pip install -r requirements.txt
 
-# 2. 데이터베이스 초기화
+# 2. 환경 변수 설정
+export SECRET_KEY=$(python -c "import secrets; print(secrets.token_hex(32))")
+
+# 3. 데이터베이스 초기화
 python init_db.py
 
-# 3. 앱 실행
+# 4. 앱 실행
 python admin_web/app.py
 ```
 
