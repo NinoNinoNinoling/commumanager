@@ -6,6 +6,26 @@ from typing import Optional
 
 @dataclass
 class CalendarEvent:
+    """
+    커뮤니티 일정 및 이벤트를 나타내는 모델
+
+    calendar_events 테이블의 데이터를 나타냅니다.
+    커뮤니티 일정, 공휴일, 리뉴얼 기간 등을 관리합니다.
+
+    Attributes:
+        title: 이벤트 제목
+        event_date: 이벤트 시작 날짜
+        created_by: 이벤트 생성자 (관리자명)
+        id: 이벤트 ID (Primary key, auto-increment)
+        description: 이벤트 설명
+        start_time: 이벤트 시작 시각 (선택사항)
+        end_date: 이벤트 종료 날짜 (선택사항, 기간 이벤트인 경우)
+        end_time: 이벤트 종료 시각 (선택사항)
+        event_type: 이벤트 유형 (event, holiday, community 등)
+        is_global_vacation: 리뉴얼 기간 여부 (True 시 전체 유저 휴식 처리)
+        created_at: 생성 시각
+        updated_at: 수정 시각
+    """
     title: str
     event_date: date
     created_by: str

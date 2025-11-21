@@ -1,8 +1,11 @@
 """Flask 애플리케이션 메인"""
 import os
+import logging
 from flask import Flask
 from admin_web.routes.web import web_bp
 from admin_web.routes.api import api_bp
+
+logger = logging.getLogger(__name__)
 
 
 def create_app():
@@ -12,7 +15,11 @@ def create_app():
     # 환경 변수에서 SECRET_KEY 가져오기 (없으면 경고와 함께 기본값 사용)
     secret_key = os.environ.get('SECRET_KEY')
     if not secret_key:
-        print("경고: SECRET_KEY 환경 변수가 설정되지 않았습니다. 개발 모드에서만 사용하세요!")
+        logger.warning(
+            "⚠️  SECRET_KEY 환경 변수가 설정되지 않았습니다! "
+            "기본값 'dev-secret-key-change-in-production'을 사용 중입니다. "
+            "프로덕션 환경에서는 반드시 강력한 SECRET_KEY로 변경하세요!"
+        )
         secret_key = 'dev-secret-key-change-in-production'
     app.secret_key = secret_key
 

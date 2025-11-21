@@ -6,6 +6,20 @@ from typing import Optional, Dict, Any
 
 @dataclass
 class AdminLog:
+    """
+    관리자 활동 로그를 나타내는 모델
+
+    admin_logs 테이블의 데이터를 나타냅니다.
+    모든 관리자의 주요 활동을 기록하여 투명한 관리를 지원합니다.
+
+    Attributes:
+        admin_name: 활동을 수행한 관리자명
+        action_type: 활동 유형 (adjust_balance, role_change, warning_add, auto_ban, manual_ban, unban 등)
+        id: 로그 ID (Primary key, auto-increment)
+        target_user: 대상 유저 ID (유저 관련 활동인 경우)
+        details: 활동 상세 설명
+        timestamp: 활동 발생 시각 (자동 기록)
+    """
     admin_name: str
     action_type: str
     id: Optional[int] = None

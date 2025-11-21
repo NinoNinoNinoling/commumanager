@@ -6,6 +6,25 @@ from typing import Optional, Dict, Any
 
 @dataclass
 class ScheduledAnnouncement:
+    """
+    예약 발송 공지를 나타내는 모델
+
+    scheduled_posts 테이블의 데이터를 나타냅니다.
+    특정 시각에 자동으로 발송될 공지사항을 관리합니다.
+
+    Attributes:
+        post_type: 포스트 유형 (announcement 등)
+        content: 공지 내용
+        scheduled_at: 예약 발송 시각
+        created_by: 공지 생성자 (관리자명)
+        id: 공지 ID (Primary key, auto-increment)
+        visibility: 공개 범위 (public, unlisted, private)
+        is_public: 유저 조회 가능 여부 (@봇 공지 명령어로 조회 가능)
+        status: 발송 상태 (pending, published, failed)
+        mastodon_scheduled_id: 마스토돈 예약 포스트 ID
+        created_at: 공지 생성 시각
+        published_at: 실제 발송 시각
+    """
     post_type: str
     content: str
     scheduled_at: datetime

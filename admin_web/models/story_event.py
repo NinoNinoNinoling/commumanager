@@ -6,6 +6,24 @@ from typing import Optional, List, Dict, Any
 
 @dataclass
 class StoryPost:
+    """
+    스토리 이벤트에 포함된 개별 포스트를 나타내는 모델
+
+    story_posts 테이블의 데이터를 나타냅니다.
+    여러 개의 포스트를 일정 간격으로 자동 발송하는 스토리 이벤트의 구성 요소입니다.
+
+    Attributes:
+        event_id: 스토리 이벤트 ID (Foreign key to story_events)
+        sequence: 포스트 순서 (1부터 시작)
+        content: 포스트 내용
+        id: 포스트 ID (Primary key, auto-increment)
+        media_urls: 첨부 미디어 URL (JSON 문자열)
+        status: 발송 상태 (pending, published, failed)
+        mastodon_post_id: 마스토돈에 발행된 포스트 ID
+        scheduled_at: 예약 발송 시각
+        published_at: 실제 발송 시각
+        error_message: 발송 실패 시 에러 메시지
+    """
     event_id: int
     sequence: int
     content: str
@@ -78,6 +96,24 @@ class StoryPost:
 
 @dataclass
 class StoryEvent:
+    """
+    여러 포스트를 일정 간격으로 자동 발송하는 스토리 이벤트 모델
+
+    story_events 테이블의 데이터를 나타냅니다.
+    하나의 이벤트는 여러 개의 StoryPost를 포함하며, 설정된 간격으로 자동 발송됩니다.
+
+    Attributes:
+        title: 이벤트 제목
+        start_time: 첫 번째 포스트 발송 시각
+        created_by: 이벤트 생성자 (관리자명)
+        id: 이벤트 ID (Primary key, auto-increment)
+        description: 이벤트 설명
+        interval_minutes: 포스트 간 발송 간격 (분 단위, 기본값: 5분)
+        status: 이벤트 상태 (pending, in_progress, completed, failed)
+        created_at: 이벤트 생성 시각
+        published_at: 첫 번째 포스트 발송 시각 (실제 발송 시작 시각)
+        posts: 이벤트에 포함된 포스트 목록
+    """
     title: str
     start_time: datetime
     created_by: str
