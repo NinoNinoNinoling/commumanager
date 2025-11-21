@@ -246,6 +246,193 @@ OAuth 콜백 처리
 }
 ```
 
+## 아웃 관리 (Ban Management)
+
+### GET /api/v1/users/{mastodon_id}/ban-status
+유저의 현재 아웃 상태 조회
+
+**Response**:
+```json
+{
+  "is_banned": true,
+  "ban_record": {
+    "id": 1,
+    "user_id": "123456",
+    "banned_at": "2025-11-18T10:00:00Z",
+    "banned_by": "system",
+    "reason": "자동 아웃: 경고 3회 누적",
+    "warning_count": 3,
+    "evidence_snapshot": null,
+    "is_active": true,
+    "unbanned_at": null,
+    "unbanned_by": null,
+    "unban_reason": null
+  }
+}
+```
+
+**참고**: is_banned가 false인 경우 ban_record는 null입니다.
+
+### GET /api/v1/users/{mastodon_id}/ban-history
+유저의 전체 아웃 이력 조회
+
+**Response**:
+```json
+{
+  "ban_records": [
+    {
+      "id": 2,
+      "user_id": "123456",
+      "banned_at": "2025-11-18T10:00:00Z",
+      "banned_by": "system",
+      "reason": "자동 아웃: 경고 3회 누적",
+      "warning_count": 3,
+      "is_active": true,
+      "unbanned_at": null,
+      "unbanned_by": null,
+      "unban_reason": null
+    },
+    {
+      "id": 1,
+      "user_id": "123456",
+      "banned_at": "2025-10-15T08:00:00Z",
+      "banned_by": "admin",
+      "reason": "스팸 행위",
+      "warning_count": 2,
+      "is_active": false,
+      "unbanned_at": "2025-10-20T10:00:00Z",
+      "unbanned_by": "admin",
+      "unban_reason": "경고 후 개선 확인"
+    }
+  ],
+  "total_bans": 2,
+  "active_ban_count": 1
+}
+```
+
+### POST /api/v1/users/{mastodon_id}/ban
+유저를 수동으로 아웃 처리
+
+**Request**:
+```json
+{
+  "reason": "스팸 행위",
+  "admin_name": "admin",
+  "evidence_snapshot": "증거 스냅샷 (선택사항)"
+}
+```
+
+**Response**: 201 Created
+```json
+{
+  "id": 3,
+  "user_id": "123456",
+  "banned_at": "2025-11-21T10:30:00Z",
+  "banned_by": "admin",
+  "reason": "스팸 행위",
+  "warning_count": 2,
+  "evidence_snapshot": "증거 스냅샷 (선택사항)",
+  "is_active": true
+}
+```
+
+**참고**:
+- 이미 활성 아웃 상태인 유저에게는 아웃 처리 불가 (400 에러)
+- 아웃 처리 시 admin_logs에 자동 기록됨
+
+### DELETE /api/v1/users/{mastodon_id}/ban
+유저의 아웃 해제 (언아웃)
+
+**Request**:
+```json
+{
+  "unban_reason": "경고 후 개선 확인됨",
+  "admin_name": "admin",
+  "reset_warning_count": false
+}
+```
+
+**Response**: 200 OK
+```json
+{
+  "id": 3,
+  "user_id": "123456",
+  "banned_at": "2025-11-21T10:30:00Z",
+  "banned_by": "admin",
+  "reason": "스팸 행위",
+  "warning_count": 2,
+  "is_active": false,
+  "unbanned_at": "2025-11-21T15:00:00Z",
+  "unbanned_by": "admin",
+  "unban_reason": "경고 후 개선 확인됨"
+}
+```
+
+**참고**:
+- `reset_warning_count`가 true인 경우 유저의 warning_count를 0으로 초기화합니다
+- 활성 아웃이 없는 유저에게는 언아웃 처리 불가 (400 에러)
+- 언아웃 처리 시 admin_logs에 자동 기록됨
+
+### GET /api/v1/bans
+전체 아웃 기록 조회
+
+**Query Params**:
+- `page`: int (default: 1)
+- `limit`: int (default: 50)
+- `is_active`: boolean (활성 아웃만 조회)
+- `banned_by`: string (아웃 처리자 필터)
+- `start_date`: string (아웃 시작일 필터)
+- `end_date`: string (아웃 종료일 필터)
+
+**Response**:
+```json
+{
+  "bans": [
+    {
+      "id": 5,
+      "user_id": "789012",
+      "username": "user2",
+      "banned_at": "2025-11-20T14:00:00Z",
+      "banned_by": "system",
+      "reason": "자동 아웃: 경고 3회 누적",
+      "warning_count": 3,
+      "is_active": true,
+      "unbanned_at": null
+    },
+    {
+      "id": 4,
+      "user_id": "123456",
+      "username": "user1",
+      "banned_at": "2025-11-18T10:00:00Z",
+      "banned_by": "admin",
+      "reason": "스팸 행위",
+      "warning_count": 1,
+      "is_active": false,
+      "unbanned_at": "2025-11-19T16:00:00Z",
+      "unbanned_by": "admin",
+      "unban_reason": "개선 확인"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 50,
+    "total": 15,
+    "total_pages": 1
+  },
+  "summary": {
+    "total_bans": 15,
+    "active_bans": 3,
+    "auto_bans": 10,
+    "manual_bans": 5
+  }
+}
+```
+
+**참고**: 자동 아웃 로직
+- 유저의 warning_count가 3 이상이 되면 시스템이 자동으로 아웃 처리
+- banned_by='system', reason='자동 아웃: 경고 N회 누적'로 기록됨
+- UserService.add_warning() 메서드에서 자동 실행
+
 ## 재화 관리 (Transactions)
 
 ### GET /api/v1/transactions
