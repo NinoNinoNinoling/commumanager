@@ -5,14 +5,14 @@
 """
 from datetime import datetime, timedelta
 from mastodon import Mastodon
-from .database import (
+from database import (
     get_economy_db,
     get_or_create_user,
     get_user_balance,
     add_transaction,
     invalidate_user_cache
 )
-from .utils import (
+from utils import (
     setup_logger,
     send_dm,
     favorite_status,
@@ -44,7 +44,7 @@ def handle_command(mastodon: Mastodon, notification: dict) -> None:
         get_or_create_user(user_id, username, account.get('display_name'))
 
         # 명령어 파싱
-        from .utils import sanitize_html
+        from utils import sanitize_html
         clean_content = sanitize_html(content)
         command, args = parse_mention_command(clean_content)
 
@@ -201,7 +201,7 @@ def cmd_purchase(mastodon: Mastodon, user_id: str, username: str,
             """, (user_id, item['id']))
 
             # 캐시 무효화
-            from .utils import invalidate_user_cache
+            from utils import invalidate_user_cache
             invalidate_user_cache(user_id)
 
             # 성공: 멘션 좋아요
@@ -278,7 +278,7 @@ def cmd_vacation(mastodon: Mastodon, user_id: str, username: str, args: list) ->
             return
 
         # 최대 휴식 기간 확인
-        from .database import get_setting
+        from database import get_setting
         max_days = int(get_setting('max_vacation_days', '90'))
         if days > max_days:
             send_dm(mastodon, username, f"최대 휴식 기간은 {max_days}일입니다.")
@@ -391,7 +391,7 @@ def cmd_notice(mastodon: Mastodon, user_id: str, username: str) -> None:
             for notice in notices:
                 date = datetime.fromisoformat(notice['scheduled_at']).strftime('%Y-%m-%d')
                 # content 첫 50자만 표시
-                from .utils import sanitize_html
+                from utils import sanitize_html
                 content_preview = sanitize_html(notice['content'])[:50]
                 message += f"• {date}: {content_preview}...\n"
             message += "\n"
