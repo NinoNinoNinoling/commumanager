@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}로그 관리{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="page-header">
+        <h1 class="page-title mb-1">로그 관리</h1>
+        <p class="page-subtitle mb-0">관리자 활동 및 서버 헬스를 실시간으로 모니터링합니다</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary tab-link-btn active" data-tab="admin">📋 관리자 로그</button>
+        <button class="btn btn-outline-secondary tab-link-btn" data-tab="server">🖥️ 서버 로그</button>
+        <button class="btn btn-success">📥 CSV 다운로드</button>
+    </div>
+</div>
+
+<!-- 통계 카드 -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="dashboard-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="dashboard-card-label" style="color: white;">총 로그</div>
+            <h2 class="dashboard-card-value" style="color: white;">0</h2>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="dashboard-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <div class="dashboard-card-label" style="color: white;">현재 페이지</div>
+            <h2 class="dashboard-card-value" style="color: white;">1 / 1</h2>
+        </div>
+    </div>
+</div>
+
+<!-- 탭 1: 관리자 로그 -->
+<div class="tab-content" id="tab-admin">
+    <!-- 필터 영역 -->
+    <div class="card mb-3" style="background-color: #e9ecef;">
+        <div class="card-body">
+            <h6 class="mb-3">필터</h6>
+            <div class="row g-2">
+                <div class="col-md-3">
+                    <label class="form-label small">관리자</label>
+                    <select class="form-select form-select-sm">
+                        <option>전체</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">작업 유형</label>
+                    <select class="form-select form-select-sm">
+                        <option>전체</option>
+                        <option>유저 관리</option>
+                        <option>재화 조정</option>
+                        <option>경고 발송</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">시작일</label>
+                    <input type="date" class="form-control form-control-sm">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small">종료일</label>
+                    <input type="date" class="form-control form-control-sm">
+                </div>
+            </div>
+            <div class="mt-3">
+                <button class="btn btn-sm btn-primary">검색</button>
+                <button class="btn btn-sm btn-secondary">초기화</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로그 테이블 -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>시간</th>
+                            <th>관리자</th>
+                            <th>작업 유형</th>
+                            <th>대상 유저</th>
+                            <th>설명</th>
+                            <th>상세</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">로그가 없습니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 페이지네이션 -->
+            <nav>
+                <ul class="pagination justify-content-center mb-0">
+                    <li class="page-item disabled"><a class="page-link" href="#">이전</a></li>
+                    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item disabled"><a class="page-link" href="#">다음</a></li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- 탭 2: 서버 로그 -->
+<div class="tab-content" id="tab-server" style="display: none;">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="mb-3">서버 로그</h5>
+            <div class="bg-dark text-white p-3 rounded" style="font-family: monospace; font-size: 12px; max-height: 500px; overflow-y: auto;">
+                <div class="text-muted">서버 로그가 여기에 표시됩니다...</div>
+            </div>
+            <div class="mt-3">
+                <button class="btn btn-sm btn-primary">새로고침</button>
+                <button class="btn btn-sm btn-danger">로그 지우기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 탭 전환 스크립트
+document.querySelectorAll('.tab-link-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        document.querySelectorAll('.tab-link-btn').forEach(btn => {
+            btn.classList.remove('btn-primary', 'active');
+            btn.classList.add('btn-outline-secondary');
+        });
+        this.classList.remove('btn-outline-secondary');
+        this.classList.add('btn-primary', 'active');
+
+        document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+        const tabId = 'tab-' + this.dataset.tab;
+        document.getElementById(tabId).style.display = 'block';
+    });
+});
+</script>
+{% endblock %}

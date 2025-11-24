@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}계정 설정{% endblock %}
+
+{% block content %}
+<div class="page-header mb-4">
+    <h1 class="page-title">계정 설정</h1>
+    <p class="page-subtitle">프로필 및 계정 정보를 관리합니다</p>
+</div>
+
+<!-- 현재 계정 정보 -->
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="mb-4">현재 로그인 정보</h5>
+
+        {% if session.get('auth_method') == 'oauth' %}
+        <div class="d-flex align-items-center mb-4">
+            {% if session.get('avatar') %}
+            <img src="{{ session.get('avatar') }}" class="rounded-circle me-3" width="64" height="64" alt="Avatar">
+            {% endif %}
+            <div>
+                <h5 class="mb-1">{{ session.get('display_name', session.get('username', '사용자')) }}</h5>
+                <p class="text-muted mb-0">@{{ session.get('username') }}</p>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">계정 ID</label>
+                <input type="text" class="form-control" value="{{ session.get('user_id') }}" readonly>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">인증 방식</label>
+                <input type="text" class="form-control" value="Mastodon OAuth" readonly>
+            </div>
+        </div>
+        {% else %}
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">사용자명</label>
+                <input type="text" class="form-control" value="{{ session.get('user_id', 'admin') }}" readonly>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-bold">인증 방식</label>
+                <input type="text" class="form-control" value="기본 인증" readonly>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Mastodon 계정 설정 -->
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="mb-4">🦣 Mastodon 계정 설정</h5>
+        <p class="text-muted mb-3">Mastodon 웹사이트에서 프로필, 개인정보, 보안 설정을 변경할 수 있습니다.</p>
+
+        <div class="d-flex gap-2">
+            <a href="{{ mastodon_settings_url }}" target="_blank" class="btn btn-primary">
+                <i class="bi bi-box-arrow-up-right"></i> Mastodon 설정 열기
+            </a>
+            <a href="{{ mastodon_url }}" target="_blank" class="btn btn-outline-primary">
+                <i class="bi bi-house"></i> Mastodon 서버 방문
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- OAuth 연동 설정 -->
+{% if session.get('auth_method') == 'oauth' %}
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="mb-4">🔗 OAuth 연동 정보</h5>
+
+        <div class="row g-3">
+            <div class="col-md-12">
+                <label class="form-label fw-bold">인스턴스 URL</label>
+                <input type="text" class="form-control" value="{{ mastodon_url }}" readonly>
+            </div>
+            <div class="col-md-12">
+                <label class="form-label fw-bold">프로필 URL</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" value="{{ session.get('mastodon_url', '') }}" readonly>
+                    <a href="{{ session.get('mastodon_url', '') }}" target="_blank" class="btn btn-outline-secondary">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-3 mb-0">
+            <strong>ℹ️ OAuth 연동 상태:</strong> 활성화됨 - Mastodon API를 통해 봇 기능을 사용할 수 있습니다.
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- 권한 정보 -->
+<div class="card">
+    <div class="card-body">
+        <h5 class="mb-4">🔒 권한 정보</h5>
+
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>권한</th>
+                        <th>상태</th>
+                        <th>설명</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>관리자 (Admin)</td>
+                        <td><span class="badge bg-success">활성</span></td>
+                        <td>모든 관리 기능 접근 가능</td>
+                    </tr>
+                    <tr>
+                        <td>유저 관리</td>
+                        <td><span class="badge bg-success">허용</span></td>
+                        <td>유저 정보 조회 및 수정</td>
+                    </tr>
+                    <tr>
+                        <td>재화 관리</td>
+                        <td><span class="badge bg-success">허용</span></td>
+                        <td>재화 지급 및 차감</td>
+                    </tr>
+                    <tr>
+                        <td>콘텐츠 관리</td>
+                        <td><span class="badge bg-success">허용</span></td>
+                        <td>스토리, 공지, 일정 관리</td>
+                    </tr>
+                    <tr>
+                        <td>시스템 설정</td>
+                        <td><span class="badge bg-success">허용</span></td>
+                        <td>봇 설정 및 파라미터 조정</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
