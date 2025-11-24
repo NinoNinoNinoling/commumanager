@@ -623,6 +623,43 @@ CREATE INDEX idx_story_posts_status ON story_posts(status);
 
 **CASCADE**: 이벤트 삭제 시 포스트도 함께 삭제
 
+### oauth_admins
+```sql
+CREATE TABLE oauth_admins (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    mastodon_acct TEXT UNIQUE NOT NULL,
+    display_name TEXT,
+    added_by TEXT NOT NULL,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT 1,
+    last_login_at TIMESTAMP
+);
+CREATE INDEX idx_oauth_admins_acct ON oauth_admins(mastodon_acct);
+CREATE INDEX idx_oauth_admins_active ON oauth_admins(is_active);
+```
+
+**설명**:
+- OAuth를 통해 로그인 가능한 관리자 계정 목록
+- `mastodon_acct`: Mastodon 계정 (예: 'admin', 'user@remote.instance')
+- `is_active`: 활성화 여부 (0이면 로그인 불가)
+- `last_login_at`: 마지막 로그인 시각 (자동 업데이트)
+
+**계정 형식 지원**:
+- 로컬 계정: `admin` (도메인 없음)
+- 로컬 계정 (도메인 포함): `admin@your-instance.com`
+- 원격 계정: `user@remote.instance`
+
+**관리 방법**:
+```bash
+# 관리자 추가
+python3 add_oauth_admin.py admin "관리자"
+
+# 관리자 목록 조회
+python3 list_oauth_admins.py
+```
+
+**Note**: 환경 변수 `MASTODON_ADMIN_ACCOUNTS` 대신 이 테이블을 사용합니다.
+
 ## PostgreSQL 참조 (읽기 전용)
 
 ### 48시간 답글 수 조회 (벌크)

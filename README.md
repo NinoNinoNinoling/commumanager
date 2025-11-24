@@ -48,6 +48,45 @@ python admin_web/app.py
 - **Docker Compose**: `.env` 파일에서 `ADMIN_PASSWORD=your-secure-password` 설정
 - **로컬 실행**: `export ADMIN_PASSWORD="your-secure-password"` 명령 실행
 
+## 🔐 OAuth 로그인 설정 (Mastodon)
+
+기본 인증 외에 Mastodon OAuth를 통한 로그인도 지원합니다.
+
+### 1단계: 환경 변수 설정
+
+`.env` 파일에 다음을 설정하세요:
+
+```bash
+MASTODON_INSTANCE_URL=https://your-instance.com
+MASTODON_CLIENT_ID=your-client-id
+MASTODON_CLIENT_SECRET=your-client-secret
+MASTODON_REDIRECT_URI=http://localhost:5000/oauth/callback
+```
+
+### 2단계: 관리자 계정 등록
+
+DB에 OAuth 관리자를 추가하세요:
+
+```bash
+# 데이터베이스 초기화 (처음 한 번만)
+python3 init_db.py
+
+# 관리자 계정 추가
+python3 add_oauth_admin.py admin "관리자"
+
+# 또는 도메인 포함
+python3 add_oauth_admin.py admin@your-instance.com "관리자"
+
+# 관리자 목록 확인
+python3 list_oauth_admins.py
+```
+
+### 3단계: 로그인
+
+웹 브라우저에서 "Mastodon OAuth로 로그인" 버튼을 클릭하여 인증하세요.
+
+**Note**: 환경 변수 `MASTODON_ADMIN_ACCOUNTS`는 더 이상 사용되지 않습니다. 대신 DB의 `oauth_admins` 테이블을 사용합니다.
+
 ## 📋 주요 기능
 
 - ✅ 유저 관리 (잔액 조정, 경고 관리)
