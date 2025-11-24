@@ -2,58 +2,114 @@
 {% block title %}대시보드{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">대시보드</h2>
+<div class="page-header">
+    <h1 class="page-title">대시보드</h1>
+    <p class="page-subtitle">커뮤니티 건강도를 한눈에 확인하세요</p>
+</div>
 
-<div class="row">
+<!-- 1열: 주요 지표 -->
+<div class="section-title">📊 주요 지표</div>
+<div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card text-white bg-primary mb-3">
-            <div class="card-body">
-                <h5 class="card-title">총 유저 수</h5>
-                <h2 class="card-text">{{ stats.total_users }}</h2>
-            </div>
+        <div class="dashboard-card">
+            <div class="dashboard-card-label">전체 유저</div>
+            <h2 class="dashboard-card-value">{{ stats.total_users|default(0) }}</h2>
+            <div class="dashboard-card-icon">👥</div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-success mb-3">
-            <div class="card-body">
-                <h5 class="card-title">총 아이템 수</h5>
-                <h2 class="card-text">{{ stats.total_items }}</h2>
-            </div>
+        <div class="dashboard-card">
+            <div class="dashboard-card-label">활성 유저 (24h)</div>
+            <h2 class="dashboard-card-value">{{ stats.active_users_24h|default(0) }}</h2>
+            <div class="dashboard-card-icon" style="color: #198754;">✓</div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-info mb-3">
-            <div class="card-body">
-                <h5 class="card-title">총 재화</h5>
-                <h2 class="card-text">{{ stats.total_balance }}</h2>
-            </div>
+        <div class="dashboard-card">
+            <div class="dashboard-card-label">위험 감지 유저</div>
+            <h2 class="dashboard-card-value">{{ stats.risk_users|default(0) }}</h2>
+            <div class="dashboard-card-icon" style="color: #dc3545;">⚠️</div>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-white bg-warning mb-3">
-            <div class="card-body">
-                <h5 class="card-title">경고 수</h5>
-                <h2 class="card-text">{{ stats.total_warnings|default(0) }}</h2>
-            </div>
+        <div class="dashboard-card">
+            <div class="dashboard-card-label">총 재화</div>
+            <h2 class="dashboard-card-value">{{ stats.total_balance|default(0) }}</h2>
+            <div class="dashboard-card-icon" style="color: #0d6efd;">💰</div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">최근 활동</div>
-            <div class="card-body">
-                <p>최근 유저 활동 로그가 여기에 표시됩니다.</p>
-            </div>
+<!-- 2열: 활동량 위험 유형별 현황 -->
+<div class="section-title">⚠️ 활동량 위험 유형별 현황</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="dashboard-card has-top-bar">
+            <div class="card-top-bar isolation"></div>
+            <div class="dashboard-card-label">고립 위험</div>
+            <div class="dashboard-card-subtitle">접속 인원 절반 미만</div>
+            <h2 class="dashboard-card-value">{{ stats.isolation_risk|default(0) }}</h2>
+            <div class="dashboard-card-icon" style="color: var(--color-isolation);">🎯</div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-header">시스템 상태</div>
-            <div class="card-body">
-                <p class="text-success"><i class="bi bi-check-circle"></i> 모든 시스템 정상 작동 중</p>
-            </div>
+    <div class="col-md-3">
+        <div class="dashboard-card has-top-bar">
+            <div class="card-top-bar bias"></div>
+            <div class="dashboard-card-label">편향 위험</div>
+            <div class="dashboard-card-subtitle">특정인 10% 이상</div>
+            <h2 class="dashboard-card-value">{{ stats.bias_risk|default(0) }}</h2>
+            <div class="dashboard-card-icon" style="color: var(--color-bias);">⚖️</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card has-top-bar">
+            <div class="card-top-bar avoidance"></div>
+            <div class="dashboard-card-label">회피 패턴</div>
+            <div class="dashboard-card-subtitle">주요 멤버 회피</div>
+            <h2 class="dashboard-card-value">{{ stats.avoidance_risk|default(0) }}</h2>
+            <div class="dashboard-card-icon" style="color: var(--color-avoidance);">🚫</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card has-top-bar">
+            <div class="card-top-bar reply-low"></div>
+            <div class="dashboard-card-label">답글 미달</div>
+            <div class="dashboard-card-subtitle">48h 내 5개 미만</div>
+            <h2 class="dashboard-card-value">{{ stats.reply_low_risk|default(0) }}</h2>
+            <div class="dashboard-card-icon" style="color: var(--color-reply-low);">💬</div>
+        </div>
+    </div>
+</div>
+
+<!-- 3열: 관리 현황 -->
+<div class="section-title">📋 관리 현황</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="dashboard-card">
+            <div class="dashboard-card-label">휴식 중</div>
+            <h2 class="dashboard-card-value">{{ stats.on_vacation|default(0) }}</h2>
+            <div class="dashboard-card-icon" style="color: #0dcaf0;">🏖️</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card">
+            <div class="dashboard-card-label">예약 스토리</div>
+            <h2 class="dashboard-card-value">{{ stats.scheduled_stories|default(0) }}</h2>
+            <div class="dashboard-card-icon" style="color: #6f42c1;">📹</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card">
+            <div class="dashboard-card-label">예약 공지</div>
+            <h2 class="dashboard-card-value">{{ stats.scheduled_announcements|default(0) }}</h2>
+            <div class="dashboard-card-icon" style="color: #d63384;">📢</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="dashboard-card">
+            <div class="dashboard-card-label">경고 발송 (7일)</div>
+            <h2 class="dashboard-card-value">{{ stats.warnings_7d|default(0) }}</h2>
+            <div class="dashboard-card-icon" style="color: #6c757d;">📨</div>
         </div>
     </div>
 </div>

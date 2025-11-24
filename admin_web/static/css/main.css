@@ -1,0 +1,330 @@
+/* 마녀봇 관리 커스텀 스타일 */
+
+:root {
+  /* 색상 팔레트 */
+  --sidebar-bg: #2d3748;
+  --sidebar-border: #4a5568;
+  --sidebar-text: #a0aec0;
+  --sidebar-active: #4299e1;
+  --bg-main: #f8f9fa;
+
+  /* 위험 유형 색상 */
+  --color-isolation: #6f42c1;
+  --color-bias: #fd7e14;
+  --color-avoidance: #dc3545;
+  --color-reply-low: #17a2b8;
+
+  /* 기본 색상 */
+  --color-primary: #0d6efd;
+  --color-success: #198754;
+  --color-danger: #dc3545;
+  --color-warning: #ffc107;
+  --color-info: #0dcaf0;
+}
+
+/* 전역 배경 */
+body {
+  background-color: var(--bg-main);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* 사이드바 레이아웃 */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 100vh;
+  background-color: var(--sidebar-bg);
+  padding: 20px 10px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.sidebar-logo {
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding: 0 10px;
+}
+
+.sidebar-divider {
+  border-top: 1px solid var(--sidebar-border);
+  margin: 10px 0 20px 0;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-menu-item {
+  margin-bottom: 10px;
+}
+
+.sidebar-menu-link {
+  display: block;
+  padding: 10px 20px;
+  color: var(--sidebar-text);
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-menu-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.sidebar-menu-link.active {
+  background-color: var(--sidebar-active);
+  color: white;
+  font-weight: 600;
+}
+
+/* 메인 콘텐츠 영역 */
+.main-content {
+  margin-left: 200px;
+  padding: 30px;
+  min-height: 100vh;
+}
+
+/* 페이지 헤더 */
+.page-header {
+  margin-bottom: 30px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: #6c757d;
+}
+
+/* 섹션 타이틀 */
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #495057;
+  margin: 30px 0 15px 0;
+}
+
+/* 대시보드 카드 */
+.dashboard-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+  position: relative;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-card-label {
+  font-size: 13px;
+  color: #6c757d;
+  margin-bottom: 10px;
+}
+
+.dashboard-card-value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+.dashboard-card-icon {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 36px;
+  opacity: 0.9;
+}
+
+.dashboard-card-subtitle {
+  font-size: 11px;
+  color: #adb5bd;
+  margin-top: 5px;
+}
+
+/* 위험 유형 카드 색상 상단 바 */
+.card-top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8px;
+  border-radius: 8px 8px 0 0;
+}
+
+.card-top-bar.isolation {
+  background-color: var(--color-isolation);
+}
+
+.card-top-bar.bias {
+  background-color: var(--color-bias);
+}
+
+.card-top-bar.avoidance {
+  background-color: var(--color-avoidance);
+}
+
+.card-top-bar.reply-low {
+  background-color: var(--color-reply-low);
+}
+
+/* 위험 유형 카드는 padding-top 추가 */
+.dashboard-card.has-top-bar {
+  padding-top: 28px;
+}
+
+/* 탭 UI */
+.tab-container {
+  background: white;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.tab-nav {
+  display: flex;
+  gap: 10px;
+}
+
+.tab-link {
+  padding: 8px 20px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6c757d;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab-link:hover {
+  background-color: #f8f9fa;
+}
+
+.tab-link.active {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+/* 로그인 페이지 */
+.login-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-card {
+  background: white;
+  border-radius: 10px;
+  padding: 40px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  width: 100%;
+  max-width: 300px;
+}
+
+.login-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #667eea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px auto;
+  font-size: 24px;
+}
+
+.login-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.login-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.login-btn {
+  background-color: #6364FF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.login-btn:hover {
+  background-color: #4f50cc;
+}
+
+.login-footer {
+  font-size: 12px;
+  color: #999;
+  margin-top: 20px;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .dashboard-card-value {
+    font-size: 24px;
+  }
+
+  .dashboard-card-icon {
+    font-size: 28px;
+  }
+}
+
+/* 알림 메시지 */
+.alert {
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 테이블 스타일 개선 */
+.table {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}

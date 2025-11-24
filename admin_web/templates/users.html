@@ -2,39 +2,144 @@
 {% block title %}유저 관리{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">유저 관리</h2>
+<div class="page-header">
+    <h1 class="page-title">유저 관리</h1>
+    <p class="page-subtitle">활동량 모니터링, 휴식 현황, 재화 관리</p>
+</div>
 
-<div class="card">
-    <div class="card-body">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>사용자명</th>
-                    <th>Mastodon ID</th>
-                    <th>역할</th>
-                    <th>잔액</th>
-                    <th>경고 횟수</th>
-                    <th>작업</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>{{ user.username }}</td>
-                    <td>{{ user.mastodon_id }}</td>
-                    <td><span class="badge bg-{{ 'danger' if user.role == 'admin' else 'primary' }}">{{ user.role }}</span></td>
-                    <td>{{ user.balance }}</td>
-                    <td>{{ user.warning_count }}</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary" onclick="adjustBalance('{{ user.mastodon_id }}')">잔액 조정</button>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<!-- 탭 메뉴 -->
+<div class="tab-container">
+    <div class="tab-nav">
+        <button class="tab-link active" data-tab="activity">⚠️ 활동량 모니터링</button>
+        <button class="tab-link" data-tab="vacation">🏖️ 휴식 현황</button>
+        <button class="tab-link" data-tab="currency">💰 재화 관리</button>
     </div>
 </div>
 
+<!-- 탭 1: 활동량 모니터링 -->
+<div class="tab-content" id="tab-activity">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="mb-3">위험 감지 유저 목록</h5>
+            <p class="text-muted mb-4">활동량 분석에서 위험으로 감지된 유저들입니다.</p>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>사용자</th>
+                            <th>위험 유형</th>
+                            <th>상세 지표</th>
+                            <th>최근 경고</th>
+                            <th>작업</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if users %}
+                            {% for user in users %}
+                            <tr>
+                                <td><a href="/users/{{ user.mastodon_id }}">{{ user.username }}</a></td>
+                                <td>
+                                    <span class="badge" style="background-color: var(--color-isolation);">고립 위험</span>
+                                </td>
+                                <td>소수 인원과만 대화</td>
+                                <td>-</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger">경고 발송</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">위험 감지된 유저가 없습니다.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 탭 2: 휴식 현황 -->
+<div class="tab-content" id="tab-vacation" style="display: none;">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="mb-3">휴식 중인 유저</h5>
+            <p class="text-muted mb-4">현재 휴식 기간에 있는 유저들입니다.</p>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>사용자</th>
+                            <th>시작일</th>
+                            <th>종료일</th>
+                            <th>사유</th>
+                            <th>작업</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">휴식 중인 유저가 없습니다.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 탭 3: 재화 관리 -->
+<div class="tab-content" id="tab-currency" style="display: none;">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="mb-3">전체 유저 목록</h5>
+            <p class="text-muted mb-4">유저별 재화 잔액 및 관리</p>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>사용자명</th>
+                            <th>Mastodon ID</th>
+                            <th>역할</th>
+                            <th>잔액</th>
+                            <th>경고 횟수</th>
+                            <th>작업</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if users %}
+                            {% for user in users %}
+                            <tr>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.mastodon_id }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'danger' if user.role == 'admin' else 'primary' }}">
+                                        {{ user.role }}
+                                    </span>
+                                </td>
+                                <td>{{ user.balance|default(0) }}</td>
+                                <td>{{ user.warning_count|default(0) }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="adjustBalance('{{ user.mastodon_id }}')">잔액 조정</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">등록된 유저가 없습니다.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 잔액 조정 모달 -->
 <div class="modal fade" id="balanceModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -66,6 +171,23 @@
 
 {% block scripts %}
 <script>
+// 탭 전환 스크립트
+document.querySelectorAll('.tab-link').forEach(button => {
+    button.addEventListener('click', function() {
+        // 모든 탭 버튼 비활성화
+        document.querySelectorAll('.tab-link').forEach(btn => btn.classList.remove('active'));
+        // 현재 버튼 활성화
+        this.classList.add('active');
+
+        // 모든 탭 콘텐츠 숨기기
+        document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+        // 선택된 탭 콘텐츠 표시
+        const tabId = 'tab-' + this.dataset.tab;
+        document.getElementById(tabId).style.display = 'block';
+    });
+});
+
+// 잔액 조정 기능
 function adjustBalance(userId) {
     document.getElementById('userId').value = userId;
     new bootstrap.Modal(document.getElementById('balanceModal')).show();
@@ -75,7 +197,7 @@ function submitBalance() {
     const userId = document.getElementById('userId').value;
     const amount = document.getElementById('amount').value;
     const description = document.getElementById('description').value;
-    
+
     fetch(`/api/v1/users/${userId}/balance`, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
