@@ -9,8 +9,7 @@ from database import (
     get_economy_db,
     get_or_create_user,
     get_user_balance,
-    add_transaction,
-    invalidate_user_cache
+    add_transaction
 )
 from utils import (
     setup_logger,
@@ -18,7 +17,8 @@ from utils import (
     favorite_status,
     format_currency,
     parse_mention_command,
-    truncate_text
+    truncate_text,
+    invalidate_user_cache
 )
 
 logger = setup_logger('bot.command_handler')
@@ -201,7 +201,6 @@ def cmd_purchase(mastodon: Mastodon, user_id: str, username: str,
             """, (user_id, item['id']))
 
             # 캐시 무효화
-            from utils import invalidate_user_cache
             invalidate_user_cache(user_id)
 
             # 성공: 멘션 좋아요
