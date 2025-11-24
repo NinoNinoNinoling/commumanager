@@ -10,6 +10,12 @@ services:
       - FLASK_ENV=production
       - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      - MASTODON_INSTANCE_URL=${MASTODON_INSTANCE_URL}
+      - MASTODON_CLIENT_ID=${MASTODON_CLIENT_ID}
+      - MASTODON_CLIENT_SECRET=${MASTODON_CLIENT_SECRET}
+      - MASTODON_REDIRECT_URI=${MASTODON_REDIRECT_URI}
+      - MASTODON_ADMIN_ACCOUNTS=${MASTODON_ADMIN_ACCOUNTS}
+      - BOT_ACCESS_TOKEN=${BOT_ACCESS_TOKEN}
     restart: unless-stopped
     networks:
       - app_network
