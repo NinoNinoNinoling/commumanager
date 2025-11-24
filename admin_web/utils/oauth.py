@@ -118,6 +118,7 @@ class MastodonOAuth:
         """
         사용자가 관리자 권한이 있는지 확인합니다.
 
+        DB에서 관리자 목록을 조회하여 확인합니다.
         로컬 계정과 원격 계정을 모두 지원하며, 도메인이 있는/없는 형식 모두 매칭합니다.
 
         Args:
@@ -127,43 +128,26 @@ class MastodonOAuth:
             관리자 여부
 
         Note:
-            MASTODON_ADMIN_ACCOUNTS 환경 변수 형식:
-            - 로컬 계정: 'admin' 또는 'admin@testmast.duckdns.org'
-            - 원격 계정: 'user@remote.instance'
-            - 여러 계정: 쉼표로 구분
+            oauth_admins 테이블에서 is_active=1인 관리자만 인증 허용
         """
+        from admin_web.services.oauth_admin_service import OAuthAdminService
+
         user_info = self.get_user_info(access_token)
-
-        # 환경 변수에서 관리자 계정 목록 가져오기
-        admin_accounts = os.environ.get('MASTODON_ADMIN_ACCOUNTS', '').split(',')
-        admin_accounts = [acc.strip() for acc in admin_accounts if acc.strip()]
-
-        # 디버깅 로그
-        logger.info(f"🔍 OAuth 인증 시도 - username: {user_info['username']}, acct: {user_info['acct']}")
-        logger.info(f"🔍 설정된 관리자 계정: {admin_accounts}")
-
-        # 매칭 로직: 로컬/원격 계정, 도메인 포함/제외 모두 지원
         user_acct = user_info['acct']  # 로컬: 'admin', 원격: 'user@remote.instance'
         user_name = user_info['username']  # 항상 도메인 없는 이름
 
-        for admin_account in admin_accounts:
-            # 1. 정확히 일치하는 경우 (acct 기준)
-            if user_acct == admin_account:
-                logger.info(f"✅ 관리자 인증 성공 (acct 정확히 일치): {user_acct}")
-                return True
+        # 디버깅 로그
+        logger.info(f"🔍 OAuth 인증 시도 - username: {user_name}, acct: {user_acct}")
 
-            # 2. username과 일치하는 경우
-            if user_name == admin_account:
-                logger.info(f"✅ 관리자 인증 성공 (username 일치): {user_name}")
-                return True
+        # DB에서 관리자 권한 확인
+        oauth_admin_service = OAuthAdminService()
+        is_admin = oauth_admin_service.is_admin(user_acct, user_name)
 
-            # 3. admin_account에서 도메인을 제거한 것과 일치하는 경우
-            # 예: 'admin@testmast.duckdns.org' → 'admin'
-            if '@' in admin_account:
-                admin_name_only = admin_account.split('@')[0]
-                if user_name == admin_name_only or user_acct == admin_name_only:
-                    logger.info(f"✅ 관리자 인증 성공 (도메인 제외 일치): {admin_name_only}")
-                    return True
+        if is_admin:
+            logger.info(f"✅ 관리자 인증 성공: {user_acct}")
+            # 마지막 로그인 시각 업데이트
+            oauth_admin_service.update_last_login(user_acct)
+        else:
+            logger.warning(f"❌ 관리자 인증 실패 - {user_acct}는 DB에 없거나 비활성화되었습니다")
 
-        logger.warning(f"❌ 관리자 인증 실패 - {user_acct}는 관리자 목록에 없습니다")
-        return False
+        return is_admin
