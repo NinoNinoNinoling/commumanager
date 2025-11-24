@@ -84,18 +84,24 @@ def users():
 @login_required
 def items():
     item_service = ItemService()
-    all_items = item_service.get_active_items()
+    all_items = item_service.get_all_items()
 
     return render_template('items.html', items=all_items)
 
 
-@web_bp.route('/warnings')
+@web_bp.route('/content')
 @login_required
-def warnings():
-    return render_template('dashboard.html', stats={'total_users': 0, 'total_items': 0, 'total_balance': 0})
+def content():
+    return render_template('content.html')
 
 
-@web_bp.route('/calendar')
+@web_bp.route('/logs')
 @login_required
-def calendar():
-    return render_template('dashboard.html', stats={'total_users': 0, 'total_items': 0, 'total_balance': 0})
+def logs():
+    return render_template('logs.html')
+
+
+@web_bp.route('/settings')
+@login_required
+def settings():
+    return render_template('settings.html')
