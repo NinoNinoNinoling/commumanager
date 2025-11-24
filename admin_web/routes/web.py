@@ -83,14 +83,17 @@ def oauth_callback():
 
         # 액세스 토큰 받기
         access_token = oauth.get_access_token(code)
+        logger.info("✅ OAuth 액세스 토큰 받기 성공")
 
         # 사용자 정보 가져오기
         user_info = oauth.get_user_info(access_token)
+        logger.info(f"✅ 사용자 정보 받기 성공: {user_info['username']} ({user_info['acct']})")
 
         # 관리자 권한 확인
         is_admin = oauth.verify_admin(access_token)
 
         if not is_admin:
+            logger.warning(f"❌ 관리자 권한 없음: {user_info['acct']}")
             flash('관리자 권한이 없습니다', 'danger')
             return redirect(url_for('web.login'))
 
