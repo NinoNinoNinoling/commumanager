@@ -362,6 +362,22 @@ def init_database(db_path='economy.db'):
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_story_posts_status ON story_posts(status)")
     print("✓ story_posts")
 
+    # 19. oauth_admins (OAuth 관리자 계정)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS oauth_admins (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            mastodon_acct TEXT UNIQUE NOT NULL,
+            display_name TEXT,
+            added_by TEXT NOT NULL,
+            added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            is_active BOOLEAN DEFAULT 1,
+            last_login_at TIMESTAMP
+        )
+    """)
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_oauth_admins_acct ON oauth_admins(mastodon_acct)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_oauth_admins_active ON oauth_admins(is_active)")
+    print("✓ oauth_admins")
+
     print("=" * 60)
     print("📝 초기 데이터 삽입 중...")
 
@@ -420,7 +436,7 @@ def init_database(db_path='economy.db'):
     print("=" * 60)
     print("✅ 데이터베이스 초기화 완료!")
     print(f"📍 경로: {db_path}")
-    print(f"📊 테이블: 18개")
+    print(f"📊 테이블: 19개")
     print(f"⚙️  설정: {len(settings_data)}개")
     print(f"📋 템플릿: {len(templates_data)}개")
 
