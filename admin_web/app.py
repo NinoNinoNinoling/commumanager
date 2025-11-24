@@ -22,6 +22,12 @@ def create_app():
         )
         secret_key = 'dev-secret-key-change-in-production'
     app.secret_key = secret_key
+    # 마스토돈 및 기타 필수 환경 변수 로드
+    app.config['MASTODON_INSTANCE_URL'] = os.getenv('MASTODON_INSTANCE_URL')
+    app.config['MASTODON_CLIENT_ID'] = os.getenv('MASTODON_CLIENT_ID')
+    app.config['MASTODON_CLIENT_SECRET'] = os.getenv('MASTODON_CLIENT_SECRET')
+    app.config['BOT_ACCESS_TOKEN'] = os.getenv('BOT_ACCESS_TOKEN')
+    app.config['ADMIN_PASSWORD'] = os.getenv('ADMIN_PASSWORD')
 
     # Blueprint 등록
     app.register_blueprint(web_bp)
