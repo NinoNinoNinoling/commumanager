@@ -133,8 +133,12 @@ def index():
     items = item_service.get_active_items()
 
     # 시스템 계정 필터링 (마스토돈 역할 기준)
-    SYSTEM_ROLES = ['Owner', 'Admin', 'Moderator', '봇', '시스템', '테스트']
-    regular_users = [u for u in all_users if u.role_name not in SYSTEM_ROLES]
+    # 일반 유저는 role_name이 None 또는 빈 문자열("")입니다
+    SYSTEM_ROLES = {'Owner', 'Admin', 'Moderator', '봇', '시스템', '테스트'}
+    regular_users = [
+        u for u in all_users
+        if (not u.role_name) or (u.role_name.strip() not in SYSTEM_ROLES)
+    ]
 
     stats = {
         'total_users': len(regular_users),
