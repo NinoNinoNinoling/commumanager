@@ -14,10 +14,26 @@ class UserService:
         return conn
 
     def get_all_users(self) -> List[User]:
-        """전체 유저 조회"""
+        """
+        전체 유저 조회 (시스템 계정 제외)
+
+        시스템 역할(Owner, Admin, Moderator, 봇 등)을 가진 계정은 제외합니다.
+
+        Returns:
+            일반 유저 목록
+        """
         conn = self._get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM users ORDER BY created_at DESC")
+
+        # 시스템 역할을 제외하는 조건 추가
+        placeholders = ','.join(['?'] * len(self.SYSTEM_ROLES))
+        query = f"""
+            SELECT * FROM users
+            WHERE role_name IS NULL OR role_name NOT IN ({placeholders})
+            ORDER BY created_at DESC
+        """
+
+        cursor.execute(query, list(self.SYSTEM_ROLES))
         rows = cursor.fetchall()
         conn.close()
         return [User(**dict(row)) for row in rows]
