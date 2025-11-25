@@ -4,6 +4,7 @@ import logging
 from flask import Flask
 from admin_web.routes.web import web_bp
 from admin_web.routes.api import api_bp
+from admin_web.routes.webhook import webhook_bp
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,7 @@ def create_app():
     # Blueprint 등록
     app.register_blueprint(web_bp)
     app.register_blueprint(api_bp)
+    app.register_blueprint(webhook_bp)
 
     return app
 
