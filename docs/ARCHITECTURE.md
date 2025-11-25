@@ -311,6 +311,57 @@ def should_process_user(user_id):
 - 모든 유저 활동량 체크 중단
 - 재화 지급은 정상 작동
 
+### 3.5 웹훅 처리 흐름
+
+마스토돈 서버에서 발생하는 이벤트를 실시간으로 수신하여 처리합니다.
+
+```mermaid
+flowchart TD
+    A[마스토돈 서버 이벤트 발생] --> B[웹훅 POST 요청<br/>/webhooks/mastodon]
+    B --> C[HMAC 서명 검증<br/>X-Hub-Signature 헤더]
+    C --> D{서명 유효?}
+    D -->|NO| Z1[403 Forbidden<br/>로그 기록]
+    D -->|YES| E{이벤트 타입?}
+
+    E -->|account.created| F[새 계정 생성 처리]
+    F --> F1{기존 유저 확인}
+    F1 -->|존재함| F2[역할 정보만 업데이트]
+    F1 -->|없음| F3[새 유저 생성<br/>초기 재화 0]
+    F2 --> F4[관리 로그 기록]
+    F3 --> F4
+    F4 --> F5[200 OK 응답]
+
+    E -->|status.created| G[새 포스트 작성 이벤트]
+    G --> G1[로그 기록만 수행<br/>현재 미처리]
+    G1 --> G2[200 OK 응답]
+
+    E -->|status.updated| H[포스트 수정 이벤트]
+    H --> H1[로그 기록만 수행<br/>현재 미처리]
+    H1 --> H2[200 OK 응답]
+
+    E -->|기타 이벤트| I[미지원 이벤트]
+    I --> I1[로그 기록<br/>200 OK 응답]
+
+    style A fill:#e3f2fd
+    style F3 fill:#c8e6c9
+    style Z1 fill:#ffccbc
+```
+
+**웹훅 설정 요구사항**:
+- 환경변수: `MASTODON_WEBHOOK_SECRET` (HMAC 서명용)
+- 마스토돈 관리자 페이지에서 웹훅 등록 필요
+- URL: `https://your-admin-server/webhooks/mastodon`
+- 지원 이벤트: `account.created`, `status.created`, `status.updated`
+
+**역할 정보 자동 동기화**:
+- OAuth 로그인 시: 사용자의 마스토돈 역할 정보 자동 저장
+- 웹훅 이벤트 시: 계정 생성/업데이트 시 역할 정보 동기화
+- DB 저장 필드: `role_name` (역할 이름), `role_color` (역할 색상 hex)
+
+**시스템 계정 필터링**:
+대시보드 통계는 다음 `role_name`을 가진 사용자를 자동 제외:
+- Owner, Admin, Moderator, 봇, 시스템, 테스트
+
 ---
 
 ## 4. 기술 스택
