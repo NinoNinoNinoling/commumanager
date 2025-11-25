@@ -62,8 +62,8 @@ class UserRepository:
             last_active=datetime.fromisoformat(row['last_active']) if row['last_active'] else None,
             last_check=datetime.fromisoformat(row['last_check']) if row['last_check'] else None,
             created_at=datetime.fromisoformat(row['created_at']) if row['created_at'] else None,
-            role_name=row.get('role_name'),
-            role_color=row.get('role_color')
+            role_name=row['role_name'],
+            role_color=row['role_color']
         )
 
     def find_by_id(self, mastodon_id: str) -> Optional[User]:
