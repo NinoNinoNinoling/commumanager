@@ -84,15 +84,9 @@ def create_item():
 @api_bp.route('/dashboard/stats', methods=['GET'])
 @require_auth
 def get_stats():
-    user_service = UserService()
-    item_service = ItemService()
+    from admin_web.services.dashboard_service import DashboardService
 
-    users = user_service.get_all_users()
-    items = item_service.get_active_items()
+    dashboard_service = DashboardService()
+    stats = dashboard_service.get_dashboard_stats()
 
-    stats = {
-        'total_users': len(users),
-        'total_items': len(items),
-        'total_balance': sum(u.balance for u in users),
-    }
     return jsonify({'stats': stats})
