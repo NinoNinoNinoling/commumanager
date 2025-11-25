@@ -126,25 +126,10 @@ def logout():
 @web_bp.route('/')
 @login_required
 def index():
-    user_service = UserService()
-    item_service = ItemService()
+    from admin_web.services.dashboard_service import DashboardService
 
-    all_users = user_service.get_all_users()
-    items = item_service.get_active_items()
-
-    # 시스템 계정 필터링 (마스토돈 역할 기준)
-    # 일반 유저는 role_name이 None 또는 빈 문자열("")입니다
-    SYSTEM_ROLES = {'Owner', 'Admin', 'Moderator', '봇', '시스템', '테스트'}
-    regular_users = [
-        u for u in all_users
-        if (not u.role_name) or (u.role_name.strip() not in SYSTEM_ROLES)
-    ]
-
-    stats = {
-        'total_users': len(regular_users),
-        'total_items': len(items),
-        'total_balance': sum(u.balance for u in regular_users),
-    }
+    dashboard_service = DashboardService()
+    stats = dashboard_service.get_dashboard_stats()
 
     return render_template('dashboard.html', stats=stats)
 

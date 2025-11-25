@@ -13,28 +13,28 @@
     <div class="col-md-3">
         <div class="dashboard-card">
             <div class="dashboard-card-label">전체 유저</div>
-            <h2 class="dashboard-card-value">{{ stats.total_users|default(0) }}</h2>
+            <h2 class="dashboard-card-value" data-stat="total_users">{{ stats.total_users|default(0) }}</h2>
             <div class="dashboard-card-icon">👥</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="dashboard-card">
             <div class="dashboard-card-label">활성 유저 (24h)</div>
-            <h2 class="dashboard-card-value">{{ stats.active_users_24h|default(0) }}</h2>
+            <h2 class="dashboard-card-value" data-stat="active_users_24h">{{ stats.active_users_24h|default(0) }}</h2>
             <div class="dashboard-card-icon" style="color: #198754;">✓</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="dashboard-card">
             <div class="dashboard-card-label">위험 감지 유저</div>
-            <h2 class="dashboard-card-value">{{ stats.risk_users|default(0) }}</h2>
+            <h2 class="dashboard-card-value" data-stat="risk_users">{{ stats.risk_users|default(0) }}</h2>
             <div class="dashboard-card-icon" style="color: #dc3545;">⚠️</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="dashboard-card">
             <div class="dashboard-card-label">총 재화</div>
-            <h2 class="dashboard-card-value">{{ stats.total_balance|default(0) }}</h2>
+            <h2 class="dashboard-card-value" data-stat="total_balance">{{ stats.total_balance|default(0) }}</h2>
             <div class="dashboard-card-icon" style="color: #0d6efd;">💰</div>
         </div>
     </div>
@@ -48,7 +48,7 @@
             <div class="card-top-bar isolation"></div>
             <div class="dashboard-card-label">고립 위험</div>
             <div class="dashboard-card-subtitle">접속 인원 절반 미만</div>
-            <h2 class="dashboard-card-value">{{ stats.isolation_risk|default(0) }}</h2>
+            <h2 class="dashboard-card-value" data-stat="isolation_risk">{{ stats.isolation_risk|default(0) }}</h2>
             <div class="dashboard-card-icon" style="color: var(--color-isolation);">🎯</div>
         </div>
     </div>
@@ -57,7 +57,7 @@
             <div class="card-top-bar bias"></div>
             <div class="dashboard-card-label">편향 위험</div>
             <div class="dashboard-card-subtitle">특정인 10% 이상</div>
-            <h2 class="dashboard-card-value">{{ stats.bias_risk|default(0) }}</h2>
+            <h2 class="dashboard-card-value" data-stat="bias_risk">{{ stats.bias_risk|default(0) }}</h2>
             <div class="dashboard-card-icon" style="color: var(--color-bias);">⚖️</div>
         </div>
     </div>
@@ -66,7 +66,7 @@
             <div class="card-top-bar avoidance"></div>
             <div class="dashboard-card-label">회피 패턴</div>
             <div class="dashboard-card-subtitle">주요 멤버 회피</div>
-            <h2 class="dashboard-card-value">{{ stats.avoidance_risk|default(0) }}</h2>
+            <h2 class="dashboard-card-value" data-stat="avoidance_risk">{{ stats.avoidance_risk|default(0) }}</h2>
             <div class="dashboard-card-icon" style="color: var(--color-avoidance);">🚫</div>
         </div>
     </div>
@@ -75,7 +75,7 @@
             <div class="card-top-bar reply-low"></div>
             <div class="dashboard-card-label">답글 미달</div>
             <div class="dashboard-card-subtitle">48h 내 5개 미만</div>
-            <h2 class="dashboard-card-value">{{ stats.reply_low_risk|default(0) }}</h2>
+            <h2 class="dashboard-card-value" data-stat="reply_low_risk">{{ stats.reply_low_risk|default(0) }}</h2>
             <div class="dashboard-card-icon" style="color: var(--color-reply-low);">💬</div>
         </div>
     </div>
@@ -87,30 +87,79 @@
     <div class="col-md-3">
         <div class="dashboard-card">
             <div class="dashboard-card-label">휴식 중</div>
-            <h2 class="dashboard-card-value">{{ stats.on_vacation|default(0) }}</h2>
+            <h2 class="dashboard-card-value" data-stat="on_vacation">{{ stats.on_vacation|default(0) }}</h2>
             <div class="dashboard-card-icon" style="color: #0dcaf0;">🏖️</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="dashboard-card">
             <div class="dashboard-card-label">예약 스토리</div>
-            <h2 class="dashboard-card-value">{{ stats.scheduled_stories|default(0) }}</h2>
+            <h2 class="dashboard-card-value" data-stat="scheduled_stories">{{ stats.scheduled_stories|default(0) }}</h2>
             <div class="dashboard-card-icon" style="color: #6f42c1;">📹</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="dashboard-card">
             <div class="dashboard-card-label">예약 공지</div>
-            <h2 class="dashboard-card-value">{{ stats.scheduled_announcements|default(0) }}</h2>
+            <h2 class="dashboard-card-value" data-stat="scheduled_announcements">{{ stats.scheduled_announcements|default(0) }}</h2>
             <div class="dashboard-card-icon" style="color: #d63384;">📢</div>
         </div>
     </div>
     <div class="col-md-3">
         <div class="dashboard-card">
             <div class="dashboard-card-label">경고 발송 (7일)</div>
-            <h2 class="dashboard-card-value">{{ stats.warnings_7d|default(0) }}</h2>
+            <h2 class="dashboard-card-value" data-stat="warnings_7d">{{ stats.warnings_7d|default(0) }}</h2>
             <div class="dashboard-card-icon" style="color: #6c757d;">📨</div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 대시보드 자동 갱신 (30초마다)
+function refreshDashboard() {
+    fetch('/api/v1/dashboard/stats')
+        .then(response => response.json())
+        .then(data => {
+            const stats = data.stats;
+
+            // 주요 지표 업데이트
+            updateValue('total_users', stats.total_users);
+            updateValue('active_users_24h', stats.active_users_24h);
+            updateValue('risk_users', stats.risk_users);
+            updateValue('total_balance', stats.total_balance);
+
+            // 활동량 위험 유형별 업데이트
+            updateValue('isolation_risk', stats.isolation_risk);
+            updateValue('bias_risk', stats.bias_risk);
+            updateValue('avoidance_risk', stats.avoidance_risk);
+            updateValue('reply_low_risk', stats.reply_low_risk);
+
+            // 관리 현황 업데이트
+            updateValue('on_vacation', stats.on_vacation);
+            updateValue('scheduled_stories', stats.scheduled_stories);
+            updateValue('scheduled_announcements', stats.scheduled_announcements);
+            updateValue('warnings_7d', stats.warnings_7d);
+
+            console.log('✅ 대시보드 갱신 완료:', new Date().toLocaleTimeString());
+        })
+        .catch(error => {
+            console.error('❌ 대시보드 갱신 실패:', error);
+        });
+}
+
+function updateValue(statKey, value) {
+    // data-stat 속성으로 요소를 찾아 값 업데이트
+    const element = document.querySelector(`[data-stat="${statKey}"]`);
+    if (element) {
+        element.textContent = value || 0;
+    }
+}
+
+// 30초마다 자동 갱신
+setInterval(refreshDashboard, 30000);
+
+console.log('✅ 대시보드 자동 갱신 활성화 (30초 간격)');
+</script>
 {% endblock %}
