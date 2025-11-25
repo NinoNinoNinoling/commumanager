@@ -11,12 +11,6 @@ api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 def require_auth(f):
     """
     인증을 요구하는 라우트를 위한 데코레이터
-
-    Args:
-        f: 데코레이트할 함수
-
-    Returns:
-        인증 체크가 추가된 래퍼 함수
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -32,6 +26,19 @@ def get_users():
     user_service = UserService()
     users = user_service.get_all_users()
     return jsonify({'users': [u.to_dict() for u in users]})
+
+
+@api_bp.route('/users/risk', methods=['GET'])
+@require_auth
+def get_risk_users():
+    """
+    위험 감지 유저 목록 조회 API
+    HTML(AJAX)에서 호출하는 엔드포인트입니다.
+    """
+    user_service = UserService()
+    # 시스템 계정이 필터링된 리스트를 가져옵니다.
+    risk_users = user_service.get_risk_users() 
+    return jsonify({'users': risk_users})
 
 
 @api_bp.route('/users/<user_id>', methods=['GET'])

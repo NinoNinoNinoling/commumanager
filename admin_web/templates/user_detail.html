@@ -4,78 +4,137 @@
 {% block content %}
 <div class="mb-4">
     <a href="{{ url_for('web.users') }}" class="btn btn-outline-secondary btn-sm mb-3">← 목록으로</a>
-    <div class="d-flex justify-content-between align-items-start">
-        <div>
-            <h2 class="d-flex align-items-center gap-2">
-                {{ user.display_name or user.username }}
-                <span class="badge bg-secondary fs-6">@{{ user.username }}</span>
-            </h2>
-            <p class="text-muted">가입일: {{ user.created_at[:10] }}</p>
-        </div>
-        <div class="card bg-light border-0 p-3" style="min-width: 300px;">
-            <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">현재 잔액</span>
-                <span class="fw-bold fs-4 text-primary">{{ user.balance }} <small class="fs-6 text-muted">갈레온</small></span>
+    
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start">
+                
+                <div>
+                    <h2 class="d-flex align-items-center gap-2">
+                        {{ user.display_name or user.username }}
+                        <span class="badge bg-secondary fs-6">@{{ user.username }}</span>
+                        
+                        {% if is_on_vacation %}
+                            <span class="badge bg-info fs-6">🏖️ 휴식 중</span>
+                        {% endif %}
+                    </h2>
+                    <p class="text-muted">가입일: {{ user.created_at[:10] }} | 경고: 
+                        <span class="fw-bold text-{{ 'danger' if user.warning_count >= 3 else 'warning' if user.warning_count >= 1 else 'success' }}">
+                            {{ user.warning_count }}회 (최대 3회)
+                        </span>
+                    </p>
+                </div>
+                
+                <div class="text-end">
+                    <span class="text-muted small">현재 잔액</span>
+                    <div class="fw-bold fs-3 text-primary mb-2">{{ user.balance }} <small class="fs-6 text-muted">갈레온</small></div>
+                    <button class="btn btn-primary btn-sm" onclick="adjustBalance('{{ user.mastodon_id }}')">
+                        + 잔액 조정
+                    </button>
+                </div>
             </div>
-            <div class="d-flex justify-content-between text-muted small">
-                <span>누적 획득</span>
-                <span class="text-success">+{{ user.total_earned }}</span>
+            
+            <hr>
+            <div class="d-flex justify-content-start gap-4 small">
+                <div>
+                    <span class="text-muted">누적 획득</span>
+                    <span class="fw-bold text-success ms-2">+{{ user.total_earned }}</span>
+                </div>
+                <div>
+                    <span class="text-muted">누적 사용</span>
+                    <span class="fw-bold text-danger ms-2">-{{ user.total_spent }}</span>
+                </div>
             </div>
-            <div class="d-flex justify-content-between text-muted small">
-                <span>누적 사용</span>
-                <span class="text-danger">-{{ user.total_spent }}</span>
-            </div>
-            <button class="btn btn-primary btn-sm w-100 mt-3" onclick="adjustBalance('{{ user.mastodon_id }}')">
-                + 잔액 조정
-            </button>
         </div>
     </div>
-</div>
-
-<div class="card">
-    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">재화 내역</h5>
-        <div>
-            </div>
-    </div>
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>일시</th>
-                    <th>내용</th>
-                    <th class="text-end">변동액</th>
-                    <th class="text-end">작업</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% if transactions %}
-                    {% for tx in transactions %}
-                    <tr>
-                        <td>{{ tx.timestamp[:16] }}</td>
-                        <td>
-                            <div class="fw-bold">{{ tx.description }}</div>
-                            <div class="small text-muted">{{ tx.category }}</div>
-                        </td>
-                        <td class="text-end">
-                            {% if tx.amount > 0 %}
-                                <span class="text-success fw-bold">+{{ tx.amount }}</span>
+    
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">재화 내역</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>일시</th>
+                                <th>내용</th>
+                                <th class="text-end">변동액</th>
+                                <th class="text-end">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if transactions %}
+                                {% for tx in transactions %}
+                                <tr>
+                                    <td>{{ tx.timestamp[:16] }}</td>
+                                    <td>
+                                        <div class="fw-bold">{{ tx.description }}</div>
+                                        <div class="small text-muted">{{ tx.category }}</div>
+                                    </td>
+                                    <td class="text-end">
+                                        {% if tx.amount > 0 %}
+                                            <span class="text-success fw-bold">+{{ tx.amount }}</span>
+                                        {% else %}
+                                            <span class="text-danger fw-bold">{{ tx.amount }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-secondary" disabled>수정</button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
                             {% else %}
-                                <span class="text-danger fw-bold">{{ tx.amount }}</span>
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">거래 내역이 없습니다.</td>
+                                </tr>
                             {% endif %}
-                        </td>
-                        <td class="text-end">
-                            
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr>
-                        <td colspan="4" class="text-center py-5 text-muted">거래 내역이 없습니다.</td>
-                    </tr>
-                {% endif %}
-            </tbody>
-        </table>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">경고 기록</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>일시</th>
+                                <th>사유</th>
+                                <th class="text-end">DM 전송</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if warnings %}
+                                {% for warning in warnings %}
+                                <tr>
+                                    <td>{{ warning.timestamp[:10] }}</td>
+                                    <td>{{ warning.message | truncate(20, True) }}</td>
+                                    <td class="text-end">
+                                        {% if warning.dm_sent %}
+                                            <span class="badge bg-success">O</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">X</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-5 text-muted">경고 기록이 없습니다.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -100,7 +159,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"></button>
                 <button type="button" class="btn btn-primary" onclick="submitBalance()">확인</button>
             </div>
         </div>
