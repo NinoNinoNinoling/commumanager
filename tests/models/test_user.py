@@ -247,3 +247,103 @@ def test_should_check_if_user_is_at_risk_of_ban():
     # Then
     assert user1.is_at_risk_of_ban() is True
     assert user2.is_at_risk_of_ban() is False  # 이미 아웃되어야 함
+
+
+def test_should_store_mastodon_role_name():
+    """
+    마스토돈 역할 이름을 저장할 수 있어야 한다
+    """
+    from admin_web.models.user import User
+
+    # When: 마스토돈 역할 정보 포함하여 생성
+    user = User(
+        mastodon_id='admin@example.com',
+        username='admin',
+        role='admin',  # 기존 role 필드 (시스템 내부 역할)
+        role_name='Admin'  # 마스토돈 역할 이름
+    )
+
+    # Then
+    assert user.role_name == 'Admin'
+
+
+def test_should_store_mastodon_role_color():
+    """
+    마스토돈 역할 색상을 저장할 수 있어야 한다
+    """
+    from admin_web.models.user import User
+
+    # When: 역할 색상 포함
+    user = User(
+        mastodon_id='bot@example.com',
+        username='bot',
+        role='user',
+        role_name='봇',
+        role_color='#6c757d'
+    )
+
+    # Then
+    assert user.role_color == '#6c757d'
+
+
+def test_should_allow_none_for_role_name_and_color():
+    """
+    role_name과 role_color는 선택 필드여야 한다
+    """
+    from admin_web.models.user import User
+
+    # When: 역할 정보 없이 생성
+    user = User(
+        mastodon_id='user@example.com',
+        username='user'
+    )
+
+    # Then
+    assert user.role_name is None
+    assert user.role_color is None
+
+
+def test_should_serialize_role_name_and_color_to_dict():
+    """
+    to_dict() 메서드에 역할 정보가 포함되어야 한다
+    """
+    from admin_web.models.user import User
+
+    # Given
+    user = User(
+        mastodon_id='admin@example.com',
+        username='admin',
+        role='admin',
+        role_name='Owner',
+        role_color='#ff3838'
+    )
+
+    # When
+    user_dict = user.to_dict()
+
+    # Then
+    assert user_dict['role_name'] == 'Owner'
+    assert user_dict['role_color'] == '#ff3838'
+
+
+def test_should_deserialize_role_name_and_color_from_dict():
+    """
+    from_dict() 메서드에서 역할 정보를 복원할 수 있어야 한다
+    """
+    from admin_web.models.user import User
+
+    # Given
+    data = {
+        'mastodon_id': 'bot@example.com',
+        'username': 'bot',
+        'role': 'user',
+        'role_name': '봇',
+        'role_color': '#6c757d'
+    }
+
+    # When
+    user = User.from_dict(data)
+
+    # Then
+    assert user.role_name == '봇'
+    assert user.role_color == '#6c757d'

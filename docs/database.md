@@ -689,3 +689,32 @@ GROUP BY u.id, u.username;
 ```bash
 python3 init_db.py
 ```
+
+---
+
+## 마스토돈 역할 정보 (v1.1.0+)
+
+### users 테이블 추가 컬럼
+
+**role_name** (TEXT, NULL 허용)
+- 마스토돈 서버에서 부여된 역할 이름
+- 예: 'Owner', 'Admin', 'Moderator', '봇', '시스템', '테스트'
+- OAuth 로그인 시 자동 동기화
+
+**role_color** (TEXT, NULL 허용)
+- 마스토돈 역할의 색상 코드
+- 예: '#ff3838', '#6c757d'
+- 웹 UI에서 시각적 구분에 활용
+
+### 활용
+
+1. **대시보드 필터링**: 시스템 계정 자동 제외
+2. **자동 동기화**: OAuth 로그인 시 마스토돈 API에서 역할 정보 가져옴
+3. **수동 관리 불필요**: 마스토돈 웹 UI에서 역할 변경 → 자동 반영
+
+### 마이그레이션
+
+기존 DB에 컬럼 추가:
+```bash
+python init_db.py economy.db --migrate
+```
