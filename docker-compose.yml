@@ -16,6 +16,7 @@ services:
       - MASTODON_REDIRECT_URI=${MASTODON_REDIRECT_URI}
       - MASTODON_ADMIN_ACCOUNTS=${MASTODON_ADMIN_ACCOUNTS}
       - BOT_ACCESS_TOKEN=${BOT_ACCESS_TOKEN}
+      - MASTODON_WEBHOOK_SECRET=${MASTODON_WEBHOOK_SECRET}
     restart: unless-stopped
     networks:
       - app_network

@@ -1299,17 +1299,54 @@ GET    /api/v1/admin-logs                 # 관리자 로그 조회
 
 ---
 
-## Phase 7: Controller 통합 & 대시보드
+## ✅ Phase 7: Controller 통합 & 대시보드 (부분 완료)
 
 ### 🎯 목표
 - **모든 Controller 구현 (Phase 1-6에서 연기된 항목)**
-- 대시보드 통계 API
+- 대시보드 통계 API ✅
+- 웹훅 시스템 ✅
 - 전체 시스템 통합 테스트
 
 ### 📦 의존성
 - Phase 1-6 도메인 로직 완료 (Models, Repositories, Services)
 
-### 🎮 Controller 통합 구현 (TDD)
+### ✅ 완료 상태
+
+**Phase 7.1: 대시보드 시스템 (완료)**
+- [x] DashboardService 구현 (admin_web/services/dashboard_service.py)
+  - get_dashboard_stats() 메서드로 모든 통계 계산
+  - 시스템 계정 필터링 (Owner, Admin, Moderator, 봇, 시스템, 테스트)
+- [x] DashboardController 구현 (admin_web/routes/api.py)
+  - GET /api/v1/dashboard/stats 엔드포인트
+- [x] 웹 UI 구현 (admin_web/templates/dashboard.html)
+  - 주요 지표: 전체 유저, 활성 유저, 위험 유저, 총 재화
+  - 활동량 위험 유형별 현황 (고립/편향/회피/답글 미달)
+  - 관리 현황 (휴식 중, 예약 스토리/공지, 경고 발송)
+  - 자동 갱신 기능 (30초 간격)
+- **Commits**:
+  - 3a7dbc2 - "기능 추가: 대시보드 전체 통계 및 자동 갱신 기능 구현"
+  - 2b79f0d - "기능 추가: 마스토돈 역할 정보 연동 및 대시보드 시스템 계정 필터링"
+
+**Phase 7.2: 웹훅 시스템 (완료)**
+- [x] WebhookService 구현 (admin_web/services/webhook_service.py)
+  - handle_account_created() - 새 계정 자동 등록
+  - update_user_role() - 역할 정보 동기화
+- [x] WebhookController 구현 (admin_web/routes/webhook.py)
+  - POST /webhooks/mastodon 엔드포인트
+  - HMAC-SHA256 서명 검증
+  - account.created, status.created, status.updated 이벤트 처리
+- [x] 마스토돈 역할 연동
+  - OAuth 로그인 시 role_name, role_color 자동 저장
+  - 웹훅 이벤트 시 역할 정보 자동 동기화
+- **Commits**:
+  - d9050df - "기능 추가: 마스토돈 웹훅 엔드포인트 구현"
+
+**Phase 7.3: 문서화 (완료)**
+- [x] api_design.md에 웹훅 섹션 추가
+- [x] ARCHITECTURE.md에 웹훅 처리 흐름 추가
+- **Commit**: 044321d - "문서 업데이트: 웹훅 엔드포인트 및 역할 동기화 문서화"
+
+### 🎮 Controller 통합 구현 (TDD) - 미완료
 
 **Phase 1 Controllers:**
 - [ ] UserController (tests/controllers/test_user_controller.py)
@@ -1334,9 +1371,6 @@ GET    /api/v1/admin-logs                 # 관리자 로그 조회
 **Phase 6 Controllers:**
 - [ ] SettingsController
 - [ ] AdminLogController
-
-**Phase 7 새 Controllers:**
-- [ ] DashboardController
 
 ### 🧠 Service 로직
 
@@ -1765,20 +1799,28 @@ def test_complete_bot_workflow():
 
 ### 관리자 웹 (admin_web)
 
-| Phase | 목표 | 예상 시간 | 누적 시간 |
-|-------|------|----------|----------|
-| 0 | 프로젝트 초기화 & 테스트 환경 | 2~3h | 3h |
-| 1 | User & Transaction | 6~8h | 11h |
-| 2 | Warning & Vacation | 6~8h | 19h |
-| **2.5** | **도커화 & 서버 배포** 🐳 | **3~4h** | **23h** |
-| 3 | Item & Shop | 4~5h | 28h |
-| 4 | Calendar Events | 3~4h | 32h |
-| 5 | Story Events & Announcements | 6~7h | 39h |
-| 6 | Settings & Admin Logs | 3~4h | 43h |
-| 7 | Dashboard & 통합 | 3~4h | 47h |
-| 8 | 인증 & 권한 | 4~5h | 52h |
+| Phase | 목표 | 상태 | 예상 시간 | 누적 시간 |
+|-------|------|------|----------|----------|
+| 0 | 프로젝트 초기화 & 테스트 환경 | ✅ 완료 | 2~3h | 3h |
+| 1 | User & Transaction | ✅ 완료 (Controllers 제외) | 6~8h | 11h |
+| 2 | Warning & Vacation | ✅ 완료 (Controllers 제외) | 6~8h | 19h |
+| **2.5** | **도커화 & 서버 배포** 🐳 | ⏸️ 보류 | **3~4h** | **23h** |
+| 3 | Item & Shop | ⏳ 미완료 | 4~5h | 28h |
+| 4 | Calendar Events | ⏳ 미완료 | 3~4h | 32h |
+| 5 | Story Events & Announcements | ⏳ 미완료 | 6~7h | 39h |
+| 6 | Settings & Admin Logs | ⏳ 미완료 | 3~4h | 43h |
+| **7** | **Dashboard & 웹훅 & 통합** | **🔄 부분 완료** | **3~4h** | **47h** |
+| 8 | 인증 & 권한 | ⏳ 미완료 | 4~5h | 52h |
+
+**Phase 7 완료 항목:**
+- ✅ DashboardService, DashboardController, dashboard.html (자동 갱신)
+- ✅ WebhookService, WebhookController (/webhooks/mastodon)
+- ✅ 마스토돈 역할 연동 (OAuth + 웹훅)
+- ✅ 시스템 계정 필터링
+- ❌ Phase 1-6 Controllers (미완료)
 
 **관리자 웹 소계: 약 52시간 (6.5일 풀타임)**
+**현재 진행률: Phase 0-2 완료, Phase 7 부분 완료 (약 30% 진행)**
 
 ### 봇 시스템 (economy_bot)
 

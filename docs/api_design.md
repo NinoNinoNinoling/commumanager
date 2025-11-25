@@ -1162,3 +1162,163 @@ OAuth 인증 완료 시 사용자 정보에 마스토돈 역할 정보가 포함
 - 시스템
 - 테스트
 
+---
+
+## 웹훅 (Webhooks)
+
+### POST /webhooks/mastodon
+마스토돈 웹훅 이벤트 처리
+
+**인증**: HMAC 서명 검증 (X-Hub-Signature 헤더)
+
+**Headers**:
+- `X-Hub-Signature`: sha256=... (HMAC-SHA256 서명)
+- `Content-Type`: application/json
+
+**지원 이벤트**:
+
+#### 1. account.created
+새 계정 생성 시 자동으로 DB에 유저 등록
+
+**Payload**:
+```json
+{
+  "event": "account.created",
+  "object": {
+    "id": "123456789",
+    "username": "newuser",
+    "acct": "newuser@mastodon.example.com",
+    "display_name": "New User",
+    "role": {
+      "name": "Admin",
+      "color": "#ff6600"
+    }
+  }
+}
+```
+
+**Response** (성공):
+```json
+{
+  "status": "created",
+  "user_id": "123456789",
+  "username": "newuser",
+  "display_name": "New User",
+  "balance": 0,
+  "message": "새 유저가 등록되었습니다"
+}
+```
+
+**Response** (이미 존재하는 경우):
+```json
+{
+  "status": "updated",
+  "user_id": "123456789",
+  "username": "newuser",
+  "message": "역할 정보 업데이트됨"
+}
+```
+
+#### 2. status.created
+새 포스트 작성 시 (현재 로깅만 수행)
+
+**Payload**:
+```json
+{
+  "event": "status.created",
+  "object": {
+    "id": "110000000000000000",
+    "account": {
+      "username": "user1"
+    },
+    "content": "<p>Hello World!</p>",
+    "created_at": "2025-11-25T10:00:00Z"
+  }
+}
+```
+
+**Response**:
+```json
+{
+  "status": "logged",
+  "event": "status.created"
+}
+```
+
+#### 3. status.updated
+포스트 수정 시 (현재 로깅만 수행)
+
+**Payload**: status.created와 유사
+
+**Response**:
+```json
+{
+  "status": "logged",
+  "event": "status.updated"
+}
+```
+
+### 웹훅 설정 방법
+
+#### 1. 환경변수 설정
+```bash
+MASTODON_WEBHOOK_SECRET=your_secret_key_here
+```
+
+#### 2. 마스토돈 서버 웹훅 등록
+```bash
+# 마스토돈 관리자 페이지에서 설정
+https://your-mastodon-instance/admin/webhooks
+
+# 설정 항목:
+URL: https://your-admin-server/webhooks/mastodon
+이벤트: account.created, status.created, status.updated
+비밀키: (환경변수와 동일)
+```
+
+### 웹훅 보안
+
+**HMAC 서명 검증**:
+1. 마스토돈이 요청 본문을 HMAC-SHA256으로 서명
+2. `X-Hub-Signature: sha256=...` 헤더로 전송
+3. 서버가 동일한 방식으로 서명 계산 후 비교
+4. 서명 불일치 시 403 Forbidden
+
+**에러 응답**:
+```json
+{
+  "error": "Invalid signature"
+}
+```
+
+### 웹훅 처리 로직
+
+**account.created 처리 흐름**:
+1. 서명 검증
+2. 기존 유저 확인
+   - 존재하면: 역할 정보만 업데이트
+   - 없으면: 새 유저 생성 (초기 재화 0)
+3. 관리 로그 기록 (action_type: webhook_account_created)
+4. 응답 반환
+
+**자동으로 기록되는 정보**:
+- mastodon_id, username, display_name
+- role_name, role_color (있는 경우)
+- 초기 재화: 0 (사용자 요청에 따라)
+
+**관리 로그 예시**:
+```json
+{
+  "action_type": "webhook_account_created",
+  "admin_name": "system",
+  "target_user": "123456789",
+  "description": "웹훅으로 새 유저 등록: @newuser@mastodon.example.com",
+  "details": {
+    "username": "newuser",
+    "display_name": "New User",
+    "role_name": "Admin",
+    "role_color": "#ff6600"
+  }
+}
+```
+
