@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}유저 상세{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{{ url_for('web.users') }}" class="btn btn-outline-secondary btn-sm mb-3">← 목록으로</a>
+    <div class="d-flex justify-content-between align-items-start">
+        <div>
+            <h2 class="d-flex align-items-center gap-2">
+                {{ user.display_name or user.username }}
+                <span class="badge bg-secondary fs-6">@{{ user.username }}</span>
+            </h2>
+            <p class="text-muted">가입일: {{ user.created_at[:10] }}</p>
+        </div>
+        <div class="card bg-light border-0 p-3" style="min-width: 300px;">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">현재 잔액</span>
+                <span class="fw-bold fs-4 text-primary">{{ user.balance }} <small class="fs-6 text-muted">갈레온</small></span>
+            </div>
+            <div class="d-flex justify-content-between text-muted small">
+                <span>누적 획득</span>
+                <span class="text-success">+{{ user.total_earned }}</span>
+            </div>
+            <div class="d-flex justify-content-between text-muted small">
+                <span>누적 사용</span>
+                <span class="text-danger">-{{ user.total_spent }}</span>
+            </div>
+            <button class="btn btn-primary btn-sm w-100 mt-3" onclick="adjustBalance('{{ user.mastodon_id }}')">
+                + 잔액 조정
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">재화 내역</h5>
+        <div>
+            </div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>일시</th>
+                    <th>내용</th>
+                    <th class="text-end">변동액</th>
+                    <th class="text-end">작업</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if transactions %}
+                    {% for tx in transactions %}
+                    <tr>
+                        <td>{{ tx.timestamp[:16] }}</td>
+                        <td>
+                            <div class="fw-bold">{{ tx.description }}</div>
+                            <div class="small text-muted">{{ tx.category }}</div>
+                        </td>
+                        <td class="text-end">
+                            {% if tx.amount > 0 %}
+                                <span class="text-success fw-bold">+{{ tx.amount }}</span>
+                            {% else %}
+                                <span class="text-danger fw-bold">{{ tx.amount }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5 text-muted">거래 내역이 없습니다.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="balanceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">잔액 조정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="balanceForm">
+                    <input type="hidden" id="userId" name="userId">
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">금액 (양수: 추가, 음수: 차감)</label>
+                        <input type="number" class="form-control" id="amount" name="amount" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">사유</label>
+                        <input type="text" class="form-control" id="description" name="description" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" onclick="submitBalance()">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function adjustBalance(userId) {
+    document.getElementById('userId').value = userId;
+    new bootstrap.Modal(document.getElementById('balanceModal')).show();
+}
+
+function submitBalance() {
+    const userId = document.getElementById('userId').value;
+    const amount = document.getElementById('amount').value;
+    const description = document.getElementById('description').value;
+
+    fetch(`/api/v1/users/${userId}/balance`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({amount: parseInt(amount), description: description})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.error) {
+            alert(data.error);
+        } else {
+            location.reload();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+{% endblock %}
