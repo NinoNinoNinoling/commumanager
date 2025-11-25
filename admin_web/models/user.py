@@ -28,6 +28,8 @@ class User:
         last_active: 마지막 활동 시각
         last_check: 마지막 체크 시각
         created_at: 계정 생성 시각
+        role_name: 마스토돈 역할 이름 (Owner, Admin, 봇 등)
+        role_color: 마스토돈 역할 색상 (#ff3838 등)
     """
     mastodon_id: str
     username: str
@@ -43,6 +45,8 @@ class User:
     last_active: Optional[datetime] = None
     last_check: Optional[datetime] = None
     created_at: Optional[datetime] = None
+    role_name: Optional[str] = None
+    role_color: Optional[str] = None
 
     def to_dict(self) -> dict:
         """
@@ -66,6 +70,8 @@ class User:
             'last_active': self.last_active.isoformat() if self.last_active else None,
             'last_check': self.last_check.isoformat() if self.last_check else None,
             'created_at': self.created_at.isoformat() if self.created_at else None,
+            'role_name': self.role_name,
+            'role_color': self.role_color,
         }
 
     @classmethod
@@ -115,7 +121,9 @@ class User:
             is_key_member=data.get('is_key_member', False),
             last_active=last_active,
             last_check=last_check,
-            created_at=created_at
+            created_at=created_at,
+            role_name=data.get('role_name'),
+            role_color=data.get('role_color')
         )
 
     def has_warnings(self) -> bool:

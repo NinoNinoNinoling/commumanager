@@ -96,7 +96,7 @@ class MastodonOAuth:
             access_token: Mastodon 액세스 토큰
 
         Returns:
-            사용자 정보 딕셔너리
+            사용자 정보 딕셔너리 (role 정보 포함)
         """
         mastodon = Mastodon(
             access_token=access_token,
@@ -105,13 +105,24 @@ class MastodonOAuth:
 
         account = mastodon.account_verify_credentials()
 
+        # 역할 정보 추출 (Mastodon v4.0.0+)
+        role_info = account.get('role')
+        role_name = None
+        role_color = None
+
+        if role_info:
+            role_name = role_info.get('name')
+            role_color = role_info.get('color')
+
         return {
             'id': account['id'],
             'username': account['username'],
             'acct': account['acct'],
             'display_name': account['display_name'],
             'avatar': account['avatar'],
-            'url': account['url']
+            'url': account['url'],
+            'role_name': role_name,
+            'role_color': role_color
         }
 
     def verify_admin(self, access_token: str) -> bool:

@@ -1127,3 +1127,38 @@ OAuth 콜백 처리
 - 일반 요청: 100 req/min
 - 통계 조회: 20 req/min
 - 인증: 5 req/min
+
+---
+
+## OAuth 역할 정보 (v1.1.0+)
+
+### GET /oauth/callback
+
+OAuth 인증 완료 시 사용자 정보에 마스토돈 역할 정보가 포함됩니다:
+
+```json
+{
+  "id": "123456",
+  "username": "user",
+  "acct": "user@mastodon.example.com",
+  "display_name": "User Display Name",
+  "avatar": "https://...",
+  "url": "https://mastodon.example.com/@user",
+  "role_name": "Admin",
+  "role_color": "#ff6600"
+}
+```
+
+**role_name**: 마스토돈 역할 이름 (null 가능)
+**role_color**: 역할 색상 hex 코드 (null 가능)
+
+### 시스템 계정 필터링
+
+대시보드 통계는 다음 역할을 가진 사용자를 자동 제외:
+- Owner
+- Admin
+- Moderator
+- 봇
+- 시스템
+- 테스트
+

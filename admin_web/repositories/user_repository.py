@@ -61,7 +61,9 @@ class UserRepository:
             is_key_member=bool(row['is_key_member']),
             last_active=datetime.fromisoformat(row['last_active']) if row['last_active'] else None,
             last_check=datetime.fromisoformat(row['last_check']) if row['last_check'] else None,
-            created_at=datetime.fromisoformat(row['created_at']) if row['created_at'] else None
+            created_at=datetime.fromisoformat(row['created_at']) if row['created_at'] else None,
+            role_name=row.get('role_name'),
+            role_color=row.get('role_color')
         )
 
     def find_by_id(self, mastodon_id: str) -> Optional[User]:
@@ -178,8 +180,9 @@ class UserRepository:
                 mastodon_id, username, display_name, role, dormitory,
                 balance, total_earned, total_spent, reply_count,
                 warning_count, is_key_member,
-                last_active, last_check, created_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                last_active, last_check, created_at,
+                role_name, role_color
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)
         """, (
             user.mastodon_id,
             user.username,
@@ -193,7 +196,9 @@ class UserRepository:
             user.warning_count,
             1 if user.is_key_member else 0,
             user.last_active.isoformat() if user.last_active else None,
-            user.last_check.isoformat() if user.last_check else None
+            user.last_check.isoformat() if user.last_check else None,
+            user.role_name,
+            user.role_color
         ))
 
         conn.commit()
@@ -330,6 +335,28 @@ class UserRepository:
             SET is_key_member = ?
             WHERE mastodon_id = ?
         """, (1 if is_key_member else 0, mastodon_id))
+
+        conn.commit()
+        conn.close()
+
+    def update_role_info(self, mastodon_id: str, role_name: Optional[str] = None,
+                        role_color: Optional[str] = None) -> None:
+        """
+        마스토돈 역할 정보를 업데이트합니다.
+
+        Args:
+            mastodon_id: 유저의 Mastodon ID
+            role_name: 마스토돈 역할 이름 (Owner, Admin, 봇 등)
+            role_color: 마스토돈 역할 색상 (#ff3838 등)
+        """
+        conn = self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            UPDATE users
+            SET role_name = ?, role_color = ?
+            WHERE mastodon_id = ?
+        """, (role_name, role_color, mastodon_id))
 
         conn.commit()
         conn.close()

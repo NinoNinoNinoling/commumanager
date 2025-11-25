@@ -35,7 +35,9 @@ def init_database(db_path='economy.db'):
             is_key_member BOOLEAN DEFAULT 0,
             last_active TIMESTAMP,
             last_check TIMESTAMP,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            role_name TEXT,
+            role_color TEXT
         )
     """)
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_users_balance ON users(balance DESC)")
@@ -441,6 +443,40 @@ def init_database(db_path='economy.db'):
     print(f"📋 템플릿: {len(templates_data)}개")
 
 
+def migrate_add_role_columns(db_path='economy.db'):
+    """
+    기존 DB에 role_name, role_color 컬럼 추가 (마이그레이션)
+
+    이미 컬럼이 있으면 무시됩니다.
+    """
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    print(f"🔄 DB 마이그레이션 중: {db_path}")
+
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN role_name TEXT")
+        print("✓ users 테이블에 role_name 컬럼 추가")
+    except sqlite3.OperationalError as e:
+        if "duplicate column name" in str(e):
+            print("✓ role_name 컬럼이 이미 존재합니다")
+        else:
+            raise
+
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN role_color TEXT")
+        print("✓ users 테이블에 role_color 컬럼 추가")
+    except sqlite3.OperationalError as e:
+        if "duplicate column name" in str(e):
+            print("✓ role_color 컬럼이 이미 존재합니다")
+        else:
+            raise
+
+    conn.commit()
+    conn.close()
+    print("✅ 마이그레이션 완료!")
+
+
 def initialize_database(db_path='economy.db'):
     """
     Alias for init_database to match test expectations
@@ -450,4 +486,8 @@ def initialize_database(db_path='economy.db'):
 
 if __name__ == '__main__':
     db_path = sys.argv[1] if len(sys.argv) > 1 else 'economy.db'
-    init_database(db_path)
+
+    if len(sys.argv) > 2 and sys.argv[2] == '--migrate':
+        migrate_add_role_columns(db_path)
+    else:
+        init_database(db_path)
