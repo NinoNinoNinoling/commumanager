@@ -51,9 +51,6 @@ class User:
     def to_dict(self) -> dict:
         """
         User를 JSON 직렬화를 위한 딕셔너리로 변환합니다.
-
-        Returns:
-            User의 딕셔너리 표현
         """
         return {
             'mastodon_id': self.mastodon_id,
@@ -74,17 +71,10 @@ class User:
             'role_color': self.role_color,
         }
 
-
     @classmethod
     def from_dict(cls, data: dict) -> 'User':
         """
         딕셔너리로부터 User를 생성합니다.
-
-        Args:
-            data: 사용자 데이터를 담은 딕셔너리
-
-        Returns:
-            User 인스턴스
         """
         return cls(
             mastodon_id=data['mastodon_id'],
@@ -106,21 +96,7 @@ class User:
         )
 
     def has_warnings(self) -> bool:
-        """
-        사용자가 경고를 받은 적이 있는지 확인합니다.
-
-        Returns:
-            warning_count > 0이면 True, 아니면 False
-        """
         return self.warning_count > 0
 
     def is_at_risk_of_ban(self) -> bool:
-        """
-        사용자가 자동 아웃 위험에 처했는지 확인합니다.
-
-        경고 3회 도달 시 자동 아웃되므로, warning_count == 2일 때 위험 상태입니다.
-
-        Returns:
-            warning_count == 2이면 True, 아니면 False
-        """
         return self.warning_count == 2

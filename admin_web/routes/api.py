@@ -1,13 +1,16 @@
 """REST API 라우트"""
 from functools import wraps
 from flask import Blueprint, request, jsonify, session
+
+# Services
 from admin_web.services.user_service import UserService
 from admin_web.services.item_service import ItemService
 from admin_web.services.settings_service import SettingsService
-from admin_web.models.item import Item
-from admin_web.controllers.warning_controller import create_warning, get_all_warnings, get_user_warnings
-from admin_web.controllers.user_controller import get_user_detail, update_user_role
+from admin_web.services.dashboard_service import DashboardService
+from admin_web.services.warning_service import WarningService
 
+# Models
+from admin_web.models.item import Item
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 
@@ -37,10 +40,8 @@ def get_users():
 def get_risk_users():
     """
     위험 감지 유저 목록 조회 API
-    HTML(AJAX)에서 호출하는 엔드포인트입니다.
     """
     user_service = UserService()
-    # 시스템 계정이 필터링된 리스트를 가져옵니다.
     risk_users = user_service.get_risk_users() 
     return jsonify({'users': risk_users})
 
@@ -48,25 +49,48 @@ def get_risk_users():
 @api_bp.route('/users/<user_id>', methods=['GET'])
 @require_auth
 def get_user_api(user_id):
-    return get_user_detail(user_id)
+    """유저 상세 정보 조회"""
+    user_service = UserService()
+    user = user_service.get_user(user_id)
+    
+    if user:
+        return jsonify(user.to_dict())
+    else:
+        return jsonify({'error': 'User not found'}), 404
 
 
 @api_bp.route('/users/<user_id>/role', methods=['PATCH'])
 @require_auth
 def patch_user_role(user_id):
-    return update_user_role(user_id)
+    """유저 역할 변경"""
+    data = request.get_json()
+    new_role = data.get('role')
+    
+    if not new_role:
+        return jsonify({'error': 'Role is required'}), 400
+
+    user_service = UserService()
+    try:
+        updated_user = user_service.update_user_role(user_id, new_role)
+        return jsonify(updated_user.to_dict())
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
 
 
 @api_bp.route('/users/<user_id>/balance', methods=['POST'])
 @require_auth
 def adjust_balance(user_id):
+    """유저 잔액 조정"""
     data = request.get_json()
     amount = data.get('amount')
     description = data.get('description', '관리자 조정')
+    
+    # 관리자 정보 (세션에서 가져옴)
+    admin_id = session.get('user_id')
 
     user_service = UserService()
     try:
-        result = user_service.adjust_balance(user_id, amount, 'adjustment', description, session.get('user_id'))
+        result = user_service.adjust_balance(user_id, amount, 'adjustment', description, admin_id)
         return jsonify(result)
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
@@ -84,24 +108,20 @@ def get_items():
 @require_auth
 def create_item():
     data = request.get_json()
-    item = Item.from_dict(data)
-
-    item_service = ItemService()
     try:
+        item = Item.from_dict(data)
+        item_service = ItemService()
         result = item_service.create_item(item)
         return jsonify(result), 201
-    except ValueError as e:
+    except Exception as e:
         return jsonify({'error': str(e)}), 400
 
 
 @api_bp.route('/dashboard/stats', methods=['GET'])
 @require_auth
 def get_stats():
-    from admin_web.services.dashboard_service import DashboardService
-
     dashboard_service = DashboardService()
     stats = dashboard_service.get_dashboard_stats()
-
     return jsonify({'stats': stats})
 
 
@@ -121,21 +141,32 @@ def update_settings():
     settings_service = SettingsService()
     result = settings_service.update_settings(settings_list, admin_user)
 
-    if result.get('success'):
-        return jsonify(result), 200
-    else:
-        return jsonify(result), 500
+    status_code = 200 if result.get('success') else 500
+    return jsonify(result), status_code
 
 
-@api_bp.route('/warnings', methods=['POST', 'GET']) # Add GET method
+@api_bp.route('/warnings', methods=['POST', 'GET'])
 @require_auth
-def post_warning():
-    if request.method == 'POST':
-        return create_warning()
-    elif request.method == 'GET':
-        return get_all_warnings()
+def handle_warnings():
+    warning_service = WarningService()
+    
+    if request.method == 'GET':
+        warnings = warning_service.get_all_warnings()
+        return jsonify({'warnings': warnings})
+        
+    elif request.method == 'POST':
+        data = request.get_json()
+        try:
+            # create_warning의 시그니처에 맞춰 데이터 전달
+            result = warning_service.create_warning(data)
+            return jsonify(result), 201
+        except ValueError as e:
+            return jsonify({'error': str(e)}), 400
+
 
 @api_bp.route('/users/<user_id>/warnings', methods=['GET'])
 @require_auth
 def get_warnings_for_user(user_id):
-    return get_user_warnings(user_id)
+    warning_service = WarningService()
+    warnings = warning_service.get_user_warnings(user_id)
+    return jsonify({'warnings': warnings})
