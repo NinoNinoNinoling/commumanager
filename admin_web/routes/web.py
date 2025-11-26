@@ -8,6 +8,7 @@ from admin_web.services.item_service import ItemService
 from admin_web.services.transaction_service import TransactionService
 from admin_web.services.vacation_service import VacationService
 from admin_web.services.warning_service import WarningService
+from admin_web.services.settings_service import SettingsService
 from admin_web.utils.auth import login_required
 from admin_web.utils.oauth import MastodonOAuth
 
@@ -15,9 +16,9 @@ web_bp = Blueprint('web', __name__)
 logger = logging.getLogger(__name__)
 
 def _get_admin_users():
-    admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
-    if admin_password == 'admin123':
-        logger.warning("⚠️ ADMIN_PASSWORD 미설정: 기본값 사용 중")
+    admin_password = os.environ.get('ADMIN_PASSWORD')
+    if not admin_password:
+        raise RuntimeError("ADMIN_PASSWORD 환경 변수가 설정되지 않았습니다. 프로덕션을 위해 반드시 설정해주세요.")
     return {'admin': generate_password_hash(admin_password)}
 
 ADMIN_USERS = _get_admin_users()
@@ -133,7 +134,13 @@ def logs():
 @web_bp.route('/settings')
 @login_required
 def settings():
-    return render_template('settings.html')
+    settings_service = SettingsService()
+    all_settings_list = settings_service.get_all_settings()
+    
+    # Convert list of dicts to a single dict for easier template access
+    settings_dict = {setting['key']: setting['value'] for setting in all_settings_list}
+    
+    return render_template('settings.html', settings=settings_dict)
 
 @web_bp.route('/account')
 @login_required

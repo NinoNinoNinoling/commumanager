@@ -48,27 +48,20 @@
             <div class="col-md-4">
                 <label class="form-label fw-bold">답글 100개당 지급액</label>
                 <div class="input-group">
-                    <input type="number" class="form-control" value="100" min="0">
+                    <input type="number" id="reward-per-replies" class="form-control" value="{{ settings.get('reward_per_replies', '10') }}" min="0">
                     <span class="input-group-text">갈레온</span>
                 </div>
             </div>
             <div class="col-md-4">
                 <label class="form-label fw-bold">일일 출석 보상</label>
                 <div class="input-group">
-                    <input type="number" class="form-control" value="10" min="0">
-                    <span class="input-group-text">갈레온</span>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label fw-bold">신규 가입 보상</label>
-                <div class="input-group">
-                    <input type="number" class="form-control" value="1000" min="0">
+                    <input type="number" id="attendance-base-reward" class="form-control" value="{{ settings.get('attendance_base_reward', '50') }}" min="0">
                     <span class="input-group-text">갈레온</span>
                 </div>
             </div>
         </div>
         <div class="mt-3">
-            <button class="btn btn-primary">저장</button>
+            <button id="save-reward-settings-btn" class="btn btn-primary">저장</button>
         </div>
     </div>
 </div>
@@ -165,5 +158,8 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
 {% endblock %}

@@ -142,7 +142,7 @@ def create_mastodon_client(access_token: str = None) -> Mastodon:
 
     return Mastodon(
         access_token=access_token,
-        api_base_url=os.getenv('MASTODON_INSTANCE_URL')
+        api_base_url=os.getenv('INTERNAL_MASTODON_INSTANCE_URL', os.getenv('MASTODON_INSTANCE_URL'))
     )
 
 

@@ -1,5 +1,6 @@
 """ItemService"""
 from typing import List, Dict, Any, Optional
+from flask import current_app
 
 from admin_web.models.item import Item
 from admin_web.repositories.item_repository import ItemRepository
@@ -12,9 +13,12 @@ class ItemService:
     상점 아이템의 생성, 조회, 활성화 관리를 처리합니다.
     """
 
-    def __init__(self, db_path: str = 'economy.db'):
-        self.db_path = db_path
-        self.item_repo = ItemRepository(db_path)
+    def __init__(self, db_path: str = None):
+        if db_path is None:
+            self.db_path = current_app.config.get('DATABASE_PATH', 'economy.db')
+        else:
+            self.db_path = db_path
+        self.item_repo = ItemRepository(self.db_path)
 
     def create_item(self, item: Item) -> Dict[str, Any]:
         """아이템을 생성합니다."""
@@ -22,6 +26,10 @@ class ItemService:
             raise ValueError('Price must be positive')
         created = self.item_repo.create(item)
         return {'item': created}
+
+    def get_all_items(self) -> List[Item]:
+        """모든 아이템 목록을 조회합니다."""
+        return self.item_repo.find_all()
 
     def get_active_items(self) -> List[Item]:
         """활성 상태인 아이템 목록을 조회합니다."""

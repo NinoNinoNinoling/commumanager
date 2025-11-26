@@ -13,16 +13,12 @@ def create_app():
     """Flask 앱 생성"""
     app = Flask(__name__)
 
-    # 환경 변수에서 SECRET_KEY 가져오기 (없으면 경고와 함께 기본값 사용)
+    # 환경 변수에서 SECRET_KEY 가져오기 (필수)
     secret_key = os.environ.get('SECRET_KEY')
     if not secret_key:
-        logger.warning(
-            "⚠️  SECRET_KEY 환경 변수가 설정되지 않았습니다! "
-            "기본값 'dev-secret-key-change-in-production'을 사용 중입니다. "
-            "프로덕션 환경에서는 반드시 강력한 SECRET_KEY로 변경하세요!"
-        )
-        secret_key = 'dev-secret-key-change-in-production'
+        raise RuntimeError("SECRET_KEY 환경 변수가 설정되지 않았습니다. 프로덕션을 위해 반드시 설정해주세요.")
     app.secret_key = secret_key
+
     # 마스토돈 및 기타 필수 환경 변수 로드
     app.config['MASTODON_INSTANCE_URL'] = os.getenv('MASTODON_INSTANCE_URL')
     app.config['MASTODON_CLIENT_ID'] = os.getenv('MASTODON_CLIENT_ID')
@@ -40,4 +36,5 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    debug_mode = os.environ.get('FLASK_ENV') == 'development'
+    app.run(debug=debug_mode, host='0.0.0.0', port=5000)
