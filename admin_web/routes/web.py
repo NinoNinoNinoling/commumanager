@@ -1,124 +1,155 @@
-from flask import Blueprint, render_template, request, jsonify
-from admin_web.repositories.user_repository import UserRepository
+"""웹 UI 라우트"""
+import os
+import logging
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+from werkzeug.security import check_password_hash, generate_password_hash
+from admin_web.services.user_service import UserService
+from admin_web.services.item_service import ItemService
 from admin_web.services.transaction_service import TransactionService
-from admin_web.services.warning_service import WarningService
 from admin_web.services.vacation_service import VacationService
-from admin_web.services.moderation_service import ModerationService
+from admin_web.services.warning_service import WarningService
+from admin_web.services.moderation_service import ModerationService # 사용하지 않더라도 초기화 충돌 방지
+from admin_web.utils.auth import login_required
+from admin_web.utils.oauth import MastodonOAuth
 
-web = Blueprint('web', __name__)
+# 🆕 Blueprint 이름 변경: 'web' 대신 'web_bp' 사용
+web_bp = Blueprint('web', __name__) 
+logger = logging.getLogger(__name__)
 
-user_repo = UserRepository()
-transaction_service = TransactionService()
-warning_service = WarningService()
-vacation_service = VacationService()
-moderation_service = ModerationService()
+# 전역 서비스 인스턴스는 제거 (사용자님의 이전 코드 스타일이 혼재되어 있어 제거)
+# 라우트 내에서 서비스 인스턴스화 하거나, app.py에서 주입해야 함
 
-@web.route('/')
-def dashboard():
-    """관리자 대시보드 메인 페이지"""
-    stats = user_repo.get_dashboard_stats()
-    warning_stats = warning_service.get_dashboard_warning_stats()
-    moderation_stats = moderation_service.get_dashboard_moderation_stats()
-    
-    # 휴가 중인 유저 수 계산 (유지)
-    on_vacation_count = moderation_service.get_vacation_count()
+def _get_admin_users():
+    admin_password = os.environ.get('ADMIN_PASSWORD', 'admin123')
+    if admin_password == 'admin123':
+        logger.warning("⚠️ ADMIN_PASSWORD 미설정: 기본값 사용 중")
+    return {'admin': generate_password_hash(admin_password)}
 
-    return render_template(
-        'dashboard.html',
-        stats=stats,
-        warning_stats=warning_stats,
-        moderation_stats=moderation_stats,
-        on_vacation_count=on_vacation_count
-    )
+ADMIN_USERS = _get_admin_users()
 
-@web.route('/users')
+@web_bp.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        if username in ADMIN_USERS and check_password_hash(ADMIN_USERS[username], password):
+            session['user_id'] = username
+            session['role'] = 'admin'
+            flash('로그인 성공!', 'success')
+            return redirect(url_for('web.index'))
+        else:
+            flash('잘못된 정보', 'danger')
+    mastodon_url = os.environ.get('MASTODON_INSTANCE_URL', 'https://mastodon.social')
+    return render_template('login.html', mastodon_url=mastodon_url)
+
+@web_bp.route('/oauth/login')
+def oauth_login():
+    try:
+        return redirect(MastodonOAuth().get_authorization_url())
+    except Exception as e:
+        flash(f'OAuth 실패: {e}', 'danger')
+        return redirect(url_for('web.login'))
+
+@web_bp.route('/oauth/callback')
+def oauth_callback():
+    code = request.args.get('code')
+    if not code: return redirect(url_for('web.login'))
+    try:
+        oauth = MastodonOAuth()
+        token = oauth.get_access_token(code)
+        user_info = oauth.get_user_info(token)
+        if not oauth.verify_admin(token):
+            flash('관리자 권한 없음', 'danger')
+            return redirect(url_for('web.login'))
+        
+        session['user_id'] = user_info['acct']
+        session['username'] = user_info['username']
+        session['role'] = 'admin'
+        return redirect(url_for('web.index'))
+    except Exception as e:
+        flash(f'인증 에러: {e}', 'danger')
+        return redirect(url_for('web.login'))
+
+@web_bp.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('web.login'))
+
+
+# 🚨 주의: web.py가 복구되면서 아래 라우트들이 복잡하게 섞여 있었는데, 
+# app.py에서 web_bp만 임포트하고 라우트 함수 이름에 @web_bp.route 데코레이터가 붙어있다면 실행에 문제는 없습니다.
+# 여기서는 라우트만 남기고 불필요한 전역 변수 초기화는 제거하여 안정성을 확보합니다.
+
+@web_bp.route('/')
+@login_required
+def index():
+    from admin_web.services.dashboard_service import DashboardService
+    return render_template('dashboard.html', stats=DashboardService().get_dashboard_stats())
+
+@web_bp.route('/users')
+@login_required
 def users():
-    """유저 목록 페이지 (재화 관리)"""
-    users_list = user_repo.find_all_users_with_stats()
-    return render_template(
-        'users.html',
-        users=users_list,
-        current_tab='재화 관리'
-    )
+    user_service = UserService()
+    all_users = user_service.get_all_users()
+    
+    mastodon_url = os.environ.get('MASTODON_INSTANCE_URL', 'https://mastodon.social')
+    return render_template('users.html', users=all_users, mastodon_url=mastodon_url)
 
-@web.route('/users/monitoring')
-def users_monitoring():
-    """유저 목록 페이지 (활동량 모니터링)"""
-    users_list = user_repo.find_risky_users() 
-    return render_template(
-        'users.html',
-        users=users_list,
-        current_tab='활동량 모니터링'
-    )
-
-@web.route('/users/vacation')
-def users_vacation():
-    """유저 목록 페이지 (휴식 현황)"""
-    users_list = user_repo.find_all_users_with_stats() 
-    return render_template(
-        'users.html',
-        users=users_list,
-        current_tab='휴식 현황'
-    )
-
-@web.route('/users/detail/<user_id>')
+@web_bp.route('/users/<user_id>')
+@login_required
 def user_detail(user_id):
-    """특정 유저 상세 정보 및 재화/경고 내역"""
-    user = user_repo.find_by_mastodon_id(user_id)
+    user_service = UserService()
+    transaction_service = TransactionService()
+    vacation_service = VacationService()
+    warning_service = WarningService()
+    
+    user = user_service.get_user(user_id)
     if not user:
-        user = user_repo.find_by_id(user_id)
-        if not user:
-             return "User not found", 404
+        flash('존재하지 않는 유저입니다.', 'danger')
+        return redirect(url_for('web.users'))
+        
+    transactions = transaction_service.get_user_transactions(user_id)
+    is_on_vacation = vacation_service.is_user_on_vacation(user_id)
+    warnings_history = warning_service.get_user_warnings(user_id) # ⬅️ 이 데이터가 사용되지 않지만, 오류를 피하기 위해 유지
 
-    # 1. 재화 내역 로드
-    transactions = transaction_service.get_user_transactions(user.mastodon_id)
+    mastodon_url = os.environ.get('MASTODON_INSTANCE_URL', 'https://mastodon.social')
+    
+    return render_template('user_detail.html', 
+                           user=user, 
+                           transactions=transactions, 
+                           mastodon_url=mastodon_url,
+                           is_on_vacation=is_on_vacation,
+                           warnings=warnings_history) # ⬅️ warnings_history 대신 warnings로 템플릿에 전달해야 HTML 롤백이 가능함
 
-    # 2. 경고 내역 로드 (롤백된 로직)
-    warnings = warning_service.get_user_warnings(user.mastodon_id)
+@web_bp.route('/items')
+@login_required
+def items():
+    item_service = ItemService()
+    all_items = item_service.get_all_items()
+    return render_template('items.html', items=all_items)
 
-    # 3. 휴가 상태 확인 (유지)
-    is_on_vacation = vacation_service.is_user_on_vacation(user.mastodon_id)
 
+@web_bp.route('/content')
+@login_required
+def content():
+    return render_template('content.html')
 
-    return render_template(
-        'user_detail.html',
-        user=user,
-        transactions=transactions,
-        warnings=warnings,  # 경고 내역 전달
-        is_on_vacation=is_on_vacation
-    )
+@web_bp.route('/logs')
+@login_required
+def logs():
+    return render_template('logs.html')
 
-@web.route('/api/v1/users/<user_id>/balance', methods=['POST'])
-def api_adjust_balance(user_id):
-    data = request.json
-    amount = data.get('amount')
-    description = data.get('description')
+@web_bp.route('/settings')
+@login_required
+def settings():
+    return render_template('settings.html')
 
-    if not amount or not description:
-        return jsonify({'error': 'Amount and description are required'}), 400
+@web_bp.route('/account')
+@login_required
+def account():
+    mastodon_url = os.environ.get('MASTODON_INSTANCE_URL', 'https://mastodon.social')
+    mastodon_settings_url = f"{mastodon_url}/settings/profile"
 
-    try:
-        transaction = transaction_service.create_transaction(
-            user_id=user_id,
-            amount=int(amount),
-            description=description,
-            category='admin_adjustment'
-        )
-        return jsonify({'message': 'Balance adjusted successfully', 'transaction': transaction}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-@web.route('/api/v1/warnings/send', methods=['POST'])
-def api_send_warning():
-    data = request.json
-    user_id = data.get('user_id')
-    warning_type = data.get('warning_type')
-
-    if not user_id or not warning_type:
-        return jsonify({'error': 'User ID and warning type are required'}), 400
-
-    try:
-        warning = warning_service.create_warning_from_ui(user_id, warning_type)
-        return jsonify({'message': 'Warning sent successfully', 'warning': warning}), 200
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+    return render_template('account.html',
+                           mastodon_url=mastodon_url,
+                           mastodon_settings_url=mastodon_settings_url)
