@@ -5,6 +5,9 @@ from flask import Blueprint, request, jsonify, session
 # Models
 from admin_web.models.item import Item
 
+# Utils (Validation)
+from admin_web.utils.validators import validate_schema
+
 # Dependencies (DI)
 from admin_web.dependencies import (
     get_user_service,
@@ -18,9 +21,7 @@ api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 
 
 def require_auth(f):
-    """
-    인증을 요구하는 라우트를 위한 데코레이터
-    """
+    """인증을 요구하는 라우트를 위한 데코레이터"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
@@ -50,7 +51,6 @@ def get_risk_users():
 def get_user_api(user_id):
     user_service = get_user_service()
     user = user_service.get_user(user_id)
-    
     if user:
         return jsonify(user.to_dict())
     else:
@@ -59,13 +59,11 @@ def get_user_api(user_id):
 
 @api_bp.route('/users/<user_id>/role', methods=['PATCH'])
 @require_auth
+@validate_schema(required_fields=['role'])  # [추가] 필수 필드 검증
 def patch_user_role(user_id):
     data = request.get_json()
     new_role = data.get('role')
     
-    if not new_role:
-        return jsonify({'error': 'Role is required'}), 400
-
     user_service = get_user_service()
     try:
         updated_user = user_service.update_user_role(user_id, new_role)
@@ -76,11 +74,16 @@ def patch_user_role(user_id):
 
 @api_bp.route('/users/<user_id>/balance', methods=['POST'])
 @require_auth
+@validate_schema(required_fields=['amount'])  # [추가] 필수 필드 검증
 def adjust_balance(user_id):
     data = request.get_json()
     amount = data.get('amount')
     description = data.get('description', '관리자 조정')
     admin_id = session.get('user_id')
+
+    # 추가 검증: 금액 타입 확인
+    if not isinstance(amount, int):
+        return jsonify({'error': 'Amount must be an integer'}), 400
 
     user_service = get_user_service()
     try:
@@ -100,6 +103,7 @@ def get_items():
 
 @api_bp.route('/items', methods=['POST'])
 @require_auth
+@validate_schema(required_fields=['name', 'price', 'description']) # [추가]
 def create_item():
     data = request.get_json()
     try:
@@ -121,12 +125,11 @@ def get_stats():
 
 @api_bp.route('/settings', methods=['POST'])
 @require_auth
+@validate_schema(required_fields=['settings']) # [추가]
 def update_settings():
     data = request.get_json()
     settings_list = data.get('settings')
-    if not settings_list:
-        return jsonify({'error': 'No settings provided'}), 400
-
+    
     admin_user = session.get('user_id', 'unknown')
     
     settings_service = get_settings_service()
@@ -146,7 +149,18 @@ def handle_warnings():
         return jsonify({'warnings': warnings})
         
     elif request.method == 'POST':
+        # POST 요청일 때만 스키마 검증을 수동 호출하거나, 
+        # 별도 함수로 분리하는 게 좋지만 여기선 간단히 내부 처리
+        if not request.is_json:
+             return jsonify({'error': 'Request must be JSON'}), 400
+        
         data = request.get_json()
+        # 필수 필드 수동 체크 (GET/POST 혼용 라우트라 데코레이터 적용이 까다로움)
+        required = ['user_id', 'type', 'message']
+        missing = [f for f in required if f not in data]
+        if missing:
+            return jsonify({'error': 'Missing fields', 'fields': missing}), 400
+
         try:
             result = warning_service.create_warning(data)
             return jsonify(result), 201
