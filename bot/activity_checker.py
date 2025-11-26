@@ -295,6 +295,18 @@ def analyze_all_users_social() -> None:
                     is_inactive,
                     is_biased
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(user_id) DO UPDATE SET
+                    analyzed_at = CURRENT_TIMESTAMP,
+                    unique_conversation_partners = excluded.unique_conversation_partners,
+                    total_replies_sent = excluded.total_replies_sent,
+                    top_partner_id = excluded.top_partner_id,
+                    top_partner_count = excluded.top_partner_count,
+                    top_partner_ratio = excluded.top_partner_ratio,
+                    active_days_7d = excluded.active_days_7d,
+                    login_rate_7d = excluded.login_rate_7d,
+                    is_isolated = excluded.is_isolated,
+                    is_inactive = excluded.is_inactive,
+                    is_biased = excluded.is_biased
             """, (
                 user_id,
                 conversation_data['unique_partners'],
@@ -317,7 +329,110 @@ def analyze_all_users_social() -> None:
             if login_data['is_inactive']:
                 logger.warning(f'비활동성: {username} - 7일 중 {login_data["active_days"]}일 활동')
 
-    logger.info('사회성 분석 완료')
+    logger.info('사회성 분석 완료. 회피 패턴 분석 시작.')
+    analyze_avoidance_patterns()
+
+
+def analyze_avoidance_patterns():
+    """
+    회피 패턴 분석
+    - 활발하게 활동하면서 특정 '주요 멤버'와의 교류를 의도적으로 피하는 유저를 감지
+    """
+    logger.info("회피 패턴 분석 시작")
+
+    period_hours = 48
+    user_activity_threshold = 5  # 유저 본인 활동 기준 (답글 수)
+    key_member_activity_threshold = 3  # 주요 멤버 활동 기준 (답글 수)
+
+    try:
+        # 1. 모든 유저와 주요 멤버 목록 가져오기 (economy.db)
+        with get_economy_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT mastodon_id, username FROM users WHERE role = 'user' AND is_key_member = 0")
+            users = [dict(row) for row in cursor.fetchall()]
+            
+            cursor.execute("SELECT mastodon_id, username FROM users WHERE is_key_member = 1")
+            key_members = [dict(row) for row in cursor.fetchall()]
+
+        if not key_members:
+            logger.info("주요 멤버가 설정되지 않아 회피 패턴 분석을 건너뜁니다.")
+            return
+
+        key_member_ids = {km['mastodon_id'] for km in key_members}
+        key_member_map = {km['mastodon_id']: km['username'] for km in key_members}
+
+        # 2. 최근 48시간 모든 답글 활동 한번에 가져오기 (postgresql)
+        with get_mastodon_db() as pg_conn:
+            pg_cursor = pg_conn.cursor()
+            pg_cursor.execute("""
+                SELECT account_id, in_reply_to_account_id
+                FROM statuses
+                WHERE created_at > NOW() - INTERVAL '%s hours'
+                AND in_reply_to_account_id IS NOT NULL
+            """, (period_hours,))
+            interactions = pg_cursor.fetchall()
+
+        # 3. 사용자별 답글 수 및 교류 맵 생성
+        user_reply_counts = {}
+        interaction_pairs = set()
+        for inter in interactions:
+            user_id, target_id = str(inter[0]), str(inter[1])
+            user_reply_counts[user_id] = user_reply_counts.get(user_id, 0) + 1
+            # 양방향 교류로 처리
+            interaction_pairs.add(tuple(sorted((user_id, target_id))))
+
+        # 4. 각 유저별로 회피 패턴 분석
+        for user in users:
+            user_id = user['mastodon_id']
+            user_replies = user_reply_counts.get(user_id, 0)
+            
+            # 유저가 비활성이면 건너뜀
+            if user_replies < user_activity_threshold:
+                continue
+
+            avoided_key_members = []
+            for km_id in key_member_ids:
+                # 자기 자신은 건너뜀
+                if user_id == km_id:
+                    continue
+
+                key_member_replies = user_reply_counts.get(km_id, 0)
+
+                # 주요 멤버가 비활성이면 건너뜀
+                if key_member_replies < key_member_activity_threshold:
+                    continue
+                
+                # 두 사람 간의 교류가 있었는지 확인
+                has_interacted = tuple(sorted((user_id, km_id))) in interaction_pairs
+                
+                if not has_interacted:
+                    avoided_key_members.append(key_member_map[km_id])
+
+            # 5. 분석 결과 DB에 업데이트
+            if avoided_key_members:
+                logger.warning(f"회피 패턴 감지: @{user['username']} -> {avoided_key_members}")
+                with get_economy_db() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("""
+                        UPDATE user_stats
+                        SET is_avoiding = 1, avoided_users = ?
+                        WHERE user_id = ?
+                    """, (','.join(avoided_key_members), user_id))
+            else:
+                 with get_economy_db() as conn:
+                    cursor = conn.cursor()
+                    cursor.execute("""
+                        UPDATE user_stats
+                        SET is_avoiding = 0, avoided_users = NULL
+                        WHERE user_id = ?
+                    """, (user_id,))
+
+
+    except Exception as e:
+        logger.error(f"회피 패턴 분석 중 오류 발생: {e}", exc_info=True)
+
+    logger.info("회피 패턴 분석 완료")
+
 
 
 # ============================================================================

@@ -61,7 +61,7 @@ def get_mastodon_db() -> Generator[psycopg2.extensions.connection, None, None]:
         conn.close()
 
 
-def get_or_create_user(mastodon_id: str, username: str, display_name: str = None) -> dict:
+def get_or_create_user(mastodon_id: str, username: str, display_name: str = None) -> tuple[bool, dict]:
     """
     사용자 조회 또는 자동 생성 (Lazy Creation)
 
@@ -71,7 +71,7 @@ def get_or_create_user(mastodon_id: str, username: str, display_name: str = None
         display_name: 표시 이름
 
     Returns:
-        dict: 사용자 정보 (Row 객체를 dict로 변환)
+        tuple[bool, dict]: (새로 생성되었는지 여부, 사용자 정보)
     """
     with get_economy_db() as conn:
         cursor = conn.cursor()
@@ -84,7 +84,7 @@ def get_or_create_user(mastodon_id: str, username: str, display_name: str = None
         user = cursor.fetchone()
 
         if user:
-            return dict(user)
+            return (False, dict(user))
 
         # 사용자 생성
         cursor.execute("""
@@ -97,7 +97,8 @@ def get_or_create_user(mastodon_id: str, username: str, display_name: str = None
             "SELECT * FROM users WHERE mastodon_id = ?",
             (mastodon_id,)
         )
-        return dict(cursor.fetchone())
+        new_user = cursor.fetchone()
+        return (True, dict(new_user))
 
 
 def add_transaction(user_id: str, transaction_type: str, amount: int,

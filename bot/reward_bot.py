@@ -45,7 +45,9 @@ class BotStreamListener(StreamListener):
     def __init__(self, mastodon: Mastodon):
         super().__init__()
         self.mastodon = mastodon
-        self.current_attendance_post_id = None  # 현재 출석 게시글 ID
+        self.me = self.mastodon.account_verify_credentials()
+        logger.info(f"Listener initialized for account @{self.me['acct']}")
+        self.processed_statuses = set() # In-memory cache for duplicate check
 
     def on_notification(self, notification):
         """알림 수신"""
@@ -54,9 +56,76 @@ class BotStreamListener(StreamListener):
 
             if notif_type == 'mention':
                 self.handle_mention(notification)
+            elif notif_type == 'follow':
+                self.handle_follow(notification)
 
         except Exception as e:
             logger.error(f'알림 처리 오류: {e}', exc_info=True)
+
+    def on_update(self, status):
+        """새로운 공개 게시글 수신 (local stream)"""
+        try:
+            # 1. 답글이 아니면 무시
+            if not status.get('in_reply_to_id'):
+                return
+
+            status_id = status['id']
+            account = status['account']
+            user_id = str(account['id'])
+
+            # 2. 중복 처리 (인메모리 + DB)
+            if status_id in self.processed_statuses or is_duplicate_transaction(status_id):
+                return
+            self.processed_statuses.add(status_id)
+            if len(self.processed_statuses) > 10000: # 메모리 관리
+                self.processed_statuses.pop()
+
+            # 3. 자기 자신 또는 봇 계정의 답글은 무시
+            if user_id == str(self.me['id']):
+                return
+
+            # 4. 사용자 정보 가져오기 및 휴가 체크
+            username = account['acct']
+            get_or_create_user(user_id, username, account.get('display_name'))
+            if is_on_vacation(user_id):
+                logger.debug(f'실시간 보상 제외 (휴가 중): @{username}')
+                return
+            
+            # 5. 보상 지급
+            reward = int(get_setting('realtime_reply_reward', '1'))
+            if reward > 0:
+                add_transaction(
+                    user_id=user_id,
+                    transaction_type='realtime_reply',
+                    amount=reward,
+                    status_id=status_id,
+                    description='실시간 답글 작성 보상'
+                )
+                logger.info(f"실시간 보상 지급: @{username}에게 {reward}코인 (status: {status_id})")
+
+        except Exception as e:
+            logger.error(f"실시간 보상 처리 오류: {e}", exc_info=True)
+
+
+    def handle_follow(self, notification):
+        """팔로우 처리: 신규 사용자를 DB에 등록"""
+        account = notification['account']
+        user_id = str(account['id'])
+        username = account['acct']
+        display_name = account.get('display_name')
+
+        logger.info(f'팔로우 수신: @{username} (id={user_id})')
+
+        # 사용자 확인/생성
+        user_created, user = get_or_create_user(user_id, username, display_name)
+
+        if user_created:
+            logger.info(f'신규 사용자 등록: @{username}')
+            # 환영 DM 발송
+            welcome_message = f"안녕하세요, {display_name}님!\n마녀봇 커뮤니티에 등록되셨습니다. 멘션을 통해 다양한 명령어를 이용하실 수 있습니다. 도움이 필요하시면 '@봇 도움말'을 이용해주세요."
+            send_dm(self.mastodon, username, welcome_message)
+        else:
+            logger.info(f'기존 사용자 재팔로우: @{username}')
 
     def handle_mention(self, notification):
         """멘션 처리"""
@@ -118,10 +187,6 @@ class BotStreamListener(StreamListener):
         """status 삭제"""
         pass
 
-    def on_update(self, status):
-        """status 업데이트"""
-        pass
-
 
 # ============================================================================
 # 리워드봇 클래스
@@ -152,9 +217,10 @@ class RewardBot:
             me = self.mastodon.account_verify_credentials()
             logger.info(f'봇 계정: @{me["acct"]} ({me["display_name"]})')
 
-            # Streaming 시작
-            logger.info('Streaming 시작...')
-            self.mastodon.stream_user(self.listener, run_async=False, reconnect_async=True)
+            # Streaming 시작 (공개 타임라인)
+            logger.info('Streaming local timeline 시작...')
+            self.mastodon.stream_local(self.listener, run_async=False, reconnect_async=True)
+
 
         except KeyboardInterrupt:
             logger.info('사용자에 의해 중단됨')
@@ -162,18 +228,6 @@ class RewardBot:
             logger.error(f'봇 실행 실패: {e}', exc_info=True)
         finally:
             self.stop()
-
-    def stop(self):
-        """봇 종료"""
-        logger.info('봇 종료 중...')
-        self.running = False
-        logger.info('봇 종료 완료')
-
-    def signal_handler(self, signum, frame):
-        """시그널 핸들러"""
-        logger.info(f'시그널 수신: {signum}')
-        self.stop()
-        sys.exit(0)
 
 
 # ============================================================================
