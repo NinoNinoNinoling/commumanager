@@ -10,6 +10,8 @@ from admin_web.services.dashboard_service import DashboardService
 from admin_web.services.warning_service import WarningService
 from admin_web.services.item_service import ItemService
 from admin_web.services.settings_service import SettingsService
+from admin_web.services.transaction_service import TransactionService
+from admin_web.services.vacation_service import VacationService
 
 def get_user_service() -> UserService:
     if 'user_service' not in g:
@@ -35,3 +37,13 @@ def get_settings_service() -> SettingsService:
     if 'settings_service' not in g:
         g.settings_service = SettingsService()
     return g.settings_service
+
+def get_transaction_service() -> TransactionService:
+    if 'transaction_service' not in g:
+        g.transaction_service = TransactionService()
+    return g.transaction_service
+
+def get_vacation_service() -> VacationService:
+    if 'vacation_service' not in g:
+        g.vacation_service = VacationService()
+    return g.vacation_service

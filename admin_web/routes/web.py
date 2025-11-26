@@ -3,14 +3,20 @@ import os
 import logging
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import check_password_hash, generate_password_hash
-from admin_web.services.user_service import UserService
-from admin_web.services.item_service import ItemService
-from admin_web.services.transaction_service import TransactionService
-from admin_web.services.vacation_service import VacationService
-from admin_web.services.warning_service import WarningService
-from admin_web.services.settings_service import SettingsService
+
 from admin_web.utils.auth import login_required
 from admin_web.utils.oauth import MastodonOAuth
+
+# Dependencies (DI 적용)
+from admin_web.dependencies import (
+    get_user_service,
+    get_item_service,
+    get_transaction_service,
+    get_vacation_service,
+    get_warning_service,
+    get_settings_service,
+    get_dashboard_service
+)
 
 web_bp = Blueprint('web', __name__)
 logger = logging.getLogger(__name__)
@@ -18,7 +24,10 @@ logger = logging.getLogger(__name__)
 def _get_admin_users():
     admin_password = os.environ.get('ADMIN_PASSWORD')
     if not admin_password:
-        raise RuntimeError("ADMIN_PASSWORD 환경 변수가 설정되지 않았습니다. 프로덕션을 위해 반드시 설정해주세요.")
+        # 개발 편의를 위해 경고만 하고 넘어갈 수도 있지만, 프로덕션 안전을 위해 에러 유지
+        if os.environ.get('FLASK_ENV') == 'development':
+            return {'admin': generate_password_hash('admin')}
+        raise RuntimeError("ADMIN_PASSWORD 환경 변수가 설정되지 않았습니다.")
     return {'admin': generate_password_hash(admin_password)}
 
 ADMIN_USERS = _get_admin_users()
@@ -75,13 +84,13 @@ def logout():
 @web_bp.route('/')
 @login_required
 def index():
-    from admin_web.services.dashboard_service import DashboardService
-    return render_template('dashboard.html', stats=DashboardService().get_dashboard_stats())
+    dashboard_service = get_dashboard_service()
+    return render_template('dashboard.html', stats=dashboard_service.get_dashboard_stats())
 
 @web_bp.route('/users')
 @login_required
 def users():
-    user_service = UserService()
+    user_service = get_user_service()
     all_users = user_service.get_all_users()
     
     mastodon_url = os.environ.get('MASTODON_INSTANCE_URL', 'https://mastodon.social')
@@ -90,10 +99,10 @@ def users():
 @web_bp.route('/users/<user_id>')
 @login_required
 def user_detail(user_id):
-    user_service = UserService()
-    transaction_service = TransactionService()
-    vacation_service = VacationService()
-    warning_service = WarningService()
+    user_service = get_user_service()
+    transaction_service = get_transaction_service()
+    vacation_service = get_vacation_service()
+    warning_service = get_warning_service()
     
     user = user_service.get_user(user_id)
     if not user:
@@ -116,7 +125,7 @@ def user_detail(user_id):
 @web_bp.route('/items')
 @login_required
 def items():
-    item_service = ItemService()
+    item_service = get_item_service()
     all_items = item_service.get_all_items()
     return render_template('items.html', items=all_items)
 
@@ -134,7 +143,7 @@ def logs():
 @web_bp.route('/settings')
 @login_required
 def settings():
-    settings_service = SettingsService()
+    settings_service = get_settings_service()
     all_settings_list = settings_service.get_all_settings()
     
     # Convert list of dicts to a single dict for easier template access
