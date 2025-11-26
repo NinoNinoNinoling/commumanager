@@ -1,3 +1,4 @@
+import sqlite3
 from typing import List, Dict, Any, Optional
 from flask import current_app
 
@@ -12,8 +13,6 @@ from datetime import datetime
 class UserService:
     """
     유저 관리 비즈니스 로직을 위한 Service
-
-    직접적인 DB 접근(SQL)을 하지 않고, Repository를 통해서만 데이터를 조작합니다.
     """
 
     def __init__(self, db_path: str = None):
@@ -22,25 +21,17 @@ class UserService:
         else:
             self.db_path = db_path
             
-        # Repository 초기화
         self.user_repo = UserRepository(self.db_path)
         self.transaction_repo = TransactionRepository(self.db_path)
         self.user_stats_repo = UserStatsRepository(self.db_path)
 
     def get_user(self, user_id: str) -> Optional[User]:
-        """Mastodon ID를 사용하여 유저 상세 정보를 조회합니다."""
         return self.user_repo.find_by_id(user_id)
 
     def get_all_users(self) -> List[User]:
-        """
-        전체 유저를 조회합니다 (시스템 계정 제외).
-        UserRepository의 find_all_non_system_users 메서드를 사용합니다.
-        """
-        # 상수를 리스트로 변환하여 전달
         return self.user_repo.find_all_non_system_users(list(SYSTEM_ROLES))
 
     def update_user_role(self, user_id: str, new_role: str) -> User:
-        """유저의 역할을 업데이트합니다."""
         user = self.user_repo.find_by_id(user_id)
         if not user:
             raise ValueError("유저를 찾을 수 없습니다.")
@@ -53,26 +44,22 @@ class UserService:
         return self.user_repo.find_by_id(user_id)
         
     def get_risk_users(self) -> List[Dict]:
-        """위험 감지 유저를 조회합니다 (시스템 계정 제외)."""
         return self.user_stats_repo.find_risk_users(list(SYSTEM_ROLES))
         
     def adjust_balance(self, user_id: str, amount: int, transaction_type: str, description: str, admin_name: Optional[str] = None) -> Dict[str, Any]:
         """
-        유저 잔액을 조정하고 거래 내역을 기록합니다.
-        
-        Note: 현재 구조상 Repository가 각각 커밋을 수행하므로, 
-        엄격한 트랜잭션 원자성이 보장되지 않습니다. (추후 개선 필요)
-        하지만 Service 계층에서 불필요한 DB 연결을 맺는 것은 제거했습니다.
+        유저 잔액을 조정하고 거래 내역을 기록합니다. (원자적 트랜잭션 보장)
         """
         if not isinstance(amount, int) or amount == 0:
             raise ValueError("유효한 금액(정수)을 입력해야 합니다.")
 
-        # 1. 유저 잔액 업데이트 (Repo 내부에서 커밋됨)
-        # 실패 시 여기서 예외 발생하고 중단됨
-        self.user_repo.adjust_balance(user_id, amount)
-
+        # [중요] 트랜잭션 시작
+        conn = sqlite3.connect(self.db_path)
         try:
-            # 2. 거래 기록 생성 (Repo 내부에서 커밋됨)
+            # 1. 유저 잔액 업데이트 (동일한 conn 전달)
+            self.user_repo.adjust_balance(user_id, amount, connection=conn)
+
+            # 2. 거래 기록 생성 (동일한 conn 전달)
             category = "관리자 조정"
             transaction_obj = Transaction(
                 user_id=user_id,
@@ -83,10 +70,14 @@ class UserService:
                 admin_name=admin_name,
                 timestamp=datetime.now()
             )
-            created_transaction = self.transaction_repo.create(transaction_obj)
+            created_transaction = self.transaction_repo.create(transaction_obj, connection=conn)
 
-            # 3. 업데이트된 잔액 조회
-            updated_user = self.user_repo.find_by_id(user_id)
+            # 3. 모든 작업 성공 시 커밋
+            conn.commit()
+
+            # 4. 결과 반환을 위한 데이터 조회 (커밋 후라 안전하게 새 연결 사용 가능하지만, 효율을 위해 그냥 리턴값 구성)
+            # (잔액은 쿼리 없이 계산 가능하거나, 필요하면 별도 조회)
+            updated_user = self.user_repo.find_by_id(user_id) 
             new_balance = updated_user.balance if updated_user else 0
 
             return {
@@ -97,6 +88,7 @@ class UserService:
             }
 
         except Exception as e:
-            # 로그 기록 실패 시에도 잔액은 이미 변경되었음을 인지해야 함
-            # (현재 아키텍처의 한계점 주석 처리)
+            conn.rollback() # 실패 시 롤백 (잔액 변경 취소됨)
             raise e
+        finally:
+            conn.close()
