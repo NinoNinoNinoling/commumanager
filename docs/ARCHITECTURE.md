@@ -410,12 +410,14 @@ economy_bot/
 UI: Bootstrap 5 (기본 스타일만)
 차트: Chart.js (통계용)
 인증: Mastodon OAuth
+의존성 주입: Flask g 객체 (요청 수명 주기)
+입력 검증: 커스텀 데코레이터 (@validate_schema)
 ```
 
-**아키텍처**: Model - Repository - Service - Controller - Route (5계층)
+**아키텍처**: 4-Layer Architecture (Controller 제거)
 
 ```
-HTTP Request → Route → Controller → Service → Repository → Database
+HTTP Request → Route → Service → Repository → Database
 ```
 
 ### 4.4 데이터베이스 전략
@@ -794,17 +796,85 @@ def bulk_check():
 /logs               → 관리 로그
 ```
 
-**5계층 아키텍처**:
+**4-Layer Architecture** (2025년 11월 리팩터링 적용):
 ```
 admin_web/
-├── routes/         # Flask Blueprint (Route)
-├── controllers/    # 비즈니스 로직 처리 (Controller)
-├── services/       # 비즈니스 로직 (Service)
-├── repositories/   # 데이터베이스 접근 (Repository)
-├── models/         # 데이터 모델 (Model)
+├── routes/         # Flask Blueprint (HTTP 라우팅)
+│   ├── api.py      # REST API 엔드포인트
+│   └── web.py      # 웹 UI 라우트
+├── services/       # 비즈니스 로직
+│   ├── user_service.py
+│   ├── dashboard_service.py
+│   ├── warning_service.py
+│   └── ...
+├── repositories/   # 데이터베이스 접근
+│   ├── user_repository.py
+│   ├── transaction_repository.py
+│   └── ...
+├── models/         # 데이터 모델 (dataclass)
+│   ├── user.py
+│   ├── transaction.py
+│   └── ...
+├── dependencies.py # Dependency Injection 컨테이너
+├── utils/          # 유틸리티 함수
+│   └── validators.py  # 입력 검증 데코레이터
 ├── templates/      # Jinja2 템플릿
-├── static/         # 정적 파일
-└── utils/          # 유틸리티 함수
+└── static/         # 정적 파일
+```
+
+**주요 개선사항**:
+
+1. **Dependency Injection (DI)**:
+   - Flask `g` 객체를 활용한 요청 수명 주기 관리
+   - `dependencies.py`에서 서비스 인스턴스 제공
+   - 중복 인스턴스 생성 방지 (싱글톤 패턴)
+
+2. **입력 검증 데코레이터**:
+   ```python
+   @validate_schema(required_fields=['amount'])
+   def adjust_balance(user_id):
+       # 필수 필드가 자동으로 검증됨
+   ```
+
+3. **원자적 트랜잭션 (Atomic Transactions)**:
+   - Connection Sharing 패턴 적용
+   - Service 계층에서 트랜잭션 관리
+   - Repository 메서드에 `connection` 파라미터 추가
+   - 예: 유저 잔액 조정 + 거래 기록 생성을 하나의 트랜잭션으로 처리
+
+**계층 간 데이터 흐름 예시**:
+```python
+# Route (api.py)
+@api_bp.route('/users/<user_id>/balance', methods=['POST'])
+@require_auth
+@validate_schema(required_fields=['amount'])
+def adjust_balance(user_id):
+    data = request.get_json()
+    user_service = get_user_service()  # DI
+    result = user_service.adjust_balance(...)
+    return jsonify(result)
+
+# Service (user_service.py)
+def adjust_balance(self, user_id, amount, ...):
+    conn = sqlite3.connect(self.db_path)
+    try:
+        # 트랜잭션 내에서 여러 Repository 호출
+        self.user_repo.adjust_balance(user_id, amount, connection=conn)
+        self.transaction_repo.create(transaction, connection=conn)
+        conn.commit()
+        return result
+    except:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+# Repository (user_repository.py)
+def adjust_balance(self, user_id, amount, connection=None):
+    # connection이 제공되면 사용 (트랜잭션)
+    # 없으면 새 연결 생성 (독립 호출)
+    conn = connection or self._get_connection()
+    ...
 ```
 
 ---

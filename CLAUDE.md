@@ -130,6 +130,15 @@ Database (SQLite)
 - `api.py`: REST API 라우트 (`/api/v1/*`)
 - `web.py`: 웹 UI 라우트 (HTML 템플릿)
 
+#### `/admin_web/dependencies.py`
+- **Dependency Injection 컨테이너**
+- Flask `g` 객체를 사용한 요청 수명 주기 관리
+- 서비스 인스턴스 싱글톤 제공 (`get_user_service()`, `get_dashboard_service()` 등)
+
+#### `/admin_web/utils/`
+- `validators.py`: 입력 검증 데코레이터 (`@validate_schema`)
+- `datetime_utils.py`: 날짜/시간 유틸리티
+
 #### `/admin_web/templates/`
 - `base.html`: 공통 레이아웃
 - `dashboard.html`: 대시보드
@@ -366,34 +375,72 @@ def create_story_event(
     # ...
 ```
 
-#### 계층 간 호출 패턴
+#### 계층 간 호출 패턴 (최신 패턴 - 2025년 11월)
+
+**1. Dependency Injection 사용**:
 ```python
-# Routes → Service
-@api_bp.route('/story-events', methods=['POST'])
-def create_story_event():
+# Routes → Service (DI 컨테이너 사용)
+from admin_web.dependencies import get_user_service
+from admin_web.utils.validators import validate_schema
+
+@api_bp.route('/users/<user_id>/balance', methods=['POST'])
+@require_auth
+@validate_schema(required_fields=['amount'])  # 입력 검증 데코레이터
+def adjust_balance(user_id):
     data = request.get_json()
-    # 입력 검증
-    if not data.get('title'):
-        return jsonify({'error': 'title is required'}), 400
+    amount = data.get('amount')
 
-    service = StoryEventService()
-    result = service.create_event(data)
-    return jsonify(result), 201
-
-# Service → Repository
-class StoryEventService:
-    def create_event(self, data):
-        event = StoryEvent(...)
-        created = self.repository.create(event)
-        # 관리 로그 기록
-        return created
-
-# Repository → DB
-class StoryEventRepository:
-    def create(self, event: StoryEvent) -> StoryEvent:
-        # SQL 실행
-        return created_event
+    user_service = get_user_service()  # DI 컨테이너에서 서비스 주입
+    result = user_service.adjust_balance(user_id, amount, ...)
+    return jsonify(result), 200
 ```
+
+**2. 트랜잭션 관리 (Service 계층)**:
+```python
+# Service → Repository (Connection Sharing)
+class UserService:
+    def adjust_balance(self, user_id, amount, ...):
+        """
+        유저 잔액 조정 + 거래 기록 생성 (원자적 트랜잭션)
+        """
+        conn = sqlite3.connect(self.db_path)
+        try:
+            # 여러 Repository 호출을 하나의 트랜잭션으로 묶음
+            self.user_repo.adjust_balance(user_id, amount, connection=conn)
+            self.transaction_repo.create(transaction, connection=conn)
+
+            conn.commit()  # 모두 성공 시 커밋
+            return {'status': 'success', ...}
+        except Exception as e:
+            conn.rollback()  # 실패 시 롤백
+            raise e
+        finally:
+            conn.close()
+```
+
+**3. Repository 패턴 (Connection 파라미터)**:
+```python
+# Repository → DB
+class UserRepository:
+    def adjust_balance(self, user_id, amount, connection=None):
+        """
+        connection 파라미터로 트랜잭션 지원
+        """
+        conn = connection or self._get_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET balance = balance + ? WHERE mastodon_id = ?",
+                       (amount, user_id))
+
+        if connection is None:  # 독립 호출이면 자동 커밋
+            conn.commit()
+            conn.close()
+```
+
+**주요 개선 포인트**:
+- ✅ DI 컨테이너로 인스턴스 재사용 (성능 향상)
+- ✅ 입력 검증 데코레이터로 코드 중복 제거
+- ✅ Connection Sharing으로 트랜잭션 보장
+- ✅ Service 계층에서 트랜잭션 관리 (비즈니스 로직과 함께)
 
 ### 관리 로그 기록
 
