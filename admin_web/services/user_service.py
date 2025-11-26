@@ -4,6 +4,7 @@ from admin_web.models.user import User
 from admin_web.models.transaction import Transaction
 from admin_web.repositories.user_repository import UserRepository
 from admin_web.repositories.transaction_repository import TransactionRepository
+from admin_web.constants import SYSTEM_ROLES
 from datetime import datetime
 
 
@@ -14,8 +15,6 @@ class UserService:
     유저 조회, 잔액 조정, 위험 감지 유저 조회 등의 기능을 제공합니다.
     UserRepository와 TransactionRepository를 사용하여 DB에 접근합니다.
     """
-
-    SYSTEM_ROLES = {'Owner', 'Admin', 'Moderator', '봇', '시스템', '테스트'}
 
     def __init__(self, db_path: str = 'economy.db'):
         """
@@ -67,7 +66,7 @@ class UserService:
         conn = self._get_connection()
         cursor = conn.cursor()
 
-        placeholders = ','.join(['?'] * len(self.SYSTEM_ROLES))
+        placeholders = ','.join(['?'] * len(SYSTEM_ROLES))
         query = f"""
             SELECT * FROM users
             WHERE role_name IS NULL
@@ -75,7 +74,7 @@ class UserService:
             ORDER BY created_at DESC
         """
 
-        cursor.execute(query, list(self.SYSTEM_ROLES))
+        cursor.execute(query, list(SYSTEM_ROLES))
         rows = cursor.fetchall()
         conn.close()
         return [User(**dict(row)) for row in rows]
@@ -93,7 +92,7 @@ class UserService:
         conn = self._get_connection()
         cursor = conn.cursor()
 
-        placeholders = ','.join(['?'] * len(self.SYSTEM_ROLES))
+        placeholders = ','.join(['?'] * len(SYSTEM_ROLES))
 
         query = f"""
             SELECT
@@ -108,7 +107,7 @@ class UserService:
             ORDER BY s.analyzed_at DESC
         """
 
-        cursor.execute(query, list(self.SYSTEM_ROLES))
+        cursor.execute(query, list(SYSTEM_ROLES))
         rows = cursor.fetchall()
         conn.close()
 

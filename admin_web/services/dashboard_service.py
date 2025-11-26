@@ -6,6 +6,7 @@ DashboardService
 import sqlite3
 from typing import Dict, Any
 from datetime import datetime, timedelta
+from admin_web.constants import SYSTEM_ROLES
 
 
 class DashboardService:
@@ -17,8 +18,6 @@ class DashboardService:
     - 활동량 위험 유형별 현황
     - 관리 현황 (휴가, 예약, 경고 등)
     """
-
-    SYSTEM_ROLES = {'Owner', 'Admin', 'Moderator', '봇', '시스템', '테스트'}
 
     def __init__(self, db_path: str = 'economy.db'):
         """
