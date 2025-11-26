@@ -127,18 +127,18 @@ class WarningService:
                     dm_message = f"커뮤니티 규정에 따라 경고 3회 누적으로 계정이 비활성화되었습니다. 자세한 내용은 관리자에게 문의해주세요."
                     send_dm(mastodon, user_obj.username, dm_message)
             except Exception as e:
-                # 로깅만 수행
-                print(f"Error sending auto-ban DM to {user_obj.username}: {e}")
+                if current_app:
+                    current_app.logger.error(f"Error sending auto-ban DM to {user_obj.username}: {e}")
+                else:
+                    print(f"[ERROR] Error sending auto-ban DM to {user_obj.username}: {e}")
 
     def get_warning(self, warning_id: int) -> Optional[Warning]:
         """ID로 경고를 조회합니다."""
-        # [수정됨] 올바른 Repository 호출
         return self.warning_repo.find_by_id(warning_id)
 
     def get_all_warnings(self) -> List[Dict]:
         """모든 경고를 조회합니다 (딕셔너리 리스트 반환)."""
         warnings = self.warning_repo.find_all()
-        # API 응답을 위해 to_dict() 처리
         return [w.to_dict() for w in warnings]
 
     def get_user_warnings(self, user_id: str) -> List[Dict]:
