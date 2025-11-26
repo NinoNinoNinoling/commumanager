@@ -34,10 +34,10 @@ class MastodonOAuth:
                 scopes=['read', 'write', 'follow', 'push'],
                 website='https://github.com/your-repo'
             )
-            logger.info(f"✅ Mastodon 앱 등록 성공: {self.instance_url}")
+            logger.info(f"Mastodon 앱 등록 성공: {self.instance_url}")
             return client_id, client_secret
         except Exception as e:
-            logger.error(f"❌ Mastodon 앱 등록 실패: {e}")
+            logger.error(f"Mastodon 앱 등록 실패: {e}")
             raise
 
     def get_authorization_url(self) -> str:
@@ -48,7 +48,7 @@ class MastodonOAuth:
             사용자를 리디렉션할 인증 URL
         """
         if not self.client_id or not self.client_secret:
-            logger.warning("⚠️  MASTODON_CLIENT_ID/SECRET 없음, 앱 등록 시도")
+            logger.warning("MASTODON_CLIENT_ID/SECRET 없음, 앱 등록 시도")
             self.client_id, self.client_secret = self.register_app()
 
         mastodon = Mastodon(
@@ -147,18 +147,16 @@ class MastodonOAuth:
         user_acct = user_info['acct']  # 로컬: 'admin', 원격: 'user@remote.instance'
         user_name = user_info['username']  # 항상 도메인 없는 이름
 
-        # 디버깅 로그
-        logger.info(f"🔍 OAuth 인증 시도 - username: {user_name}, acct: {user_acct}")
+        logger.info(f"OAuth 인증 시도 - username: {user_name}, acct: {user_acct}")
 
         # DB에서 관리자 권한 확인
         oauth_admin_service = OAuthAdminService()
         is_admin = oauth_admin_service.is_admin(user_acct, user_name)
 
         if is_admin:
-            logger.info(f"✅ 관리자 인증 성공: {user_acct}")
-            # 마지막 로그인 시각 업데이트
+            logger.info(f"관리자 인증 성공: {user_acct}")
             oauth_admin_service.update_last_login(user_acct)
         else:
-            logger.warning(f"❌ 관리자 인증 실패 - {user_acct}는 DB에 없거나 비활성화되었습니다")
+            logger.warning(f"관리자 인증 실패 - {user_acct}는 DB에 없거나 비활성화되었습니다")
 
         return is_admin

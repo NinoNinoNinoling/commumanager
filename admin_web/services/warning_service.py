@@ -23,20 +23,13 @@ class WarningService:
     def __init__(self, db_path: str = 'economy.db'):
         """
         WarningService를 초기화합니다.
+
+        Args:
+            db_path: SQLite 데이터베이스 파일 경로
         """
         self.db_path = db_path
-        # 이전에 직접 SQL을 썼던 부분을 Repository 호출로 변경합니다.
-        # WarningRepository와 UserRepository가 manager/admin_web/repositories 폴더에 있다고 가정합니다.
-        try:
-             from admin_web.repositories.warning_repository import WarningRepository
-             from admin_web.repositories.user_repository import UserRepository
-             self.warning_repo = WarningRepository(db_path)
-             self.user_repo = UserRepository(db_path)
-        except ImportError:
-            # Repository 파일이 아직 없을 경우를 대비한 임시 처리
-            print("Warning: WarningRepository or UserRepository not found. Using stub.")
-            self.warning_repo = None
-            self.user_repo = None
+        self.warning_repo = WarningRepository(db_path)
+        self.user_repo = UserRepository(db_path)
 
 
     def issue_warning(
@@ -51,12 +44,24 @@ class WarningService:
     ) -> Dict[str, Any]:
         """
         유저에게 경고를 발행하고 warning_count를 증가시킵니다.
+
+        Args:
+            user_id: 유저의 Mastodon ID
+            warning_type: 경고 유형 (activity, isolation, bias, avoidance)
+            message: 경고 메시지
+            admin_name: 경고를 발행한 관리자 이름
+            check_period_hours: 활동량 체크 기간 (시간)
+            required_replies: 필요한 답글 수
+            actual_replies: 실제 답글 수
+
+        Returns:
+            경고와 업데이트된 유저 정보를 담은 딕셔너리
+
+        Raises:
+            ValueError: 유효하지 않은 경고 유형인 경우
         """
         if warning_type not in self.VALID_WARNING_TYPES:
             raise ValueError(f'Invalid warning type: {warning_type}')
-        
-        if not self.warning_repo or not self.user_repo:
-             raise RuntimeError("Repository is not initialized. Check import paths.")
 
         warning = Warning(
             user_id=user_id,
@@ -82,34 +87,65 @@ class WarningService:
         }
 
     def get_warning(self, warning_id: int) -> Optional[Warning]:
-        """ID로 경고를 조회합니다."""
-        if not self.warning_repo: return None
+        """
+        ID로 경고를 조회합니다.
+
+        Args:
+            warning_id: 경고 ID
+
+        Returns:
+            찾은 경우 Warning 객체, 아니면 None
+        """
         return self.warning_repo.find_by_id(warning_id)
 
     def get_user_warnings(self, user_id: str) -> List[Warning]:
         """
         특정 유저의 모든 경고를 조회합니다.
-        (이전 단계에서 web.py가 호출하는 메서드입니다.)
+
+        Args:
+            user_id: 유저의 Mastodon ID
+
+        Returns:
+            경고 리스트 (최신순)
         """
-        if not self.warning_repo: return []
-        # Repository 계층의 find_by_user 메서드를 사용합니다.
         return self.warning_repo.find_by_user(user_id)
 
     def get_warnings_by_type(self, warning_type: str) -> List[Warning]:
-        """유형별로 경고를 조회합니다."""
-        if not self.warning_repo: return []
+        """
+        유형별로 경고를 조회합니다.
+
+        Args:
+            warning_type: 경고 유형
+
+        Returns:
+            해당 유형의 경고 리스트
+        """
         return self.warning_repo.find_by_type(warning_type)
 
     def update_dm_sent(self, warning_id: int, dm_sent: bool) -> Optional[Warning]:
-        """경고의 DM 전송 상태를 업데이트합니다."""
-        if not self.warning_repo: return None
+        """
+        경고의 DM 전송 상태를 업데이트합니다.
+
+        Args:
+            warning_id: 경고 ID
+            dm_sent: DM 전송 여부
+
+        Returns:
+            업데이트된 Warning 객체
+        """
         self.warning_repo.update_dm_sent(warning_id, dm_sent)
         return self.warning_repo.find_by_id(warning_id)
 
     def get_user_warning_statistics(self, user_id: str) -> Dict[str, Any]:
-        """유저의 경고 통계를 조회합니다."""
-        if not self.warning_repo or not self.user_repo: 
-            return {'total_warnings': 0, 'warning_count': 0, 'by_type': {}}
+        """
+        유저의 경고 통계를 조회합니다.
+
+        Args:
+            user_id: 유저의 Mastodon ID
+
+        Returns:
+            경고 통계 딕셔너리 (total_warnings, warning_count, by_type)
+        """
 
         warnings = self.warning_repo.find_by_user(user_id)
         by_type: Dict[str, int] = {}
@@ -127,15 +163,27 @@ class WarningService:
         }
 
     def is_user_at_risk_of_ban(self, user_id: str) -> bool:
-        """유저가 자동 아웃 위험 상태인지 확인합니다."""
-        if not self.user_repo: return False
+        """
+        유저가 자동 아웃 위험 상태인지 확인합니다.
+
+        Args:
+            user_id: 유저의 Mastodon ID
+
+        Returns:
+            경고 횟수가 기준치 이상이면 True
+        """
         user = self.user_repo.find_by_id(user_id)
-        if not user: return False
+        if not user:
+            return False
         return user.warning_count >= self.AT_RISK_THRESHOLD
 
     def get_warning_counts_by_type(self) -> Dict[str, int]:
-        """전체 시스템의 유형별 경고 수를 계산합니다."""
-        if not self.warning_repo: return {}
+        """
+        전체 시스템의 유형별 경고 수를 계산합니다.
+
+        Returns:
+            경고 유형별 카운트 딕셔너리
+        """
         all_warnings = self.warning_repo.find_all()
 
         counts: Dict[str, int] = {}

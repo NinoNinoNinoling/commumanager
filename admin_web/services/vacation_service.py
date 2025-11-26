@@ -13,16 +13,21 @@ from admin_web.repositories.vacation_repository import VacationRepository
 class VacationService:
     """
     Vacation 비즈니스 로직을 처리하는 Service
+
+    휴가 생성, 승인, 거부, 조회 등의 기능을 제공합니다.
+    VacationRepository를 사용하여 DB에 접근합니다.
     """
 
     def __init__(self, db_path: str = 'economy.db'):
         """
         VacationService를 초기화합니다.
+
+        Args:
+            db_path: SQLite 데이터베이스 파일 경로
         """
         self.db_path = db_path
         self.vacation_repo = VacationRepository(db_path)
 
-    # 🆕 현재 휴가 중인지 확인하는 메서드 추가 (유저 상세 페이지용)
     def is_user_on_vacation(self, user_id: str) -> bool:
         """
         유저가 현재 승인된 휴가 기간에 있는지 확인합니다.
@@ -34,20 +39,15 @@ class VacationService:
             현재 휴가 중이면 True
         """
         today = datetime.now().date()
-        
-        # Repository에 현재 활성 휴가를 조회하는 전용 메서드가 있다고 가정하고 호출합니다.
-        # [참고: VacationRepository.is_active_today 메서드를 구현해야 합니다.]
+
         try:
-             # Repository 계층을 통해 현재 활성 휴가 상태 확인
-             # approved=1이며 start_date <= today <= end_date 조건을 체크합니다.
-             return self.vacation_repo.is_active_today(user_id, today)
+            return self.vacation_repo.is_active_today(user_id, today)
         except AttributeError:
-             # Repository 메서드가 아직 구현되지 않았을 경우, 모든 휴가를 가져와서 확인합니다 (비효율적이지만 안전함)
-             vacations = self.vacation_repo.find_by_user(user_id)
-             for v in vacations:
-                 if v.approved and v.start_date <= today and v.end_date >= today:
-                     return True
-             return False
+            vacations = self.vacation_repo.find_by_user(user_id)
+            for v in vacations:
+                if v.approved and v.start_date <= today and v.end_date >= today:
+                    return True
+            return False
 
     def create_vacation(
         self,
@@ -60,7 +60,22 @@ class VacationService:
         reason: Optional[str] = None,
         approved: bool = True
     ) -> Dict[str, Any]:
-        """휴가를 생성합니다."""
+        """
+        휴가를 생성합니다.
+
+        Args:
+            user_id: 유저의 Mastodon ID
+            start_date: 시작 날짜
+            end_date: 종료 날짜
+            registered_by: 등록한 관리자 이름
+            start_time: 시작 시간 (선택)
+            end_time: 종료 시간 (선택)
+            reason: 휴가 사유 (선택)
+            approved: 승인 여부 (기본값: True)
+
+        Returns:
+            생성된 휴가를 담은 딕셔너리
+        """
         vacation = Vacation(
             user_id=user_id,
             start_date=start_date,
@@ -75,38 +90,89 @@ class VacationService:
         return {'vacation': created_vacation}
 
     def get_vacation(self, vacation_id: int) -> Optional[Vacation]:
-        """ID로 휴가를 조회합니다."""
+        """
+        ID로 휴가를 조회합니다.
+
+        Args:
+            vacation_id: 휴가 ID
+
+        Returns:
+            찾은 경우 Vacation 객체, 아니면 None
+        """
         return self.vacation_repo.find_by_id(vacation_id)
 
     def get_user_vacations(self, user_id: str) -> List[Vacation]:
-        """특정 유저의 모든 휴가를 조회합니다."""
+        """
+        특정 유저의 모든 휴가를 조회합니다.
+
+        Args:
+            user_id: 유저의 Mastodon ID
+
+        Returns:
+            휴가 리스트
+        """
         return self.vacation_repo.find_by_user(user_id)
 
     def approve_vacation(self, vacation_id: int, admin_name: str) -> Optional[Vacation]:
-        """휴가를 승인합니다."""
+        """
+        휴가를 승인합니다.
+
+        Args:
+            vacation_id: 휴가 ID
+            admin_name: 승인한 관리자 이름
+
+        Returns:
+            승인된 Vacation 객체, 휴가를 찾을 수 없으면 None
+        """
         vacation = self.vacation_repo.find_by_id(vacation_id)
-        if not vacation: return None
+        if not vacation:
+            return None
         self.vacation_repo.update_approved(vacation_id, True)
         return self.vacation_repo.find_by_id(vacation_id)
 
     def reject_vacation(self, vacation_id: int, admin_name: str) -> Optional[Vacation]:
-        """휴가를 거부합니다."""
+        """
+        휴가를 거부합니다.
+
+        Args:
+            vacation_id: 휴가 ID
+            admin_name: 거부한 관리자 이름
+
+        Returns:
+            거부된 Vacation 객체, 휴가를 찾을 수 없으면 None
+        """
         vacation = self.vacation_repo.find_by_id(vacation_id)
-        if not vacation: return None
+        if not vacation:
+            return None
         self.vacation_repo.update_approved(vacation_id, False)
         return self.vacation_repo.find_by_id(vacation_id)
 
     def get_vacations_by_date_range(self, start: date, end: date) -> List[Vacation]:
-        """날짜 범위로 휴가를 조회합니다."""
+        """
+        날짜 범위로 휴가를 조회합니다.
+
+        Args:
+            start: 시작 날짜
+            end: 종료 날짜
+
+        Returns:
+            해당 범위에 포함되는 휴가 리스트
+        """
         return self.vacation_repo.find_by_date_range(start, end)
 
     def get_user_vacation_statistics(self, user_id: str) -> Dict[str, Any]:
-        """유저의 휴가 통계를 조회합니다."""
+        """
+        유저의 휴가 통계를 조회합니다.
+
+        Args:
+            user_id: 유저의 Mastodon ID
+
+        Returns:
+            휴가 통계 딕셔너리 (total_vacations, approved_vacations, pending_vacations, total_days)
+        """
         vacations = self.vacation_repo.find_by_user(user_id)
         approved_count = sum(1 for v in vacations if v.approved)
         pending_count = sum(1 for v in vacations if not v.approved)
-        
-        # 'get_duration_days' 메서드가 Vacation 모델에 있다고 가정
         total_days = sum(v.get_duration_days() for v in vacations) 
 
         return {
@@ -117,7 +183,17 @@ class VacationService:
         }
 
     def delete_vacation(self, vacation_id: int, admin_name: str) -> bool:
-        """휴가를 삭제합니다."""
+        """
+        휴가를 삭제합니다.
+
+        Args:
+            vacation_id: 휴가 ID
+            admin_name: 삭제한 관리자 이름
+
+        Returns:
+            삭제 성공 여부
+        """
         vacation = self.vacation_repo.find_by_id(vacation_id)
-        if not vacation: return False
+        if not vacation:
+            return False
         return self.vacation_repo.delete(vacation_id)

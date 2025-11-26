@@ -50,7 +50,6 @@ commumanager/
 │   ├── models/             # 데이터 모델 (dataclass)
 │   ├── repositories/       # DB 접근 계층
 │   ├── services/           # 비즈니스 로직
-│   ├── controllers/        # API 요청 처리
 │   ├── routes/             # 라우팅 (api.py, web.py)
 │   ├── templates/          # Jinja2 HTML 템플릿
 │   ├── static/             # CSS, JS, 이미지
@@ -66,14 +65,12 @@ commumanager/
 └── CLAUDE.md               # 이 파일
 ```
 
-### 5-Layer 아키텍처
+### 4-Layer 아키텍처
 
 이 프로젝트는 **명확한 계층 분리**를 따릅니다:
 
 ```
 Routes (api.py, web.py)
-    ↓
-Controllers (business logic 진입점)
     ↓
 Services (핵심 비즈니스 로직)
     ↓
@@ -86,29 +83,24 @@ Database (SQLite)
 
 1. **Routes** (`admin_web/routes/`)
    - HTTP 요청 라우팅
-   - 컨트롤러 함수 호출
+   - 요청 파라미터 파싱 및 입력 검증
+   - 서비스 호출 및 응답 반환
    - 예: `@api_bp.route('/users', methods=['GET'])`
 
-2. **Controllers** (`admin_web/controllers/`)
-   - 요청 파라미터 파싱
-   - 입력 검증
-   - 서비스 호출 및 응답 반환
-   - 예: `UserController`, `StoryEventController`
-
-3. **Services** (`admin_web/services/`)
+2. **Services** (`admin_web/services/`)
    - 핵심 비즈니스 로직
    - 여러 Repository 조합
    - 트랜잭션 관리
    - 관리 로그 기록
    - 예: `UserService`, `StoryEventService`
 
-4. **Repositories** (`admin_web/repositories/`)
+3. **Repositories** (`admin_web/repositories/`)
    - DB CRUD 작업
    - SQL 쿼리 캡슐화
    - 데이터 모델 변환 (Row → Model)
    - 예: `UserRepository`, `StoryEventRepository`
 
-5. **Models** (`admin_web/models/`)
+4. **Models** (`admin_web/models/`)
    - 데이터 구조 정의 (dataclass)
    - 직렬화/역직렬화 메서드
    - 예: `User`, `StoryEvent`, `StoryPost`
@@ -133,11 +125,6 @@ Database (SQLite)
 - `story_event_service.py`: 스토리 이벤트 생성, Excel 업로드
 - `scheduled_announcement_service.py`: 공지 예약 관리
 - `calendar_service.py`: 일정 관리
-
-#### `/admin_web/controllers/`
-- `user_controller.py`: 유저 API 엔드포인트
-- `story_event_controller.py`: 스토리 API 엔드포인트 (Excel 업로드 포함)
-- `scheduled_announcement_controller.py`: 공지 API 엔드포인트
 
 #### `/admin_web/routes/`
 - `api.py`: REST API 라우트 (`/api/v1/*`)
@@ -175,7 +162,7 @@ Database (SQLite)
 6. **개발 전반에 걸쳐 높은 코드 품질을 유지합니다**
 
 ### 이 프로젝트에서의 적용
-- 새로운 API 엔드포인트 추가 시: Controller → Service → Repository 순으로 테스트 작성
+- 새로운 API 엔드포인트 추가 시: Route → Service → Repository 순으로 테스트 작성
 - DB 스키마 변경 시: init_db.py 업데이트 → Repository 테스트 → Service 테스트
 - 문서 업데이트: 코드 변경과 함께 관련 문서(api_design.md, database.md) 동기화
 
@@ -381,17 +368,17 @@ def create_story_event(
 
 #### 계층 간 호출 패턴
 ```python
-# Routes → Controller
+# Routes → Service
 @api_bp.route('/story-events', methods=['POST'])
 def create_story_event():
-    return get_story_controller().create_event()
+    data = request.get_json()
+    # 입력 검증
+    if not data.get('title'):
+        return jsonify({'error': 'title is required'}), 400
 
-# Controller → Service
-class StoryEventController:
-    def create_event(self):
-        data = request.get_json()
-        # 입력 검증
-        return self.service.create_event(data)
+    service = StoryEventService()
+    result = service.create_event(data)
+    return jsonify(result), 201
 
 # Service → Repository
 class StoryEventService:
@@ -847,7 +834,7 @@ black admin_web/ tests/
 - [ ] 관련 문서를 업데이트했는가? (api_design.md, database.md 등)
 - [ ] 관리 로그를 기록했는가? (중요한 작업인 경우)
 - [ ] 코드 중복을 제거했는가?
-- [ ] 계층 분리 원칙을 지켰는가? (Route → Controller → Service → Repository)
+- [ ] 계층 분리 원칙을 지켰는가? (Route → Service → Repository)
 
 ---
 

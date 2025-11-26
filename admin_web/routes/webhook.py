@@ -29,27 +29,27 @@ def handle_mastodon_webhook():
     payload = request.get_data()
 
     if not verify_signature(payload, signature, secret):
-        logger.warning("❌ 웹훅 서명 검증 실패")
+        logger.warning("웹훅 서명 검증 실패")
         return jsonify({'error': 'Invalid signature'}), 403
 
     try:
         data = request.get_json()
         event = data.get('event')
-        logger.info(f"📩 웹훅 수신: {event}")
+        logger.info(f"웹훅 수신: {event}")
 
         service = WebhookService()
 
         # 1. 계정 생성 (가입)
         if event == 'account.created':
             result = service.handle_account_created(data)
-            logger.info(f"✅ 유저 가입 처리: {result.get('username')}")
+            logger.info(f"유저 가입 처리: {result.get('username')}")
             return jsonify(result), 200
 
         # 2. 계정 정보 변경 (역할, 프로필 수정 등)
         elif event == 'account.updated':
             # account.created와 동일한 로직을 타면 됩니다 (UPSERT 처리되어 있음)
             result = service.handle_account_created(data)
-            logger.info(f"🔄 유저 정보 동기화: {result.get('username')}")
+            logger.info(f"유저 정보 동기화: {result.get('username')}")
             return jsonify(result), 200
 
         # 그 외 이벤트 (글 작성 등) - 일단 무시
