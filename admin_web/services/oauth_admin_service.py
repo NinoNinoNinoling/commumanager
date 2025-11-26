@@ -118,12 +118,11 @@ class OAuthAdminService:
 
         created = self.oauth_admin_repo.create(admin)
 
-        # 🚨 수정 포인트: description 인자를 제거하거나 details로 변경하여 로그 인자 오류 해결
         self.admin_log_repo.create_log(
             action_type='oauth_admin_add',
             admin_name=added_by,
             target_user=mastodon_acct,
-            details={'display_name': display_name, 'success': True} # description 대신 details 사용
+            details={'display_name': display_name, 'success': True}
         )
 
         return created
@@ -142,12 +141,11 @@ class OAuthAdminService:
         success = self.oauth_admin_repo.delete(mastodon_acct)
 
         if success:
-            # 🚨 수정 포인트: description 인자를 제거하거나 details로 변경
             self.admin_log_repo.create_log(
                 action_type='oauth_admin_remove',
                 admin_name=removed_by,
                 target_user=mastodon_acct,
-                details={'success': True} # description 대신 details 사용
+                details={'success': True}
             )
 
         return success
@@ -166,12 +164,11 @@ class OAuthAdminService:
         success = self.oauth_admin_repo.deactivate(mastodon_acct)
 
         if success:
-            # 🚨 수정 포인트: description 인자를 제거하거나 details로 변경
             self.admin_log_repo.create_log(
                 action_type='oauth_admin_deactivate',
                 admin_name=deactivated_by,
                 target_user=mastodon_acct,
-                details={'success': True} # description 대신 details 사용
+                details={'success': True}
             )
 
         return success
@@ -190,12 +187,11 @@ class OAuthAdminService:
         success = self.oauth_admin_repo.activate(mastodon_acct)
 
         if success:
-            # 🚨 수정 포인트: description 인자를 제거하거나 details로 변경
             self.admin_log_repo.create_log(
                 action_type='oauth_admin_activate',
                 admin_name=activated_by,
                 target_user=mastodon_acct,
-                details={'success': True} # description 대신 details 사용
+                details={'success': True}
             )
 
         return success

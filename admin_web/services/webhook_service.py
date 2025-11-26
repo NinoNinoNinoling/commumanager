@@ -71,13 +71,13 @@ class WebhookService:
             role_name = role_obj.get('name')
             role_color = role_obj.get('color')
 
-        logger.info(f"📥 계정 생성 이벤트: @{acct} (ID: {mastodon_id})")
+        logger.info(f"계정 생성 이벤트: @{acct} (ID: {mastodon_id})")
 
         # 기존 유저 확인
         existing_user = self.user_repo.find_by_id(mastodon_id)
 
         if existing_user:
-            logger.info(f"ℹ️ 이미 존재하는 유저: {mastodon_id}, 역할 정보만 업데이트")
+            logger.info(f"이미 존재하는 유저: {mastodon_id}, 역할 정보만 업데이트")
 
             # 역할 정보 업데이트
             if role_name or role_color:
@@ -126,7 +126,7 @@ class WebhookService:
             }
         )
 
-        logger.info(f"✅ 새 유저 등록 완료: @{acct} (ID: {mastodon_id})")
+        logger.info(f"새 유저 등록 완료: @{acct} (ID: {mastodon_id})")
 
         return {
             'status': 'created',
@@ -175,7 +175,7 @@ class WebhookService:
             }
         )
 
-        logger.info(f"✅ 역할 업데이트 완료: {mastodon_id} → {role_name}")
+        logger.info(f"역할 업데이트 완료: {mastodon_id} → {role_name}")
 
         return {
             'status': 'updated',
