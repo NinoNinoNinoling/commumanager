@@ -2,15 +2,17 @@
 from functools import wraps
 from flask import Blueprint, request, jsonify, session
 
-# Services
-from admin_web.services.user_service import UserService
-from admin_web.services.item_service import ItemService
-from admin_web.services.settings_service import SettingsService
-from admin_web.services.dashboard_service import DashboardService
-from admin_web.services.warning_service import WarningService
-
 # Models
 from admin_web.models.item import Item
+
+# Dependencies (DI)
+from admin_web.dependencies import (
+    get_user_service,
+    get_dashboard_service,
+    get_warning_service,
+    get_item_service,
+    get_settings_service
+)
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 
@@ -30,7 +32,7 @@ def require_auth(f):
 @api_bp.route('/users', methods=['GET'])
 @require_auth
 def get_users():
-    user_service = UserService()
+    user_service = get_user_service()
     users = user_service.get_all_users()
     return jsonify({'users': [u.to_dict() for u in users]})
 
@@ -38,10 +40,7 @@ def get_users():
 @api_bp.route('/users/risk', methods=['GET'])
 @require_auth
 def get_risk_users():
-    """
-    위험 감지 유저 목록 조회 API
-    """
-    user_service = UserService()
+    user_service = get_user_service()
     risk_users = user_service.get_risk_users() 
     return jsonify({'users': risk_users})
 
@@ -49,8 +48,7 @@ def get_risk_users():
 @api_bp.route('/users/<user_id>', methods=['GET'])
 @require_auth
 def get_user_api(user_id):
-    """유저 상세 정보 조회"""
-    user_service = UserService()
+    user_service = get_user_service()
     user = user_service.get_user(user_id)
     
     if user:
@@ -62,14 +60,13 @@ def get_user_api(user_id):
 @api_bp.route('/users/<user_id>/role', methods=['PATCH'])
 @require_auth
 def patch_user_role(user_id):
-    """유저 역할 변경"""
     data = request.get_json()
     new_role = data.get('role')
     
     if not new_role:
         return jsonify({'error': 'Role is required'}), 400
 
-    user_service = UserService()
+    user_service = get_user_service()
     try:
         updated_user = user_service.update_user_role(user_id, new_role)
         return jsonify(updated_user.to_dict())
@@ -80,15 +77,12 @@ def patch_user_role(user_id):
 @api_bp.route('/users/<user_id>/balance', methods=['POST'])
 @require_auth
 def adjust_balance(user_id):
-    """유저 잔액 조정"""
     data = request.get_json()
     amount = data.get('amount')
     description = data.get('description', '관리자 조정')
-    
-    # 관리자 정보 (세션에서 가져옴)
     admin_id = session.get('user_id')
 
-    user_service = UserService()
+    user_service = get_user_service()
     try:
         result = user_service.adjust_balance(user_id, amount, 'adjustment', description, admin_id)
         return jsonify(result)
@@ -99,7 +93,7 @@ def adjust_balance(user_id):
 @api_bp.route('/items', methods=['GET'])
 @require_auth
 def get_items():
-    item_service = ItemService()
+    item_service = get_item_service()
     items = item_service.get_active_items()
     return jsonify({'items': [i.to_dict() for i in items]})
 
@@ -110,7 +104,7 @@ def create_item():
     data = request.get_json()
     try:
         item = Item.from_dict(data)
-        item_service = ItemService()
+        item_service = get_item_service()
         result = item_service.create_item(item)
         return jsonify(result), 201
     except Exception as e:
@@ -120,7 +114,7 @@ def create_item():
 @api_bp.route('/dashboard/stats', methods=['GET'])
 @require_auth
 def get_stats():
-    dashboard_service = DashboardService()
+    dashboard_service = get_dashboard_service()
     stats = dashboard_service.get_dashboard_stats()
     return jsonify({'stats': stats})
 
@@ -128,9 +122,6 @@ def get_stats():
 @api_bp.route('/settings', methods=['POST'])
 @require_auth
 def update_settings():
-    """
-    시스템 설정을 업데이트합니다.
-    """
     data = request.get_json()
     settings_list = data.get('settings')
     if not settings_list:
@@ -138,7 +129,7 @@ def update_settings():
 
     admin_user = session.get('user_id', 'unknown')
     
-    settings_service = SettingsService()
+    settings_service = get_settings_service()
     result = settings_service.update_settings(settings_list, admin_user)
 
     status_code = 200 if result.get('success') else 500
@@ -148,7 +139,7 @@ def update_settings():
 @api_bp.route('/warnings', methods=['POST', 'GET'])
 @require_auth
 def handle_warnings():
-    warning_service = WarningService()
+    warning_service = get_warning_service()
     
     if request.method == 'GET':
         warnings = warning_service.get_all_warnings()
@@ -157,7 +148,6 @@ def handle_warnings():
     elif request.method == 'POST':
         data = request.get_json()
         try:
-            # create_warning의 시그니처에 맞춰 데이터 전달
             result = warning_service.create_warning(data)
             return jsonify(result), 201
         except ValueError as e:
@@ -167,6 +157,6 @@ def handle_warnings():
 @api_bp.route('/users/<user_id>/warnings', methods=['GET'])
 @require_auth
 def get_warnings_for_user(user_id):
-    warning_service = WarningService()
+    warning_service = get_warning_service()
     warnings = warning_service.get_user_warnings(user_id)
     return jsonify({'warnings': warnings})
