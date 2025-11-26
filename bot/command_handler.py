@@ -75,6 +75,9 @@ def handle_command(mastodon: Mastodon, notification: dict) -> None:
         elif command in ['도움말', 'help', 'commands', '명령어']:
             cmd_help(mastodon, user_id, username)
 
+        elif command in ['양도', 'transfer', '선물']:
+            cmd_transfer(mastodon, notification, user_id, username, args)
+
         else:
             # 알 수 없는 명령어
             send_dm(mastodon, username,
@@ -418,6 +421,7 @@ def cmd_help(mastodon: Mastodon, user_id: str, username: str) -> None:
 • 멘션 상점 - 아이템 목록
 • 멘션 구매 [아이템명] - 아이템 구매
 • 멘션 내아이템 - 보유 아이템 조회
+• 멘션 양도 @대상 [아이템] [수량] - 아이템 선물
 
 [휴가 및 일정]
 • 멘션 휴가 N - N일 휴가 신청
@@ -432,3 +436,79 @@ def cmd_help(mastodon: Mastodon, user_id: str, username: str) -> None:
 
     send_dm(mastodon, username, message)
     logger.info(f'도움말 조회: {username}')
+
+
+def cmd_transfer(mastodon: Mastodon, notification: dict, sender_id: str, sender_username: str, args: list) -> None:
+    """양도 - 다른 사용자에게 아이템 선물"""
+    status = notification['status']
+    mentions = status.get('mentions', [])
+    
+    # 1. 대상 사용자 파싱
+    target_user_mention = None
+    if len(mentions) > 1:
+        # 첫번째 멘션은 봇 자신이므로, 두번째 멘션을 대상으로 함
+        target_user_mention = mentions[1]
+    
+    if not target_user_mention:
+        send_dm(mastodon, sender_username, "아이템을 선물할 대상을 멘션해주세요.\n예: 멘션 양도 @대상 아이템 1개")
+        return
+
+    receiver_id = str(target_user_mention['id'])
+    receiver_username = target_user_mention['acct']
+
+    # 자기 자신에게 양도 불가
+    if sender_id == receiver_id:
+        send_dm(mastodon, sender_username, "자기 자신에게는 아이템을 양도할 수 없습니다.")
+        return
+
+    # 2. 아이템 이름 및 수량 파싱
+    # 멘션을 제외한 나머지 텍스트에서 아이템과 수량을 찾음
+    if not args:
+        send_dm(mastodon, sender_username, "아이템 이름과 수량을 입력해주세요.\n예: 멘션 양도 @대상 아이템 1개")
+        return
+
+    item_name = ' '.join(args[:-1])
+    quantity_str = args[-1]
+    quantity = 1
+    
+    if quantity_str.isdigit():
+        quantity = int(quantity_str)
+        if quantity <= 0:
+            send_dm(mastodon, sender_username, "수량은 1 이상이어야 합니다.")
+            return
+    else:
+        item_name = ' '.join(args)
+
+    from database import transfer_item
+
+    with get_economy_db() as conn:
+        cursor = conn.cursor()
+        
+        # 3. 아이템 조회
+        cursor.execute("SELECT id, name FROM items WHERE name = ?", (item_name,))
+        item = cursor.fetchone()
+        if not item:
+            send_dm(mastodon, sender_username, f"'{item_name}' 아이템을 찾을 수 없습니다.")
+            return
+
+        item_id = item['id']
+
+        # 4. 받는 사람 DB에 생성
+        _, receiver_user = get_or_create_user(receiver_id, receiver_username, target_user_mention.get('display_name'))
+
+        # 5. 아이템 이전 시도
+        success = transfer_item(sender_id, receiver_id, item_id, quantity)
+
+        # 6. 결과 알림
+        if success:
+            favorite_status(mastodon, status['id'])
+            # 보내는 사람에게 DM
+            send_dm(mastodon, sender_username, f"✓ {receiver_user['display_name']}님에게 '{item_name}' {quantity}개를 선물했습니다.")
+            # 받는 사람에게 DM
+            sender_user_info = get_or_create_user(sender_id, sender_username)[1]
+            send_dm(mastodon, receiver_username, f"🎁 {sender_user_info.get('display_name', sender_username)}님에게서 '{item_name}' {quantity}개를 선물받았습니다!")
+            logger.info(f"아이템 양도 성공: {sender_username} -> {receiver_username}, {item_name} x{quantity}")
+        else:
+            send_dm(mastodon, sender_username, f"'{item_name}' 아이템의 수량이 부족하여 양도할 수 없습니다.")
+            logger.warning(f"아이템 양도 실패 (수량 부족): {sender_username} -> {receiver_username}, {item_name} x{quantity}")
+

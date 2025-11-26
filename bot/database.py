@@ -386,3 +386,56 @@ def update_story_post_status(post_id: int, status: str, mastodon_post_id: str = 
             WHERE id = ?
         """, (status, mastodon_post_id, status, error_message, post_id))
 
+
+def transfer_item(sender_id: str, receiver_id: str, item_id: int, quantity: int) -> bool:
+    """
+    한 사용자에게서 다른 사용자에게로 아이템을 이전합니다.
+
+    Args:
+        sender_id: 보내는 사람의 Mastodon ID
+        receiver_id: 받는 사람의 Mastodon ID
+        item_id: 아이템 ID
+        quantity: 수량
+
+    Returns:
+        성공 여부
+    """
+    if quantity <= 0:
+        return False
+
+    with get_economy_db() as conn:
+        cursor = conn.cursor()
+        
+        # 1. 보내는 사람의 인벤토리 확인
+        cursor.execute(
+            "SELECT quantity FROM inventory WHERE user_id = ? AND item_id = ?",
+            (sender_id, item_id)
+        )
+        sender_inventory = cursor.fetchone()
+
+        if not sender_inventory or sender_inventory['quantity'] < quantity:
+            return False  # 아이템이 없거나 수량이 부족함
+
+        # 2. 보내는 사람 인벤토리에서 차감
+        new_quantity = sender_inventory['quantity'] - quantity
+        if new_quantity > 0:
+            cursor.execute(
+                "UPDATE inventory SET quantity = ? WHERE user_id = ? AND item_id = ?",
+                (new_quantity, sender_id, item_id)
+            )
+        else:
+            cursor.execute(
+                "DELETE FROM inventory WHERE user_id = ? AND item_id = ?",
+                (sender_id, item_id)
+            )
+
+        # 3. 받는 사람 인벤토리에 추가
+        cursor.execute("""
+            INSERT INTO inventory (user_id, item_id, quantity)
+            VALUES (?, ?, ?)
+            ON CONFLICT(user_id, item_id) DO UPDATE SET quantity = quantity + excluded.quantity
+        """, (receiver_id, item_id, quantity))
+
+        return True
+
+
