@@ -3,6 +3,8 @@
 Warning 관련 비즈니스 로직을 처리하는 서비스 계층
 """
 from typing import List, Optional, Dict, Any
+from flask import current_app
+
 import os
 
 from admin_web.models.warning import Warning
@@ -11,6 +13,7 @@ from admin_web.repositories.user_repository import UserRepository
 from admin_web.repositories.ban_record_repository import BanRecordRepository
 from admin_web.models.ban_record import BanRecord
 from bot.utils import create_mastodon_client, send_dm
+from flask import current_app
 
 
 class WarningService:
@@ -24,16 +27,20 @@ class WarningService:
     # 자동 아웃 위험 기준 (경고 횟수)
     AT_RISK_THRESHOLD = 2
 
-    def __init__(self, db_path: str = 'economy.db'):
+    def __init__(self, db_path: str = None):
         """
         WarningService를 초기화합니다.
 
         Args:
-            db_path: SQLite 데이터베이스 파일 경로
+            db_path: SQLite 데이터베이스 파일 경로 (제공되지 않으면 앱 컨텍스트에서 가져옴)
         """
-        self.db_path = db_path
-        self.warning_repo = WarningRepository(db_path)
-        self.user_repo = UserRepository(db_path)
+        if db_path is None:
+            self.db_path = current_app.config.get('DATABASE_PATH', 'economy.db')
+        else:
+            self.db_path = db_path
+            
+        self.warning_repo = WarningRepository(self.db_path)
+        self.user_repo = UserRepository(self.db_path)
 
 
     def issue_warning(

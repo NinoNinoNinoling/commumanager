@@ -6,6 +6,7 @@ services:
     volumes:
       - ./economy.db:/app/economy.db
       - ./admin_web:/app/admin_web
+      - ./tests:/app/tests
     environment:
       - FLASK_ENV=production
       - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}

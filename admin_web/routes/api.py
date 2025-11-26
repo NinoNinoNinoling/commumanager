@@ -3,7 +3,10 @@ from functools import wraps
 from flask import Blueprint, request, jsonify, session
 from admin_web.services.user_service import UserService
 from admin_web.services.item_service import ItemService
+from admin_web.services.settings_service import SettingsService
 from admin_web.models.item import Item
+from admin_web.controllers.warning_controller import create_warning
+
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 
@@ -97,3 +100,31 @@ def get_stats():
     stats = dashboard_service.get_dashboard_stats()
 
     return jsonify({'stats': stats})
+
+
+@api_bp.route('/settings', methods=['POST'])
+@require_auth
+def update_settings():
+    """
+    시스템 설정을 업데이트합니다.
+    """
+    data = request.get_json()
+    settings_list = data.get('settings')
+    if not settings_list:
+        return jsonify({'error': 'No settings provided'}), 400
+
+    admin_user = session.get('user_id', 'unknown')
+    
+    settings_service = SettingsService()
+    result = settings_service.update_settings(settings_list, admin_user)
+
+    if result.get('success'):
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 500
+
+
+@api_bp.route('/warnings', methods=['POST'])
+@require_auth
+def post_warning():
+    return create_warning()

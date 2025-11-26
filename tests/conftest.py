@@ -7,17 +7,29 @@ import tempfile
 from pathlib import Path
 
 import pytest
+from admin_web.app import create_app
 
+@pytest.fixture
+def app(temp_db):
+    """Create and configure a new app instance for each test."""
+    app = create_app()
+    app.config.update({
+        "TESTING": True,
+        "DATABASE_PATH": temp_db,
+    })
+    yield app
+
+@pytest.fixture
+def client(app):
+    """A test client for the app."""
+    return app.test_client()
 
 @pytest.fixture
 def temp_db():
-    """Create a temporary database for testing"""
+    """Create a temporary database for testing and yield its path."""
     fd, db_path = tempfile.mkstemp(suffix='.db')
     os.close(fd)
-    
     yield db_path
-    
-    # Cleanup
     if os.path.exists(db_path):
         os.unlink(db_path)
 
