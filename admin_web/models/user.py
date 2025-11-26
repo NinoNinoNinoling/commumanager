@@ -3,10 +3,10 @@ User 모델
 
 커뮤니티 관리 시스템의 사용자를 나타냅니다.
 """
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
-
+from admin_web.utils.datetime_utils import parse_datetime
 
 @dataclass
 class User:
@@ -67,12 +67,13 @@ class User:
             'reply_count': self.reply_count,
             'warning_count': self.warning_count,
             'is_key_member': self.is_key_member,
-            'last_active': self.last_active.isoformat() if self.last_active else None,
-            'last_check': self.last_check.isoformat() if self.last_check else None,
-            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'last_active': parse_datetime(self.last_active).isoformat() if self.last_active else None,
+            'last_check': parse_datetime(self.last_check).isoformat() if self.last_check else None,
+            'created_at': parse_datetime(self.created_at).isoformat() if self.created_at else None,
             'role_name': self.role_name,
             'role_color': self.role_color,
         }
+
 
     @classmethod
     def from_dict(cls, data: dict) -> 'User':
@@ -85,28 +86,6 @@ class User:
         Returns:
             User 인스턴스
         """
-        # Parse datetime fields if present
-        last_active = None
-        if data.get('last_active'):
-            if isinstance(data['last_active'], str):
-                last_active = datetime.fromisoformat(data['last_active'])
-            else:
-                last_active = data['last_active']
-
-        last_check = None
-        if data.get('last_check'):
-            if isinstance(data['last_check'], str):
-                last_check = datetime.fromisoformat(data['last_check'])
-            else:
-                last_check = data['last_check']
-
-        created_at = None
-        if data.get('created_at'):
-            if isinstance(data['created_at'], str):
-                created_at = datetime.fromisoformat(data['created_at'])
-            else:
-                created_at = data['created_at']
-
         return cls(
             mastodon_id=data['mastodon_id'],
             username=data['username'],
@@ -119,9 +98,9 @@ class User:
             reply_count=data.get('reply_count', 0),
             warning_count=data.get('warning_count', 0),
             is_key_member=data.get('is_key_member', False),
-            last_active=last_active,
-            last_check=last_check,
-            created_at=created_at,
+            last_active=parse_datetime(data.get('last_active')),
+            last_check=parse_datetime(data.get('last_check')),
+            created_at=parse_datetime(data.get('created_at')),
             role_name=data.get('role_name'),
             role_color=data.get('role_color')
         )

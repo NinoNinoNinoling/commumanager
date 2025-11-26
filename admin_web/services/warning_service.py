@@ -136,7 +136,16 @@ class WarningService:
         Returns:
             찾은 경우 Warning 객체, 아니면 None
         """
-        return self.warning_repo.find_by_id(warning_id)
+        return self.user_repo.find_by_id(user_id)
+
+    def get_all_warnings(self) -> List[Warning]:
+        """
+        모든 경고를 조회합니다.
+
+        Returns:
+            경고 리스트 (최신순)
+        """
+        return self.warning_repo.find_all()
 
     def get_user_warnings(self, user_id: str) -> List[Warning]:
         """

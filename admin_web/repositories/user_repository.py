@@ -5,9 +5,10 @@ users 테이블에 대한 데이터 접근 계층
 """
 import sqlite3
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime # Import datetime
 
 from admin_web.models.user import User
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 class UserRepository:
@@ -59,9 +60,8 @@ class UserRepository:
             reply_count=row['reply_count'],
             warning_count=row['warning_count'],
             is_key_member=bool(row['is_key_member']),
-            last_active=datetime.fromisoformat(row['last_active']) if row['last_active'] else None,
-            last_check=datetime.fromisoformat(row['last_check']) if row['last_check'] else None,
-            created_at=datetime.fromisoformat(row['created_at']) if row['created_at'] else None,
+            last_active=parse_datetime(row['last_active']),
+            last_check=parse_datetime(row['last_check']),
             role_name=row['role_name'],
             role_color=row['role_color']
         )
@@ -180,9 +180,9 @@ class UserRepository:
                 mastodon_id, username, display_name, role, dormitory,
                 balance, total_earned, total_spent, reply_count,
                 warning_count, is_key_member,
-                last_active, last_check, created_at,
+                last_active, last_check, 
                 role_name, role_color
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             user.mastodon_id,
             user.username,

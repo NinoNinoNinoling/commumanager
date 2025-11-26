@@ -5,7 +5,8 @@ from admin_web.services.user_service import UserService
 from admin_web.services.item_service import ItemService
 from admin_web.services.settings_service import SettingsService
 from admin_web.models.item import Item
-from admin_web.controllers.warning_controller import create_warning
+from admin_web.controllers.warning_controller import create_warning, get_all_warnings, get_user_warnings
+from admin_web.controllers.user_controller import get_user_detail, update_user_role
 
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
@@ -46,12 +47,14 @@ def get_risk_users():
 
 @api_bp.route('/users/<user_id>', methods=['GET'])
 @require_auth
-def get_user(user_id):
-    user_service = UserService()
-    user = user_service.get_user(user_id)
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-    return jsonify({'user': user.to_dict()})
+def get_user_api(user_id):
+    return get_user_detail(user_id)
+
+
+@api_bp.route('/users/<user_id>/role', methods=['PATCH'])
+@require_auth
+def patch_user_role(user_id):
+    return update_user_role(user_id)
 
 
 @api_bp.route('/users/<user_id>/balance', methods=['POST'])
@@ -124,7 +127,15 @@ def update_settings():
         return jsonify(result), 500
 
 
-@api_bp.route('/warnings', methods=['POST'])
+@api_bp.route('/warnings', methods=['POST', 'GET']) # Add GET method
 @require_auth
 def post_warning():
-    return create_warning()
+    if request.method == 'POST':
+        return create_warning()
+    elif request.method == 'GET':
+        return get_all_warnings()
+
+@api_bp.route('/users/<user_id>/warnings', methods=['GET'])
+@require_auth
+def get_warnings_for_user(user_id):
+    return get_user_warnings(user_id)

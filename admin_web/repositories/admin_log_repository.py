@@ -3,6 +3,7 @@ import sqlite3
 from typing import List, Optional
 from datetime import datetime
 from admin_web.models.admin_log import AdminLog
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 class AdminLogRepository:
@@ -31,6 +32,16 @@ class AdminLogRepository:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         return conn
+
+    def _row_to_admin_log(self, row: sqlite3.Row) -> AdminLog:
+        return AdminLog(
+            id=row['id'],
+            admin_name=row['admin_name'],
+            action_type=row['action_type'],
+            target_user=row['target_user'],
+            details=row['details'],
+            timestamp=parse_datetime(row['timestamp'])
+        )
 
     def create_log(self, admin_name: str, action_type: str, target_user: Optional[str] = None, details: Optional[str] = None):
         """
@@ -66,11 +77,4 @@ class AdminLogRepository:
         cursor.execute("SELECT * FROM admin_logs ORDER BY timestamp DESC LIMIT ?", (limit,))
         rows = cursor.fetchall()
         conn.close()
-        return [AdminLog(
-            id=row['id'],
-            admin_name=row['admin_name'],
-            action_type=row['action_type'],
-            target_user=row['target_user'],
-            details=row['details'],
-            timestamp=datetime.fromisoformat(row['timestamp']) if row['timestamp'] else None
-        ) for row in rows]
+        return [self._row_to_admin_log(row) for row in rows]

@@ -8,6 +8,7 @@ from typing import List, Optional, Dict
 from datetime import datetime
 
 from admin_web.models.transaction import Transaction
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 class TransactionRepository:
@@ -57,7 +58,7 @@ class TransactionRepository:
             category=row['category'],
             description=row['description'],
             admin_name=row['admin_name'],
-            timestamp=datetime.fromisoformat(row['timestamp']) if row['timestamp'] else None
+            timestamp=parse_datetime(row['timestamp'])
         )
 
     def create(self, transaction: Transaction) -> Transaction:

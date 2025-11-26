@@ -1,29 +1,14 @@
-"""
-Transaction 모델
-
-경제 시스템의 금융 거래를 나타냅니다.
-"""
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 @dataclass
 class Transaction:
     """
     사용자 잔액 변경을 추적하는 Transaction 모델
-
-    Attributes:
-        id: Primary key (선택, 데이터베이스에서 설정)
-        user_id: users.mastodon_id에 대한 Foreign key
-        transaction_type: 거래 유형 (reward_settlement, manual_adjust 등)
-        amount: 거래 금액 (양수: 입금, 음수: 출금)
-        status_id: 연관된 Mastodon 상태 ID (선택)
-        item_id: 상점 구매 시 연관된 아이템 ID (선택)
-        category: 필터링/분석용 거래 카테고리 (선택)
-        description: 사람이 읽을 수 있는 설명 (선택)
-        admin_name: 거래를 생성한 관리자 (선택)
-        timestamp: 거래 시각 (선택, 데이터베이스에서 설정)
+    # ...
     """
     user_id: str
     transaction_type: str
@@ -67,14 +52,6 @@ class Transaction:
         Returns:
             Transaction 인스턴스
         """
-        # Parse timestamp if present
-        timestamp = None
-        if data.get('timestamp'):
-            if isinstance(data['timestamp'], str):
-                timestamp = datetime.fromisoformat(data['timestamp'])
-            else:
-                timestamp = data['timestamp']
-
         return cls(
             id=data.get('id'),
             user_id=data['user_id'],
@@ -85,7 +62,7 @@ class Transaction:
             category=data.get('category'),
             description=data.get('description'),
             admin_name=data.get('admin_name'),
-            timestamp=timestamp
+            timestamp=parse_datetime(data.get('timestamp'))
         )
 
     def is_credit(self) -> bool:

@@ -4,6 +4,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from admin_web.models.inventory import Inventory
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 class InventoryRepository:
@@ -49,7 +50,7 @@ class InventoryRepository:
             user_id=row['user_id'],
             item_id=row['item_id'],
             quantity=row['quantity'],
-            acquired_at=datetime.fromisoformat(row['acquired_at']) if row['acquired_at'] else None
+            acquired_at=parse_datetime(row['acquired_at'])
         )
 
     def add_or_update(self, inventory: Inventory) -> Inventory:
@@ -84,10 +85,8 @@ class InventoryRepository:
             result_id = cursor.lastrowid
         
         conn.commit()
-        conn.close()
         
-        conn = self._get_connection()
-        cursor = conn.cursor()
+        # Fetch the updated/created record
         cursor.execute("SELECT * FROM inventory WHERE id = ?", (result_id,))
         row = cursor.fetchone()
         conn.close()

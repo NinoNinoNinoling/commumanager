@@ -37,3 +37,22 @@ def create_warning():
         return jsonify({'error': str(e)}), 400
     except Exception as e:
         return jsonify({'error': f'An unexpected error occurred: {str(e)}'}), 500
+
+
+def get_all_warnings():
+    """
+    Get a list of all warnings.
+    """
+    service = WarningService()
+    warnings = service.get_all_warnings()
+    return jsonify({'warnings': [w.to_dict() for w in warnings]}), 200
+
+
+def get_user_warnings(user_id):
+    """
+    Get a list of warnings for a specific user.
+    """
+    service = WarningService()
+    warnings = service.get_user_warnings(user_id)
+    return jsonify({'warnings': [w.to_dict() for w in warnings]}), 200
+

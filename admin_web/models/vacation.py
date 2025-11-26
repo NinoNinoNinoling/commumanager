@@ -1,29 +1,14 @@
-"""
-Vacation 모델
-
-사용자의 휴가 정보를 나타냅니다.
-"""
 from dataclasses import dataclass
 from datetime import date, time, datetime
 from typing import Optional
+from admin_web.utils.datetime_utils import parse_datetime, parse_date, parse_time
 
 
 @dataclass
 class Vacation:
     """
     휴가 기록을 위한 Vacation 모델
-
-    Attributes:
-        id: Primary key (선택, 데이터베이스에서 설정)
-        user_id: users.mastodon_id에 대한 Foreign key
-        start_date: 휴가 시작일 (필수)
-        start_time: 휴가 시작 시간 (선택)
-        end_date: 휴가 종료일 (필수)
-        end_time: 휴가 종료 시간 (선택)
-        reason: 휴가 사유 (선택)
-        approved: 승인 여부 (기본값: True)
-        registered_by: 등록자 (선택)
-        created_at: 생성 시각 (선택, 데이터베이스에서 설정)
+    # ...
     """
     user_id: str
     start_date: date
@@ -67,57 +52,17 @@ class Vacation:
         Returns:
             Vacation 인스턴스
         """
-        # Parse start_date
-        start_date = None
-        if data.get('start_date'):
-            if isinstance(data['start_date'], str):
-                start_date = date.fromisoformat(data['start_date'])
-            else:
-                start_date = data['start_date']
-
-        # Parse start_time
-        start_time = None
-        if data.get('start_time'):
-            if isinstance(data['start_time'], str):
-                start_time = time.fromisoformat(data['start_time'])
-            else:
-                start_time = data['start_time']
-
-        # Parse end_date
-        end_date = None
-        if data.get('end_date'):
-            if isinstance(data['end_date'], str):
-                end_date = date.fromisoformat(data['end_date'])
-            else:
-                end_date = data['end_date']
-
-        # Parse end_time
-        end_time = None
-        if data.get('end_time'):
-            if isinstance(data['end_time'], str):
-                end_time = time.fromisoformat(data['end_time'])
-            else:
-                end_time = data['end_time']
-
-        # Parse created_at
-        created_at = None
-        if data.get('created_at'):
-            if isinstance(data['created_at'], str):
-                created_at = datetime.fromisoformat(data['created_at'])
-            else:
-                created_at = data['created_at']
-
         return cls(
             id=data.get('id'),
             user_id=data['user_id'],
-            start_date=start_date,
-            start_time=start_time,
-            end_date=end_date,
-            end_time=end_time,
+            start_date=parse_date(data.get('start_date')),
+            start_time=parse_time(data.get('start_time')),
+            end_date=parse_date(data.get('end_date')),
+            end_time=parse_time(data.get('end_time')),
             reason=data.get('reason'),
             approved=data.get('approved', True),
             registered_by=data.get('registered_by'),
-            created_at=created_at
+            created_at=parse_datetime(data.get('created_at'))
         )
 
     def is_approved(self) -> bool:

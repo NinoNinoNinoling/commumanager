@@ -6,6 +6,7 @@ Warning 모델
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 @dataclass
@@ -67,14 +68,6 @@ class Warning:
         Returns:
             Warning 인스턴스
         """
-        # Parse timestamp if present
-        timestamp = None
-        if data.get('timestamp'):
-            if isinstance(data['timestamp'], str):
-                timestamp = datetime.fromisoformat(data['timestamp'])
-            else:
-                timestamp = data['timestamp']
-
         return cls(
             id=data.get('id'),
             user_id=data['user_id'],
@@ -85,7 +78,7 @@ class Warning:
             message=data.get('message'),
             dm_sent=data.get('dm_sent', False),
             admin_name=data.get('admin_name'),
-            timestamp=timestamp
+            timestamp=parse_datetime(data.get('timestamp'))
         )
 
     def is_activity_warning(self) -> bool:

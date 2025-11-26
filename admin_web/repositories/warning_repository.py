@@ -8,6 +8,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from admin_web.models.warning import Warning
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 class WarningRepository:
@@ -57,7 +58,7 @@ class WarningRepository:
             message=row['message'],
             dm_sent=bool(row['dm_sent']),
             admin_name=row['admin_name'],
-            timestamp=datetime.fromisoformat(row['timestamp']) if row['timestamp'] else None
+            timestamp=parse_datetime(row['timestamp'])
         )
 
     def create(self, warning: Warning) -> Warning:

@@ -1,9 +1,7 @@
-"""
-Setting 모델
-"""
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
+from admin_web.utils.datetime_utils import parse_datetime
 
 @dataclass
 class Setting:
@@ -34,17 +32,11 @@ class Setting:
 
     @classmethod
     def from_dict(cls, data: dict) -> "Setting":
-        updated_at = None
-        if data.get('updated_at'):
-            if isinstance(data['updated_at'], str):
-                updated_at = datetime.fromisoformat(data['updated_at'])
-            else:
-                updated_at = data['updated_at']
-
         return cls(
             key=data["key"],
             value=data["value"],
             description=data.get("description"),
-            updated_at=updated_at,
+            updated_at=parse_datetime(data.get("updated_at")),
             updated_by=data.get("updated_by"),
         )
+

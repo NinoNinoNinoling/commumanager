@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 from datetime import date, time, datetime
 from typing import Optional
+from admin_web.utils.datetime_utils import parse_datetime, parse_date, parse_time
 
 
 @dataclass
@@ -61,15 +62,15 @@ class CalendarEvent:
             id=data.get('id'),
             title=data['title'],
             description=data.get('description'),
-            event_date=date.fromisoformat(data['event_date']) if isinstance(data.get('event_date'), str) else data.get('event_date'),
-            start_time=time.fromisoformat(data['start_time']) if isinstance(data.get('start_time'), str) else data.get('start_time'),
-            end_date=date.fromisoformat(data['end_date']) if isinstance(data.get('end_date'), str) else data.get('end_date'),
-            end_time=time.fromisoformat(data['end_time']) if isinstance(data.get('end_time'), str) else data.get('end_time'),
+            event_date=parse_date(data.get('event_date')),
+            start_time=parse_time(data.get('start_time')),
+            end_date=parse_date(data.get('end_date')),
+            end_time=parse_time(data.get('end_time')),
             event_type=data.get('event_type', 'event'),
             is_global_vacation=data.get('is_global_vacation', False),
             created_by=data['created_by'],
-            created_at=datetime.fromisoformat(data['created_at']) if isinstance(data.get('created_at'), str) else data.get('created_at'),
-            updated_at=datetime.fromisoformat(data['updated_at']) if isinstance(data.get('updated_at'), str) else data.get('updated_at')
+            created_at=parse_datetime(data.get('created_at')),
+            updated_at=parse_datetime(data.get('updated_at'))
         )
 
     def is_multi_day(self) -> bool:

@@ -6,6 +6,7 @@ BanRecord 모델
 from dataclasses import dataclass
 from typing import Optional
 from datetime import datetime
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 @dataclass
@@ -60,3 +61,19 @@ class BanRecord:
             'unbanned_by': self.unbanned_by,
             'unban_reason': self.unban_reason
         }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> 'BanRecord':
+        return cls(
+            id=data.get('id'),
+            user_id=data['user_id'],
+            banned_by=data['banned_by'],
+            reason=data['reason'],
+            warning_count=data.get('warning_count'),
+            evidence_snapshot=data.get('evidence_snapshot'),
+            is_active=data.get('is_active', True),
+            banned_at=parse_datetime(data.get('banned_at')),
+            unbanned_at=parse_datetime(data.get('unbanned_at')),
+            unbanned_by=data.get('unbanned_by'),
+            unban_reason=data.get('unban_reason')
+        )

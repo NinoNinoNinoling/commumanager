@@ -8,6 +8,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from admin_web.models.item import Item
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 class ItemRepository:
@@ -61,7 +62,7 @@ class ItemRepository:
             is_unlimited_stock=bool(row['is_unlimited_stock']),
             max_purchase_per_user=row['max_purchase_per_user'],
             total_sales=row['total_sales'],
-            created_at=datetime.fromisoformat(row['created_at']) if row['created_at'] else None
+            created_at=parse_datetime(row['created_at'])
         )
 
     def create(self, item: Item) -> Item:

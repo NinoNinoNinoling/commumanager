@@ -3,6 +3,7 @@ import sqlite3
 from typing import Optional
 from datetime import datetime
 from admin_web.models.scheduled_announcement import ScheduledAnnouncement
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 class ScheduledAnnouncementRepository:
@@ -13,6 +14,20 @@ class ScheduledAnnouncementRepository:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         return conn
+
+    def _row_to_announcement(self, row: sqlite3.Row) -> ScheduledAnnouncement:
+        return ScheduledAnnouncement(
+            id=row['id'],
+            post_type=row['post_type'],
+            content=row['content'],
+            scheduled_at=parse_datetime(row['scheduled_at']),
+            visibility=row['visibility'],
+            is_public=bool(row['is_public']),
+            status=row['status'],
+            created_by=row['created_by'],
+            created_at=parse_datetime(row['created_at']),
+            published_at=parse_datetime(row['published_at'])
+        )
 
     def create(self, announcement: ScheduledAnnouncement) -> ScheduledAnnouncement:
         conn = self._get_connection()
@@ -36,13 +51,4 @@ class ScheduledAnnouncementRepository:
         conn.close()
         if not row:
             return None
-        return ScheduledAnnouncement(
-            id=row['id'],
-            post_type=row['post_type'],
-            content=row['content'],
-            scheduled_at=datetime.fromisoformat(row['scheduled_at']),
-            visibility=row['visibility'],
-            is_public=bool(row['is_public']),
-            status=row['status'],
-            created_by=row['created_by']
-        )
+        return self._row_to_announcement(row)

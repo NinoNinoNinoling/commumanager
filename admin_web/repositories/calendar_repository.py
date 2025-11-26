@@ -4,6 +4,7 @@ from typing import List, Optional
 from datetime import date, time, datetime
 
 from admin_web.models.calendar_event import CalendarEvent
+from admin_web.utils.datetime_utils import parse_datetime, parse_date, parse_time
 
 
 class CalendarRepository:
@@ -47,15 +48,15 @@ class CalendarRepository:
             id=row['id'],
             title=row['title'],
             description=row['description'],
-            event_date=date.fromisoformat(row['event_date']) if row['event_date'] else None,
-            start_time=time.fromisoformat(row['start_time']) if row['start_time'] else None,
-            end_date=date.fromisoformat(row['end_date']) if row['end_date'] else None,
-            end_time=time.fromisoformat(row['end_time']) if row['end_time'] else None,
+            event_date=parse_date(row['event_date']),
+            start_time=parse_time(row['start_time']),
+            end_date=parse_date(row['end_date']),
+            end_time=parse_time(row['end_time']),
             event_type=row['event_type'],
             is_global_vacation=bool(row['is_global_vacation']),
             created_by=row['created_by'],
-            created_at=datetime.fromisoformat(row['created_at']) if row['created_at'] else None,
-            updated_at=datetime.fromisoformat(row['updated_at']) if row['updated_at'] else None
+            created_at=parse_datetime(row['created_at']),
+            updated_at=parse_datetime(row['updated_at'])
         )
 
     def create(self, event: CalendarEvent) -> CalendarEvent:

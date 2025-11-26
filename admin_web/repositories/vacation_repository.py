@@ -8,6 +8,7 @@ from typing import List, Optional
 from datetime import date, time, datetime
 
 from admin_web.models.vacation import Vacation
+from admin_web.utils.datetime_utils import parse_datetime, parse_date, parse_time
 
 
 class VacationRepository:
@@ -47,28 +48,17 @@ class VacationRepository:
         Returns:
             Vacation 인스턴스
         """
-        # Parse dates
-        start_date = date.fromisoformat(row['start_date']) if row['start_date'] else None
-        end_date = date.fromisoformat(row['end_date']) if row['end_date'] else None
-
-        # Parse times
-        start_time = time.fromisoformat(row['start_time']) if row['start_time'] else None
-        end_time = time.fromisoformat(row['end_time']) if row['end_time'] else None
-
-        # Parse created_at
-        created_at = datetime.fromisoformat(row['created_at']) if row['created_at'] else None
-
         return Vacation(
             id=row['id'],
             user_id=row['user_id'],
-            start_date=start_date,
-            start_time=start_time,
-            end_date=end_date,
-            end_time=end_time,
+            start_date=parse_date(row['start_date']),
+            start_time=parse_time(row['start_time']),
+            end_date=parse_date(row['end_date']),
+            end_time=parse_time(row['end_time']),
             reason=row['reason'],
             approved=bool(row['approved']),
             registered_by=row['registered_by'],
-            created_at=created_at
+            created_at=parse_datetime(row['created_at'])
         )
 
     def create(self, vacation: Vacation) -> Vacation:

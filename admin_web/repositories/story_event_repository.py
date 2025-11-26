@@ -7,6 +7,7 @@ import sqlite3
 from typing import List, Optional
 from datetime import datetime
 from admin_web.models.story_event import StoryEvent, StoryPost
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 class StoryEventRepository:
@@ -35,6 +36,39 @@ class StoryEventRepository:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         return conn
+
+    def _row_to_story_event(self, row: sqlite3.Row) -> StoryEvent:
+        """
+        데이터베이스 row를 StoryEvent 모델로 변환합니다.
+        """
+        return StoryEvent(
+            id=row['id'],
+            title=row['title'],
+            description=row['description'],
+            start_time=parse_datetime(row['start_time']),
+            interval_minutes=row['interval_minutes'],
+            status=row['status'],
+            created_by=row['created_by'],
+            created_at=parse_datetime(row['created_at']),
+            published_at=parse_datetime(row['published_at'])
+        )
+
+    def _row_to_story_post(self, row: sqlite3.Row) -> StoryPost:
+        """
+        데이터베이스 row를 StoryPost 모델로 변환합니다.
+        """
+        return StoryPost(
+            id=row['id'],
+            event_id=row['event_id'],
+            sequence=row['sequence'],
+            content=row['content'],
+            media_urls=row['media_urls'],
+            status=row['status'],
+            mastodon_post_id=row['mastodon_post_id'],
+            scheduled_at=parse_datetime(row['scheduled_at']),
+            published_at=parse_datetime(row['published_at']),
+            error_message=row['error_message']
+        )
 
     def create(self, event: StoryEvent) -> StoryEvent:
         """
@@ -75,15 +109,7 @@ class StoryEventRepository:
         conn.close()
         if not row:
             return None
-        return StoryEvent(
-            id=row['id'],
-            title=row['title'],
-            description=row['description'],
-            start_time=datetime.fromisoformat(row['start_time']),
-            interval_minutes=row['interval_minutes'],
-            status=row['status'],
-            created_by=row['created_by']
-        )
+        return self._row_to_story_event(row)
 
     def add_post(self, post: StoryPost) -> StoryPost:
         """
@@ -122,11 +148,5 @@ class StoryEventRepository:
         cursor.execute("SELECT * FROM story_posts WHERE event_id = ? ORDER BY sequence", (event_id,))
         rows = cursor.fetchall()
         conn.close()
-        return [StoryPost(
-            id=row['id'],
-            event_id=row['event_id'],
-            sequence=row['sequence'],
-            content=row['content'],
-            media_urls=row['media_urls'],
-            status=row['status']
-        ) for row in rows]
+        return [self._row_to_story_post(row) for row in rows]
+

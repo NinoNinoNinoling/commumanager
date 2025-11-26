@@ -1,11 +1,7 @@
-"""
-Item 모델
-
-상점에서 판매되는 아이템 정보를 나타냅니다.
-"""
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 @dataclass
@@ -79,14 +75,6 @@ class Item:
         Returns:
             Item 인스턴스
         """
-        # Parse created_at
-        created_at = None
-        if data.get('created_at'):
-            if isinstance(data['created_at'], str):
-                created_at = datetime.fromisoformat(data['created_at'])
-            else:
-                created_at = data['created_at']
-
         return cls(
             id=data.get('id'),
             name=data['name'],
@@ -101,9 +89,8 @@ class Item:
             is_unlimited_stock=data.get('is_unlimited_stock', False),
             max_purchase_per_user=data.get('max_purchase_per_user'),
             total_sales=data.get('total_sales', 0),
-            created_at=created_at
+            created_at=parse_datetime(data.get('created_at'))
         )
-
     def is_active_item(self) -> bool:
         """
         아이템이 활성 상태인지 확인합니다.

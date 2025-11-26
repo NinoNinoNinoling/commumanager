@@ -8,6 +8,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from admin_web.models.oauth_admin import OAuthAdmin
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 class OAuthAdminRepository:
@@ -52,9 +53,9 @@ class OAuthAdminRepository:
             mastodon_acct=row['mastodon_acct'],
             display_name=row['display_name'],
             added_by=row['added_by'],
-            added_at=datetime.fromisoformat(row['added_at']) if row['added_at'] else None,
+            added_at=parse_datetime(row['added_at']),
             is_active=bool(row['is_active']),
-            last_login_at=datetime.fromisoformat(row['last_login_at']) if row['last_login_at'] else None
+            last_login_at=parse_datetime(row['last_login_at'])
         )
 
     def find_by_acct(self, mastodon_acct: str) -> Optional[OAuthAdmin]:

@@ -6,6 +6,7 @@ from admin_web.repositories.user_repository import UserRepository
 from admin_web.repositories.transaction_repository import TransactionRepository
 from admin_web.constants import SYSTEM_ROLES
 from datetime import datetime
+from flask import current_app # Import current_app
 
 
 class UserService:
@@ -16,16 +17,19 @@ class UserService:
     UserRepository와 TransactionRepository를 사용하여 DB에 접근합니다.
     """
 
-    def __init__(self, db_path: str = 'economy.db'):
+    def __init__(self, db_path: str = None):
         """
         UserService를 초기화합니다.
 
         Args:
-            db_path: SQLite 데이터베이스 파일 경로
+            db_path: SQLite 데이터베이스 파일 경로 (제공되지 않으면 앱 컨텍스트에서 가져옴)
         """
-        self.db_path = db_path
-        self.user_repo = UserRepository(db_path)
-        self.transaction_repo = TransactionRepository(db_path)
+        if db_path is None:
+            self.db_path = current_app.config.get('DATABASE_PATH', 'economy.db')
+        else:
+            self.db_path = db_path
+        self.user_repo = UserRepository(self.db_path)
+        self.transaction_repo = TransactionRepository(self.db_path)
 
     def _get_connection(self) -> sqlite3.Connection:
         """
@@ -54,7 +58,7 @@ class UserService:
         """
         return self.user_repo.find_by_id(user_id)
 
-    def get_all_users(self) -> List[User]:
+    def get_all_users(self) -> List[User]: # Changed return type to List[User]
         """
         전체 유저를 조회합니다 (시스템 계정 제외).
 
@@ -77,8 +81,35 @@ class UserService:
         cursor.execute(query, list(SYSTEM_ROLES))
         rows = cursor.fetchall()
         conn.close()
-        return [User(**dict(row)) for row in rows]
+        return [User(**dict(row)) for row in rows] # Return User objects
 
+
+    def update_user_role(self, user_id: str, new_role: str) -> User:
+        """
+        유저의 역할을 업데이트합니다.
+
+        Args:
+            user_id: 유저의 Mastodon ID
+            new_role: 변경할 새로운 역할 (user, admin, moderator)
+
+        Returns:
+            업데이트된 User 객체
+
+        Raises:
+            ValueError: 유저를 찾을 수 없거나 역할이 유효하지 않을 경우
+        """
+        user = self.user_repo.find_by_id(user_id)
+        if not user:
+            raise ValueError("유저를 찾을 수 없습니다.")
+
+        # 역할 유효성 검사 (필요에 따라 더 상세한 검증 추가)
+        allowed_roles = ['user', 'admin', 'moderator']
+        if new_role not in allowed_roles:
+            raise ValueError(f"유효하지 않은 역할입니다: {new_role}. 허용된 역할: {', '.join(allowed_roles)}")
+        
+        self.user_repo.update_role(user_id, new_role)
+        return self.user_repo.find_by_id(user_id) # 업데이트된 유저 정보 반환
+        
     def get_risk_users(self) -> List[Dict]:
         """
         위험 감지 유저를 조회합니다 (시스템 계정 제외).

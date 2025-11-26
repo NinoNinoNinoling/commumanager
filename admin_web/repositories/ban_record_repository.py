@@ -8,6 +8,7 @@ from typing import List, Optional
 from datetime import datetime
 
 from admin_web.models.ban_record import BanRecord
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 class BanRecordRepository:
@@ -50,13 +51,13 @@ class BanRecordRepository:
         return BanRecord(
             id=row['id'],
             user_id=row['user_id'],
-            banned_at=datetime.fromisoformat(row['banned_at']) if row['banned_at'] else None,
+            banned_at=parse_datetime(row['banned_at']),
             banned_by=row['banned_by'],
             reason=row['reason'],
             warning_count=row['warning_count'],
             evidence_snapshot=row['evidence_snapshot'],
             is_active=bool(row['is_active']),
-            unbanned_at=datetime.fromisoformat(row['unbanned_at']) if row['unbanned_at'] else None,
+            unbanned_at=parse_datetime(row['unbanned_at']),
             unbanned_by=row['unbanned_by'],
             unban_reason=row['unban_reason']
         )

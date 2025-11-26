@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 @dataclass
@@ -24,16 +25,10 @@ class Inventory:
 
     @classmethod
     def from_dict(cls, data: dict) -> 'Inventory':
-        acquired_at = None
-        if data.get('acquired_at'):
-            if isinstance(data['acquired_at'], str):
-                acquired_at = datetime.fromisoformat(data['acquired_at'])
-            else:
-                acquired_at = data['acquired_at']
         return cls(
             id=data.get('id'),
             user_id=data['user_id'],
             item_id=data['item_id'],
             quantity=data.get('quantity', 1),
-            acquired_at=acquired_at
+            acquired_at=parse_datetime(data.get('acquired_at'))
         )

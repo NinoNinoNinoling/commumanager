@@ -2,6 +2,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional, List, Dict, Any
+from admin_web.utils.datetime_utils import parse_datetime
 
 
 @dataclass
@@ -66,20 +67,6 @@ class StoryPost:
         Returns:
             StoryPost 인스턴스
         """
-        scheduled_at = None
-        if data.get('scheduled_at'):
-            if isinstance(data['scheduled_at'], str):
-                scheduled_at = datetime.fromisoformat(data['scheduled_at'])
-            else:
-                scheduled_at = data['scheduled_at']
-
-        published_at = None
-        if data.get('published_at'):
-            if isinstance(data['published_at'], str):
-                published_at = datetime.fromisoformat(data['published_at'])
-            else:
-                published_at = data['published_at']
-
         return cls(
             id=data.get('id'),
             event_id=data['event_id'],
@@ -88,8 +75,8 @@ class StoryPost:
             media_urls=data.get('media_urls'),
             status=data.get('status', 'pending'),
             mastodon_post_id=data.get('mastodon_post_id'),
-            scheduled_at=scheduled_at,
-            published_at=published_at,
+            scheduled_at=parse_datetime(data.get('scheduled_at')),
+            published_at=parse_datetime(data.get('published_at')),
             error_message=data.get('error_message'),
         )
 
@@ -156,27 +143,6 @@ class StoryEvent:
         Returns:
             StoryEvent 인스턴스
         """
-        start_time = None
-        if data.get('start_time'):
-            if isinstance(data['start_time'], str):
-                start_time = datetime.fromisoformat(data['start_time'])
-            else:
-                start_time = data['start_time']
-
-        created_at = None
-        if data.get('created_at'):
-            if isinstance(data['created_at'], str):
-                created_at = datetime.fromisoformat(data['created_at'])
-            else:
-                created_at = data['created_at']
-
-        published_at = None
-        if data.get('published_at'):
-            if isinstance(data['published_at'], str):
-                published_at = datetime.fromisoformat(data['published_at'])
-            else:
-                published_at = data['published_at']
-
         posts = None
         if data.get('posts'):
             posts = [StoryPost.from_dict(post) for post in data['posts']]
@@ -185,11 +151,11 @@ class StoryEvent:
             id=data.get('id'),
             title=data['title'],
             description=data.get('description'),
-            start_time=start_time,
+            start_time=parse_datetime(data.get('start_time')),
             interval_minutes=data.get('interval_minutes', 5),
             status=data.get('status', 'pending'),
             created_by=data['created_by'],
-            created_at=created_at,
-            published_at=published_at,
+            created_at=parse_datetime(data.get('created_at')),
+            published_at=parse_datetime(data.get('published_at')),
             posts=posts,
         )
