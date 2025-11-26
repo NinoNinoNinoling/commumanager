@@ -76,35 +76,44 @@ def process_scheduled_posts_task():
     
     admin_token = os.getenv('BOT_ACCESS_TOKEN')
     story_token = os.getenv('STORY_ACCESS_TOKEN')
+    supervisor_token = os.getenv('SUPERVISOR_ACCESS_TOKEN')
 
-    mastodon_admin = create_mastodon_client(admin_token) if admin_token else None
-    mastodon_story = create_mastodon_client(story_token) if story_token else None
+    clients = {
+        'announcement': create_mastodon_client(admin_token) if admin_token else None,
+        'story': create_mastodon_client(story_token) if story_token else None,
+        'admin_notice': create_mastodon_client(supervisor_token) if supervisor_token else None,
+    }
 
-    # 1. 일반 예약 공지 처리
-    if mastodon_admin:
-        due_posts = get_due_scheduled_posts()
-        for post in due_posts:
-            logger.info(f"공지 게시 시도: {post['id']} - {post['content'][:30]}")
-            try:
-                status = mastodon_admin.status_post(
-                    status=post['content'],
-                    visibility=post['visibility']
-                )
-                update_scheduled_post_status(post['id'], 'published', status['id'])
-                logger.info(f"공지 게시 성공: {post['id']}")
-            except Exception as e:
-                logger.error(f"공지 게시 실패: {post['id']} - {e}", exc_info=True)
-                update_scheduled_post_status(post['id'], 'failed', error_message=str(e))
-    else:
-        logger.warning("관리자 토큰이 없어 예약 공지를 처리할 수 없습니다.")
+    # 1. 일반 예약 포스트 처리 (공지, 관리자 알림 등)
+    due_posts = get_due_scheduled_posts()
+    for post in due_posts:
+        post_type = post.get('post_type', 'announcement')
+        client = clients.get(post_type)
 
-    # 2. 스토리 포스트 처리
-    if mastodon_story:
+        if not client:
+            logger.warning(f"{post_type} 타입 포스트를 처리할 클라이언트가 없습니다. (토큰 부재)")
+            continue
+
+        logger.info(f"{post_type} 게시 시도: {post['id']} - {post['content'][:30]}")
+        try:
+            status = client.status_post(
+                status=post['content'],
+                visibility=post['visibility']
+            )
+            update_scheduled_post_status(post['id'], 'published', status['id'])
+            logger.info(f"{post_type} 게시 성공: {post['id']}")
+        except Exception as e:
+            logger.error(f"{post_type} 게시 실패: {post['id']} - {e}", exc_info=True)
+            update_scheduled_post_status(post['id'], 'failed', error_message=str(e))
+
+    # 2. 스토리 포스트 처리 (별도 테이블)
+    story_client = clients.get('story')
+    if story_client:
         due_story_posts = get_due_story_posts()
         for post in due_story_posts:
             logger.info(f"스토리 포스트 게시 시도: {post['id']} - {post['content'][:30]}")
             try:
-                status = mastodon_story.status_post(status=post['content'])
+                status = story_client.status_post(status=post['content'])
                 update_story_post_status(post['id'], 'published', status['id'])
                 logger.info(f"스토리 포스트 게시 성공: {post['id']}")
             except Exception as e:

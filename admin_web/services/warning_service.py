@@ -3,10 +3,14 @@
 Warning 관련 비즈니스 로직을 처리하는 서비스 계층
 """
 from typing import List, Optional, Dict, Any
+import os
 
 from admin_web.models.warning import Warning
 from admin_web.repositories.warning_repository import WarningRepository
 from admin_web.repositories.user_repository import UserRepository
+from admin_web.repositories.ban_record_repository import BanRecordRepository
+from admin_web.models.ban_record import BanRecord
+from bot.utils import create_mastodon_client, send_dm
 
 
 class WarningService:
@@ -44,6 +48,7 @@ class WarningService:
     ) -> Dict[str, Any]:
         """
         유저에게 경고를 발행하고 warning_count를 증가시킵니다.
+        3회 경고 시 자동으로 아웃 처리합니다.
 
         Args:
             user_id: 유저의 Mastodon ID
@@ -70,16 +75,44 @@ class WarningService:
             required_replies=required_replies,
             actual_replies=actual_replies,
             message=message,
-            dm_sent=False,
+            dm_sent=False, # DM 발송은 별도 Task로 처리 예정
             admin_name=admin_name
         )
 
-        # Warning 생성 및 User warning_count 증가
+        # 1. Warning 생성 및 User warning_count 증가
         created_warning = self.warning_repo.create(warning)
         self.user_repo.increment_warning_count(user_id)
         updated_user = self.user_repo.find_by_id(user_id)
 
-        # 3회 도달 시 자동 아웃 로직 (이후 구현 예정)
+        # 2. 3회 도달 시 자동 아웃 처리
+        if updated_user and updated_user.warning_count >= 3:
+            
+            ban_repo = BanRecordRepository(self.db_path)
+            
+            # 이미 활성 아웃 상태인지 확인
+            if not ban_repo.find_active_ban(user_id):
+                
+                ban_reason = "자동 아웃: 경고 3회 누적"
+                ban_record = BanRecord(
+                    user_id=user_id,
+                    banned_by='system',
+                    reason=ban_reason,
+                    warning_count=updated_user.warning_count,
+                    is_active=True
+                )
+                ban_repo.create(ban_record)
+                
+                # DM 발송
+                try:
+                    admin_token = os.getenv('BOT_ACCESS_TOKEN')
+                    if admin_token:
+                        mastodon = create_mastodon_client(admin_token)
+                        dm_message = f"커뮤니티 규정에 따라 경고 3회 누적으로 계정이 비활성화되었습니다. 자세한 내용은 관리자에게 문의해주세요."
+                        send_dm(mastodon, updated_user.username, dm_message)
+                except Exception as e:
+                    # DM 발송 실패는 로깅만 하고, 아웃 처리를 롤백하지는 않음
+                    print(f"Error sending auto-ban DM to {updated_user.username}: {e}")
+
 
         return {
             'warning': created_warning,

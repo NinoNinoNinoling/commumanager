@@ -390,6 +390,7 @@ def init_database(db_path='economy.db'):
         ('min_replies_48h', '20', '최소 답글 수 기준'),
         ('reward_reply_count', '100', '재화 지급 기준 답글 수'),
         ('reward_per_replies', '10', 'N개당 지급 재화'),
+        ('realtime_reply_reward', '1', '실시간 답글 지급 재화'),
         ('last_reward_settlement_time', '2025-01-01 00:00:00', '마지막 정산 시각'),
         ('attendance_time', '10:00', '출석 트윗 발행 시간'),
         ('attendance_base_reward', '50', '기본 출석 보상'),
