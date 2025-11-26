@@ -332,3 +332,57 @@ def update_setting(key: str, value: str, updated_by: str = None) -> None:
             SET value = ?, updated_at = CURRENT_TIMESTAMP, updated_by = ?
             WHERE key = ?
         """, (value, updated_by, key))
+
+
+def get_due_scheduled_posts() -> list:
+    """발행 시간이 된 예약 공지 목록을 가져옵니다."""
+    with get_economy_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT * FROM scheduled_posts
+            WHERE status = 'pending'
+            AND scheduled_at <= datetime('now', 'localtime')
+        """)
+        return [dict(row) for row in cursor.fetchall()]
+
+def update_scheduled_post_status(post_id: int, status: str, mastodon_post_id: str = None, error_message: str = None):
+    """예약 공지의 상태를 업데이트합니다."""
+    with get_economy_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE scheduled_posts
+            SET status = ?, mastodon_scheduled_id = ?, published_at = CASE WHEN ? = 'published' THEN datetime('now', 'localtime') ELSE NULL END
+            WHERE id = ?
+        """, (status, mastodon_post_id, status, post_id))
+
+def get_due_story_posts() -> list:
+    """발행 시간이 된 스토리 포스트 목록을 가져옵니다."""
+    with get_economy_db() as conn:
+        cursor = conn.cursor()
+        # First, ensure parent story_event is active
+        cursor.execute("""
+            UPDATE story_events
+            SET status = 'processing'
+            WHERE status = 'pending' AND start_time <= datetime('now', 'localtime')
+        """)
+        
+        cursor.execute("""
+            SELECT sp.*
+            FROM story_posts sp
+            JOIN story_events se ON sp.event_id = se.id
+            WHERE se.status = 'processing'
+            AND sp.status = 'pending'
+            AND sp.scheduled_at <= datetime('now', 'localtime')
+        """)
+        return [dict(row) for row in cursor.fetchall()]
+
+def update_story_post_status(post_id: int, status: str, mastodon_post_id: str = None, error_message: str = None):
+    """스토리 포스트의 상태를 업데이트합니다."""
+    with get_economy_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE story_posts
+            SET status = ?, mastodon_post_id = ?, published_at = CASE WHEN ? = 'published' THEN datetime('now', 'localtime') ELSE NULL END, error_message = ?
+            WHERE id = ?
+        """, (status, mastodon_post_id, status, error_message, post_id))
+

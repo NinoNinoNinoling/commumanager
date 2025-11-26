@@ -48,12 +48,75 @@ app.conf.beat_schedule = {
         'task': 'bot.tasks.check_activity_task',
         'schedule': crontab(hour=16, minute=0),
     },
+
+    # 예약 포스트 처리 (매분)
+    'process-scheduled-posts': {
+        'task': 'bot.tasks.process_scheduled_posts_task',
+        'schedule': crontab(), # 매분 실행
+    },
 }
 
 
 # ============================================================================
 # Tasks
 # ============================================================================
+
+@app.task(name='bot.tasks.process_scheduled_posts_task')
+def process_scheduled_posts_task():
+    """예약된 공지 및 스토리를 게시하는 Task"""
+    from bot.database import (
+        get_due_scheduled_posts, update_scheduled_post_status,
+        get_due_story_posts, update_story_post_status
+    )
+    from bot.utils import setup_logger, create_mastodon_client
+    import os
+
+    logger = setup_logger('celery.scheduled_posts')
+    logger.info('예약 포스트 처리 Task 시작')
+    
+    admin_token = os.getenv('BOT_ACCESS_TOKEN')
+    story_token = os.getenv('STORY_ACCESS_TOKEN')
+
+    mastodon_admin = create_mastodon_client(admin_token) if admin_token else None
+    mastodon_story = create_mastodon_client(story_token) if story_token else None
+
+    # 1. 일반 예약 공지 처리
+    if mastodon_admin:
+        due_posts = get_due_scheduled_posts()
+        for post in due_posts:
+            logger.info(f"공지 게시 시도: {post['id']} - {post['content'][:30]}")
+            try:
+                status = mastodon_admin.status_post(
+                    status=post['content'],
+                    visibility=post['visibility']
+                )
+                update_scheduled_post_status(post['id'], 'published', status['id'])
+                logger.info(f"공지 게시 성공: {post['id']}")
+            except Exception as e:
+                logger.error(f"공지 게시 실패: {post['id']} - {e}", exc_info=True)
+                update_scheduled_post_status(post['id'], 'failed', error_message=str(e))
+    else:
+        logger.warning("관리자 토큰이 없어 예약 공지를 처리할 수 없습니다.")
+
+    # 2. 스토리 포스트 처리
+    if mastodon_story:
+        due_story_posts = get_due_story_posts()
+        for post in due_story_posts:
+            logger.info(f"스토리 포스트 게시 시도: {post['id']} - {post['content'][:30]}")
+            try:
+                status = mastodon_story.status_post(status=post['content'])
+                update_story_post_status(post['id'], 'published', status['id'])
+                logger.info(f"스토리 포스트 게시 성공: {post['id']}")
+            except Exception as e:
+                logger.error(f"스토리 포스트 게시 실패: {post['id']} - {e}", exc_info=True)
+                update_story_post_status(post['id'], 'failed', error_message=str(e))
+    else:
+        logger.warning("스토리 토큰이 없어 스토리 포스트를 처리할 수 없습니다.")
+    
+    logger.info('예약 포스트 처리 Task 종료')
+    return {'status': 'success', 'timestamp': datetime.now().isoformat()}
+
+
 
 @app.task(name='bot.tasks.settle_rewards_task')
 def settle_rewards_task():
