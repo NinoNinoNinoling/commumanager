@@ -136,13 +136,43 @@ def create_mastodon_client(access_token: str = None) -> Mastodon:
 
     Returns:
         Mastodon: Mastodon 클라이언트
+
+    Raises:
+        ValueError: 필수 환경 변수가 설정되지 않은 경우
     """
+    logger = setup_logger('bot.utils')
+
     if access_token is None:
         access_token = os.getenv('BOT_ACCESS_TOKEN')
 
+    # API Base URL 확인 (INTERNAL 우선, 없으면 MASTODON_INSTANCE_URL)
+    api_base_url = os.getenv('INTERNAL_MASTODON_INSTANCE_URL', os.getenv('MASTODON_INSTANCE_URL'))
+
+    # 필수 환경 변수 검증
+    if not api_base_url:
+        error_msg = (
+            "MASTODON_INSTANCE_URL 또는 INTERNAL_MASTODON_INSTANCE_URL 환경 변수가 설정되지 않았습니다.\n"
+            ".env 파일에 다음 중 하나를 설정하세요:\n"
+            "  MASTODON_INSTANCE_URL=https://your-mastodon-instance.com\n"
+            "  또는\n"
+            "  INTERNAL_MASTODON_INSTANCE_URL=http://mastodon-web:3000"
+        )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    if not access_token:
+        error_msg = (
+            "BOT_ACCESS_TOKEN 환경 변수가 설정되지 않았습니다.\n"
+            ".env 파일에 BOT_ACCESS_TOKEN을 설정하세요."
+        )
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    logger.info(f'Mastodon 클라이언트 생성 - URL: {api_base_url}, Token: {"설정됨" if access_token else "없음"}')
+
     return Mastodon(
         access_token=access_token,
-        api_base_url=os.getenv('INTERNAL_MASTODON_INSTANCE_URL', os.getenv('MASTODON_INSTANCE_URL'))
+        api_base_url=api_base_url
     )
 
 
