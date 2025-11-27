@@ -90,8 +90,7 @@ class DashboardRepository:
 
     def get_on_vacation_count(self, today: str) -> int:
         """현재 휴가 중인 유저 수"""
-        # 테이블명이 vacations라고 가정 (확인 필요 시 수정)
-        sql = "SELECT COUNT(*) FROM vacations WHERE start_date <= ? AND end_date >= ? AND status = 'approved'"
+        sql = "SELECT COUNT(*) FROM vacation WHERE start_date <= ? AND end_date >= ? AND approved = 1"
         return self._execute_scalar(sql, (today, today))
 
     def get_scheduled_stories_count(self) -> int:
@@ -102,16 +101,10 @@ class DashboardRepository:
 
     def get_scheduled_announcements_count(self) -> int:
         """발송 대기 중인 공지 수"""
-        # 테이블명이 scheduled_announcements라고 가정
-        sql = "SELECT COUNT(*) FROM scheduled_announcements WHERE is_sent = 0"
+        sql = "SELECT COUNT(*) FROM scheduled_posts WHERE status = 'pending' AND post_type = 'announcement'"
         return self._execute_scalar(sql)
 
     def get_warnings_7d_count(self, since: str) -> int:
         """최근 7일간 발송된 경고 수"""
-        # 테이블명이 warning_logs라고 가정 (없으면 admin_logs 등 확인 필요)
-        # 만약 테이블이 없다면 0을 반환하도록 수정해야 함
-        try:
-            sql = "SELECT COUNT(*) FROM warning_logs WHERE created_at >= ?"
-            return self._execute_scalar(sql, (since,))
-        except sqlite3.OperationalError:
-            return 0 # 테이블이 없을 경우 안전하게 0 반환
+        sql = "SELECT COUNT(*) FROM warnings WHERE timestamp >= ?"
+        return self._execute_scalar(sql, (since,))
