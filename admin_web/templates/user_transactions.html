@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block title %}{{ user.username }} - 거래 내역{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('web.users') }}">유저 관리</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ user.username }} - 거래 내역</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="page-header">
+            <h2 class="page-title mb-1">{{ user.username }}님의 거래 내역</h2>
+            <p class="page-subtitle mb-0">Mastodon ID: {{ user.mastodon_id }}</p>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="row g-2">
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <small class="text-muted d-block">현재 잔액</small>
+                        <h3 class="mb-0 text-primary">{{ user.balance|default(0) }}</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <small class="text-muted d-block">총 거래 건수</small>
+                        <h3 class="mb-0">{{ transactions|length }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 통계 카드 -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="dashboard-card">
+            <div class="dashboard-card-label">누적 획득</div>
+            <h2 class="dashboard-card-value text-success">+{{ stats.total_earned|default(0) }}</h2>
+            <div class="dashboard-card-icon" style="color: #198754;">↑</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card">
+            <div class="dashboard-card-label">누적 사용</div>
+            <h2 class="dashboard-card-value text-danger">-{{ stats.total_spent|default(0) }}</h2>
+            <div class="dashboard-card-icon" style="color: #dc3545;">↓</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="dashboard-card">
+            <div class="dashboard-card-label">순 획득</div>
+            <h2 class="dashboard-card-value">{{ (stats.total_earned|default(0)) - (stats.total_spent|default(0)) }}</h2>
+            <div class="dashboard-card-icon" style="color: #0d6efd;">Σ</div>
+        </div>
+    </div>
+</div>
+
+<!-- 재화 조정 버튼 -->
+<div class="mb-3">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#adjustBalanceModal">
+        <i class="bi bi-wallet"></i> 재화 조정
+    </button>
+</div>
+
+<!-- 거래 내역 테이블 -->
+<div class="card">
+    <div class="card-body">
+        <h5 class="mb-3">거래 내역 목록</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>날짜</th>
+                        <th>유형</th>
+                        <th>금액</th>
+                        <th>카테고리</th>
+                        <th>설명</th>
+                        <th>관리자</th>
+                        <th>작업</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td class="small text-muted">{{ transaction.timestamp }}</td>
+                        <td>
+                            {% if transaction.transaction_type == 'purchase' %}
+                            <span class="badge bg-danger">구매</span>
+                            {% elif transaction.transaction_type == 'adjustment' %}
+                            <span class="badge bg-primary">조정</span>
+                            {% elif transaction.transaction_type == 'reward' %}
+                            <span class="badge bg-success">보상</span>
+                            {% elif transaction.transaction_type == 'attendance' %}
+                            <span class="badge bg-info">출석</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ transaction.transaction_type }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="{% if transaction.amount > 0 %}text-success{% elif transaction.amount < 0 %}text-danger{% endif %} fw-bold">
+                            {{ '+' if transaction.amount > 0 else '' }}{{ transaction.amount }}
+                        </td>
+                        <td class="small text-muted">{{ transaction.category|default('-') }}</td>
+                        <td class="small">{{ transaction.description|default('-') }}</td>
+                        <td class="small text-muted">{{ transaction.admin_name|default('system') }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteTransaction({{ transaction.id }}, {{ transaction.amount }}, '{{ transaction.description }}')">
+                                <i class="bi bi-trash"></i> 삭제
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <div class="fs-1 mb-2">💰</div>
+                            <p class="text-muted">거래 내역이 없습니다.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 재화 조정 모달 -->
+<div class="modal fade" id="adjustBalanceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">재화 조정</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="adjustBalanceForm">
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">금액 (양수: 추가, 음수: 차감)</label>
+                        <input type="number" class="form-control" id="amount" name="amount" required>
+                        <small class="form-text text-muted">예: +100 (지급), -50 (차감)</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">사유</label>
+                        <input type="text" class="form-control" id="description" name="description" required>
+                        <small class="form-text text-muted">예: 이벤트 보상, 규정 위반 벌금 등</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">현재 잔액</label>
+                        <input type="text" class="form-control" value="{{ user.balance|default(0) }} 갈레온" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">조정 후 잔액</label>
+                        <input type="text" class="form-control" id="afterBalance" readonly>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary" onclick="submitAdjustBalance()">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const currentBalance = {{ user.balance|default(0) }};
+
+// 금액 입력 시 조정 후 잔액 계산
+document.getElementById('amount').addEventListener('input', function() {
+    const amount = parseInt(this.value) || 0;
+    const afterBalance = currentBalance + amount;
+    document.getElementById('afterBalance').value = afterBalance + ' 갈레온';
+
+    // 음수 잔액 경고
+    if (afterBalance < 0) {
+        document.getElementById('afterBalance').classList.add('text-danger');
+    } else {
+        document.getElementById('afterBalance').classList.remove('text-danger');
+    }
+});
+
+function submitAdjustBalance() {
+    const amount = parseInt(document.getElementById('amount').value);
+    const description = document.getElementById('description').value;
+
+    if (!amount || !description) {
+        alert('모든 필드를 입력해주세요.');
+        return;
+    }
+
+    fetch('/api/v1/users/{{ user.mastodon_id }}/balance', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            amount: amount,
+            description: description
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.user) {
+            alert('재화가 조정되었습니다.\n새 잔액: ' + data.user.balance + ' 갈레온');
+            location.reload();
+        } else {
+            alert('재화 조정 실패: ' + (data.error || '알 수 없는 오류'));
+        }
+    })
+    .catch(error => {
+        alert('오류가 발생했습니다: ' + error);
+    });
+}
+
+function deleteTransaction(transactionId, amount, description) {
+    if (!confirm(`정말로 이 거래를 삭제하시겠습니까?\n금액: ${amount} 갈레온\n설명: ${description}\n\n삭제 시 잔액이 복원됩니다.`)) {
+        return;
+    }
+
+    fetch(`/api/v1/transactions/${transactionId}`, {
+        method: 'DELETE',
+        headers: {'Content-Type': 'application/json'}
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`거래가 삭제되었습니다.\n복원된 금액: ${data.refunded_amount} 갈레온`);
+            location.reload();
+        } else {
+            alert('삭제 실패: ' + (data.error || '알 수 없는 오류'));
+        }
+    })
+    .catch(error => {
+        alert('오류가 발생했습니다: ' + error);
+    });
+}
+</script>
+{% endblock %}

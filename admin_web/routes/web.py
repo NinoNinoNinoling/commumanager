@@ -15,7 +15,8 @@ from admin_web.dependencies import (
     get_vacation_service,
     get_warning_service,
     get_settings_service,
-    get_dashboard_service
+    get_dashboard_service,
+    get_shop_service
 )
 
 web_bp = Blueprint('web', __name__)
@@ -160,3 +161,43 @@ def account():
     return render_template('account.html',
                            mastodon_url=mastodon_url,
                            mastodon_settings_url=mastodon_settings_url)
+
+
+@web_bp.route('/users/<user_id>/warnings')
+@login_required
+def user_warnings(user_id):
+    """유저 경고 내역 상세 페이지"""
+    user_service = get_user_service()
+    warning_service = get_warning_service()
+
+    user = user_service.get_user(user_id)
+    if not user:
+        flash('존재하지 않는 유저입니다.', 'danger')
+        return redirect(url_for('web.users'))
+
+    warnings = warning_service.get_user_warnings(user_id)
+
+    return render_template('user_warnings.html',
+                           user=user,
+                           warnings=warnings)
+
+
+@web_bp.route('/users/<user_id>/transactions')
+@login_required
+def user_transactions(user_id):
+    """유저 거래 내역 상세 페이지"""
+    user_service = get_user_service()
+    transaction_service = get_transaction_service()
+
+    user = user_service.get_user(user_id)
+    if not user:
+        flash('존재하지 않는 유저입니다.', 'danger')
+        return redirect(url_for('web.users'))
+
+    transactions = transaction_service.get_user_transactions(user_id)
+    stats = transaction_service.get_transaction_stats(user_id)
+
+    return render_template('user_transactions.html',
+                           user=user,
+                           transactions=transactions,
+                           stats=stats)

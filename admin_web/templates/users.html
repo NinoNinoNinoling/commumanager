@@ -105,7 +105,7 @@
                                 {% for user in users %}
                                 <tr>
                                     <td>
-                                        <a href="{{ url_for('web.user_detail', user_id=user.mastodon_id) }}" class="text-decoration-none fw-bold text-primary">
+                                        <a href="{{ url_for('web.user_transactions', user_id=user.mastodon_id) }}" class="text-decoration-none fw-bold text-primary">
                                             {{ user.username }} 🔗
                                         </a>
                                     </td>
@@ -197,6 +197,9 @@ function loadRiskUsers() {
                         <td class="text-muted small">${user.detail}</td>
                         <td>-</td>
                         <td>
+                            <a href="/users/${user.mastodon_id}/warnings" class="btn btn-sm btn-outline-primary me-1">
+                                <i class="bi bi-list-ul"></i> 경고 내역
+                            </a>
                             <button class="btn btn-sm btn-danger" onclick="alert('준비 중입니다')">경고 발송</button>
                         </td>
                     </tr>

@@ -254,3 +254,30 @@ class WarningRepository:
 
         conn.commit()
         conn.close()
+
+    def delete(self, warning_id: int, connection=None) -> bool:
+        """
+        경고를 삭제합니다.
+
+        Args:
+            warning_id: 삭제할 경고 ID
+            connection: 트랜잭션용 연결 (선택사항)
+
+        Returns:
+            삭제 성공 여부
+        """
+        conn = connection or self._get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            DELETE FROM warnings
+            WHERE id = ?
+        """, (warning_id,))
+
+        rows_affected = cursor.rowcount
+
+        if connection is None:
+            conn.commit()
+            conn.close()
+
+        return rows_affected > 0

@@ -460,6 +460,58 @@ OAuth 콜백 처리
 
 **Response**: 201 Created
 
+### DELETE /api/v1/transactions/{transaction_id}
+거래 내역 삭제
+
+**설명**: 거래 내역을 삭제하고 유저의 잔액을 복원합니다 (원자적 트랜잭션).
+
+**Response**:
+```json
+{
+  "success": true,
+  "deleted_transaction_id": 456,
+  "refunded_amount": 100,
+  "user": {
+    "mastodon_id": "123456",
+    "balance": 1100
+  }
+}
+```
+
+**Error**: 404 Not Found (거래 내역이 존재하지 않는 경우)
+
+### POST /api/v1/shop/purchase
+아이템 구매 (관리자 웹 UI용 - 봇 명령어와 동일한 로직)
+
+**Request**:
+```json
+{
+  "item_id": 1,
+  "quantity": 2
+}
+```
+
+**참고**: 현재 로그인한 유저(session)가 구매자로 처리됩니다.
+
+**Response**:
+```json
+{
+  "success": true,
+  "item": {
+    "id": 1,
+    "name": "마법 지팡이",
+    "price": 500
+  },
+  "quantity": 2,
+  "total_price": 1000,
+  "new_balance": 500
+}
+```
+
+**Error**:
+- 400 Bad Request: 잔액 부족, 재고 부족, 아이템 비활성
+- 404 Not Found: 아이템이 존재하지 않음
+
 ## 활동량 관리 (Activity)
 
 ### GET /api/v1/activity/check
@@ -663,6 +715,25 @@ OAuth 콜백 처리
   "failed_count": 1
 }
 ```
+
+### DELETE /api/v1/warnings/{warning_id}
+경고 삭제
+
+**설명**: 경고를 삭제하고 유저의 warning_count를 감소시킵니다 (원자적 트랜잭션).
+
+**Response**:
+```json
+{
+  "success": true,
+  "deleted_warning_id": 123,
+  "user": {
+    "mastodon_id": "123456",
+    "warning_count": 1
+  }
+}
+```
+
+**Error**: 404 Not Found (경고가 존재하지 않는 경우)
 
 ## 휴식 관리 (Vacation)
 
