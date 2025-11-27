@@ -107,12 +107,21 @@ class UserRepository:
         conn.commit()
         conn.close()
 
-    def increment_warning_count(self, mastodon_id: str) -> None:
-        conn = self._get_connection()
+    def increment_warning_count(self, mastodon_id: str, connection=None) -> None:
+        """
+        유저의 경고 횟수를 1 증가시킵니다.
+
+        Args:
+            mastodon_id: 유저의 Mastodon ID
+            connection: 트랜잭션용 연결 (선택사항)
+        """
+        conn = connection or self._get_connection()
         cursor = conn.cursor()
         cursor.execute("UPDATE users SET warning_count = warning_count + 1 WHERE mastodon_id = ?", (mastodon_id,))
-        conn.commit()
-        conn.close()
+
+        if connection is None:  # 독립 호출이면 자동 커밋
+            conn.commit()
+            conn.close()
 
     def update_key_member(self, mastodon_id: str, is_key_member: bool) -> None:
         conn = self._get_connection()

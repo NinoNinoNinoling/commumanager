@@ -3,6 +3,8 @@
 Warning 관련 비즈니스 로직을 처리하는 서비스 계층
 """
 import os
+import logging
+import sqlite3
 from typing import List, Optional, Dict, Any
 from flask import current_app
 
@@ -12,6 +14,8 @@ from admin_web.repositories.warning_repository import WarningRepository
 from admin_web.repositories.user_repository import UserRepository
 from admin_web.repositories.ban_record_repository import BanRecordRepository
 from bot.utils import create_mastodon_client, send_dm
+
+logger = logging.getLogger(__name__)
 
 
 class WarningService:
@@ -72,7 +76,7 @@ class WarningService:
         actual_replies: Optional[int] = None
     ) -> Dict[str, Any]:
         """
-        유저에게 경고를 발행하고 warning_count를 증가시킵니다.
+        유저에게 경고를 발행하고 warning_count를 증가시킵니다. (원자적 트랜잭션)
         3회 경고 시 자동으로 아웃 처리합니다.
         """
         if warning_type not in self.VALID_WARNING_TYPES:
@@ -89,19 +93,34 @@ class WarningService:
             admin_name=admin_name
         )
 
-        # 1. Warning 생성 및 User warning_count 증가
-        created_warning = self.warning_repo.create(warning)
-        self.user_repo.increment_warning_count(user_id)
-        updated_user = self.user_repo.find_by_id(user_id)
+        # [중요] 원자적 트랜잭션: Warning 생성 + User warning_count 증가
+        conn = sqlite3.connect(self.db_path)
+        try:
+            # 1. Warning 생성 및 User warning_count 증가 (동일한 conn 전달)
+            created_warning = self.warning_repo.create(warning, connection=conn)
+            self.user_repo.increment_warning_count(user_id, connection=conn)
 
-        # 2. 3회 도달 시 자동 아웃 처리
-        if updated_user and updated_user.warning_count >= 3:
-            self._handle_auto_ban(user_id, updated_user)
+            # 2. 모든 작업 성공 시 커밋
+            conn.commit()
 
-        return {
-            'warning': created_warning.to_dict() if hasattr(created_warning, 'to_dict') else created_warning,
-            'user': updated_user.to_dict() if updated_user else None
-        }
+            # 3. 업데이트된 유저 정보 조회
+            updated_user = self.user_repo.find_by_id(user_id)
+
+            # 4. 3회 도달 시 자동 아웃 처리 (트랜잭션 외부)
+            if updated_user and updated_user.warning_count >= 3:
+                self._handle_auto_ban(user_id, updated_user)
+
+            return {
+                'warning': created_warning.to_dict() if hasattr(created_warning, 'to_dict') else created_warning,
+                'user': updated_user.to_dict() if updated_user else None
+            }
+
+        except Exception as e:
+            conn.rollback()  # 실패 시 롤백
+            logger.error(f"Failed to issue warning for {user_id}: {e}")
+            raise e
+        finally:
+            conn.close()
 
     def _handle_auto_ban(self, user_id: str, user_obj):
         """자동 아웃 처리 로직 분리"""
@@ -127,10 +146,7 @@ class WarningService:
                     dm_message = f"커뮤니티 규정에 따라 경고 3회 누적으로 계정이 비활성화되었습니다. 자세한 내용은 관리자에게 문의해주세요."
                     send_dm(mastodon, user_obj.username, dm_message)
             except Exception as e:
-                if current_app:
-                    current_app.logger.error(f"Error sending auto-ban DM to {user_obj.username}: {e}")
-                else:
-                    print(f"[ERROR] Error sending auto-ban DM to {user_obj.username}: {e}")
+                logger.error(f"Error sending auto-ban DM to {user_obj.username}: {e}")
 
     def get_warning(self, warning_id: int) -> Optional[Warning]:
         """ID로 경고를 조회합니다."""

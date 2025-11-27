@@ -139,33 +139,28 @@ def update_settings():
     return jsonify(result), status_code
 
 
-@api_bp.route('/warnings', methods=['POST', 'GET'])
+@api_bp.route('/warnings', methods=['GET'])
 @require_auth
-def handle_warnings():
+def get_warnings():
+    """전체 경고 목록 조회"""
     warning_service = get_warning_service()
-    
-    if request.method == 'GET':
-        warnings = warning_service.get_all_warnings()
-        return jsonify({'warnings': warnings})
-        
-    elif request.method == 'POST':
-        # POST 요청일 때만 스키마 검증을 수동 호출하거나, 
-        # 별도 함수로 분리하는 게 좋지만 여기선 간단히 내부 처리
-        if not request.is_json:
-             return jsonify({'error': 'Request must be JSON'}), 400
-        
-        data = request.get_json()
-        # 필수 필드 수동 체크 (GET/POST 혼용 라우트라 데코레이터 적용이 까다로움)
-        required = ['user_id', 'type', 'message']
-        missing = [f for f in required if f not in data]
-        if missing:
-            return jsonify({'error': 'Missing fields', 'fields': missing}), 400
+    warnings = warning_service.get_all_warnings()
+    return jsonify({'warnings': warnings})
 
-        try:
-            result = warning_service.create_warning(data)
-            return jsonify(result), 201
-        except ValueError as e:
-            return jsonify({'error': str(e)}), 400
+
+@api_bp.route('/warnings', methods=['POST'])
+@require_auth
+@validate_schema(required_fields=['user_id', 'type', 'message'])
+def create_warning():
+    """새 경고 생성"""
+    warning_service = get_warning_service()
+    data = request.get_json()
+
+    try:
+        result = warning_service.create_warning(data)
+        return jsonify(result), 201
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
 
 
 @api_bp.route('/users/<user_id>/warnings', methods=['GET'])

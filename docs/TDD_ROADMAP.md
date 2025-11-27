@@ -1,7 +1,8 @@
 # TDD 전체 재작성 로드맵
 
 > **전략**: 모든 기존 코드를 백업하고, 순수 TDD(Red → Green → Refactor)로 처음부터 재구축
-> **원칙**: Kent Beck의 TDD + Tidy First + 5-Layer Architecture
+> **원칙**: Kent Beck의 TDD + Tidy First + 4-Layer Architecture
+> **최신 업데이트 (2025-11)**: Controller 제거, DI 도입, Atomic Transactions 적용
 
 ---
 
@@ -53,8 +54,8 @@
 # admin_web/ 전체를 백업
 mv admin_web admin_web_backup_$(date +%Y%m%d)
 
-# 새로운 admin_web/ 디렉토리 생성
-mkdir -p admin_web/{models,repositories,services,controllers,routes,templates,static,utils,tests}
+# 새로운 admin_web/ 디렉토리 생성 (4-Layer Architecture)
+mkdir -p admin_web/{models,repositories,services,routes,templates,static,utils,tests}
 ```
 
 #### 2. 테스트 프레임워크 설정
@@ -139,10 +140,10 @@ class Config:
 - [x] UserService (핵심 비즈니스 로직: adjust_balance)
 - **Commit**: a0af305 - "기능 추가: Phase 1 (Part 3/3)"
 
-**Phase 1.9: Controllers (연기됨)**
-- [ ] UserController → **Phase 7로 연기**
-- [ ] TransactionController → **Phase 7로 연기**
-- **이유**: 도메인 로직 우선 완성, Controller는 통합 단계에서 구현
+**Phase 1.9: Controllers (제거됨 - 2025-11)**
+- [x] UserController → **제거됨 (4-Layer Architecture 전환)**
+- [x] TransactionController → **제거됨**
+- **변경**: Route에서 직접 Service 호출 (DI 패턴 사용)
 
 **총 테스트**: 61 passed (6 DB + 19 Models + 21 Repositories + 15 Services)
 
@@ -435,10 +436,11 @@ def test_should_return_none_when_user_not_found():
   - 휴가 생성/조회/승인/거부/삭제
   - 휴가 통계 (총 휴가 수, 승인/미승인, 총 일수)
 
-- **Phase 2.7**: Controllers (연기)
-  - WarningController → **Phase 7로 연기**
-  - VacationController → **Phase 7로 연기**
-  - ActivityController → **Phase 7로 연기**
+- **Phase 2.7**: Controllers (제거됨 - 2025-11)
+  - WarningController → **제거됨 (4-Layer Architecture 전환)**
+  - VacationController → **제거됨**
+  - ActivityController → **제거됨**
+  - **변경**: Route에서 직접 Service 호출 (DI 패턴 사용)
 
 **총 테스트**: 64 passed (11 + 10 + 10 + 11 + 11 + 11)
 **누적 테스트**: 125 passed (Phase 0-2)
@@ -1299,13 +1301,15 @@ GET    /api/v1/admin-logs                 # 관리자 로그 조회
 
 ---
 
-## ✅ Phase 7: Controller 통합 & 대시보드 (부분 완료)
+## ✅ Phase 7: Routes 리팩터링 & 대시보드 (완료)
 
 ### 🎯 목표
-- **모든 Controller 구현 (Phase 1-6에서 연기된 항목)**
+- **4-Layer Architecture 전환 (Controller 제거)** ✅
+- **Dependency Injection 도입** ✅
+- **Input Validation 자동화** ✅
+- **Atomic Transactions 구현** ✅
 - 대시보드 통계 API ✅
 - 웹훅 시스템 ✅
-- 전체 시스템 통합 테스트
 
 ### 📦 의존성
 - Phase 1-6 도메인 로직 완료 (Models, Repositories, Services)
@@ -1346,31 +1350,37 @@ GET    /api/v1/admin-logs                 # 관리자 로그 조회
 - [x] ARCHITECTURE.md에 웹훅 처리 흐름 추가
 - **Commit**: 044321d - "문서 업데이트: 웹훅 엔드포인트 및 역할 동기화 문서화"
 
-### 🎮 Controller 통합 구현 (TDD) - 미완료
+### 🏗️ 아키텍처 리팩터링 (완료 - 2025-11)
 
-**Phase 1 Controllers:**
-- [ ] UserController (tests/controllers/test_user_controller.py)
-- [ ] TransactionController
+**Phase 7.4: Atomic Transactions (완료)**
+- [x] Connection Sharing 패턴 구현
+- [x] Repository에 `connection` 파라미터 추가
+- [x] Service 계층에서 트랜잭션 관리
+- [x] 예: `UserService.adjust_balance()` - 유저 잔액 + 거래 기록을 원자적으로 처리
+- **Commit**: b7cb29d - "Refactor: Implement Atomic Transactions using Connection Sharing"
 
-**Phase 2 Controllers:**
-- [ ] WarningController
-- [ ] VacationController
-- [ ] ActivityController
+**Phase 7.5: Dependency Injection (완료)**
+- [x] `admin_web/dependencies.py` 생성
+- [x] Flask `g` 객체를 사용한 요청 수명 주기 DI
+- [x] 7개 서비스 DI 적용 (UserService, DashboardService, WarningService, ItemService, SettingsService, TransactionService, VacationService)
+- [x] Routes에서 DI 컨테이너 사용 (`get_user_service()` 등)
+- **Commits**:
+  - a498168 - "Refactor: Implement Dependency Injection for Service instances"
+  - 27a3d49 - "Refactor: Apply Dependency Injection to Web Routes for optimization"
 
-**Phase 3 Controllers:**
-- [ ] ItemController
-- [ ] ShopController
+**Phase 7.6: Input Validation (완료)**
+- [x] `admin_web/utils/validators.py` 생성
+- [x] `@validate_schema` 데코레이터 구현
+- [x] API Routes에 검증 데코레이터 적용
+- [x] 코드 중복 제거 (필수 필드 검증 로직 통일)
+- **Commit**: d413b97 - "Feat: Add Input Validation Decorator & Fix API Tests"
 
-**Phase 4 Controllers:**
-- [ ] CalendarController
-
-**Phase 5 Controllers:**
-- [ ] StoryEventController
-- [ ] ScheduledAnnouncementController
-
-**Phase 6 Controllers:**
-- [ ] SettingsController
-- [ ] AdminLogController
+**Phase 7.7: Controller 제거 (완료)**
+- [x] 구버전 Controller 파일 제거 (user_controller.py, warning_controller.py)
+- [x] Route → Service 직접 호출 패턴으로 전환
+- [x] 4-Layer Architecture 확립 (Route → Service → Repository → Model)
+- [x] print 문 → logger 교체
+- **Commit**: 9f26c05 - "Cleanup: Remove deprecated controllers and replace print with logger"
 
 ### 🧠 Service 로직
 
@@ -1802,25 +1812,28 @@ def test_complete_bot_workflow():
 | Phase | 목표 | 상태 | 예상 시간 | 누적 시간 |
 |-------|------|------|----------|----------|
 | 0 | 프로젝트 초기화 & 테스트 환경 | ✅ 완료 | 2~3h | 3h |
-| 1 | User & Transaction | ✅ 완료 (Controllers 제외) | 6~8h | 11h |
-| 2 | Warning & Vacation | ✅ 완료 (Controllers 제외) | 6~8h | 19h |
+| 1 | User & Transaction | ✅ 완료 | 6~8h | 11h |
+| 2 | Warning & Vacation | ✅ 완료 | 6~8h | 19h |
 | **2.5** | **도커화 & 서버 배포** 🐳 | ⏸️ 보류 | **3~4h** | **23h** |
 | 3 | Item & Shop | ⏳ 미완료 | 4~5h | 28h |
 | 4 | Calendar Events | ⏳ 미완료 | 3~4h | 32h |
 | 5 | Story Events & Announcements | ⏳ 미완료 | 6~7h | 39h |
 | 6 | Settings & Admin Logs | ⏳ 미완료 | 3~4h | 43h |
-| **7** | **Dashboard & 웹훅 & 통합** | **🔄 부분 완료** | **3~4h** | **47h** |
+| **7** | **Routes 리팩터링 & 대시보드** | **✅ 완료 (2025-11)** | **3~4h** | **47h** |
 | 8 | 인증 & 권한 | ⏳ 미완료 | 4~5h | 52h |
 
-**Phase 7 완료 항목:**
-- ✅ DashboardService, DashboardController, dashboard.html (자동 갱신)
-- ✅ WebhookService, WebhookController (/webhooks/mastodon)
+**Phase 7 완료 항목 (2025-11 리팩터링):**
+- ✅ 4-Layer Architecture 전환 (Controller 제거)
+- ✅ Dependency Injection 도입 (dependencies.py)
+- ✅ Input Validation 자동화 (validators.py)
+- ✅ Atomic Transactions 구현 (Connection Sharing)
+- ✅ DashboardService, dashboard.html (자동 갱신)
+- ✅ WebhookService (/webhooks/mastodon)
 - ✅ 마스토돈 역할 연동 (OAuth + 웹훅)
 - ✅ 시스템 계정 필터링
-- ❌ Phase 1-6 Controllers (미완료)
 
 **관리자 웹 소계: 약 52시간 (6.5일 풀타임)**
-**현재 진행률: Phase 0-2 완료, Phase 7 부분 완료 (약 30% 진행)**
+**현재 진행률: Phase 0-2, 7 완료 (약 40% 진행)**
 
 ### 봇 시스템 (economy_bot)
 
@@ -1876,9 +1889,10 @@ def test_complete_bot_workflow():
 mv admin_web admin_web_backup_$(date +%Y%m%d)
 ```
 
-### 2. 새 디렉토리 생성
+### 2. 새 디렉토리 생성 (4-Layer Architecture)
 ```bash
-mkdir -p admin_web/{models,repositories,services,controllers,routes,templates,static,utils,tests}
+mkdir -p admin_web/{models,repositories,services,routes,templates,static,utils,tests}
+# 주의: controllers/ 디렉토리는 제거됨 (2025-11 리팩터링)
 ```
 
 ### 3. 테스트 프레임워크 설치
