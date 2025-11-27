@@ -1,6 +1,8 @@
 services:
   admin_web:
     build: .
+    # 컨테이너 이름을 명시하여 관리하기 쉽게 합니다
+    container_name: commumanager
     ports:
       - "5000:5000"
     volumes:
@@ -9,15 +11,27 @@ services:
       - ./tests:/app/tests
     environment:
       - FLASK_ENV=production
-      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+      # [중요] 앱이 DB 위치를 찾을 수 있도록 경로 지정
+      - DATABASE_PATH=/app/economy.db
+      
+      # 보안 설정 (기본값 제거 -> .env 강제)
+      - SECRET_KEY=${SECRET_KEY}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      
+      # 마스토돈 연동
       - MASTODON_INSTANCE_URL=${MASTODON_INSTANCE_URL}
       - MASTODON_CLIENT_ID=${MASTODON_CLIENT_ID}
       - MASTODON_CLIENT_SECRET=${MASTODON_CLIENT_SECRET}
       - MASTODON_REDIRECT_URI=${MASTODON_REDIRECT_URI}
-      - MASTODON_ADMIN_ACCOUNTS=${MASTODON_ADMIN_ACCOUNTS}
+      
+      # 봇 토큰 (추가됨)
       - BOT_ACCESS_TOKEN=${BOT_ACCESS_TOKEN}
+      - STORY_ACCESS_TOKEN=${STORY_ACCESS_TOKEN}
+      - SUPERVISOR_ACCESS_TOKEN=${SUPERVISOR_ACCESS_TOKEN}
+      
+      # 웹훅
       - MASTODON_WEBHOOK_SECRET=${MASTODON_WEBHOOK_SECRET}
+      
     restart: unless-stopped
     networks:
       - app_network

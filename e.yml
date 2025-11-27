@@ -1,0 +1,56 @@
+[1mdiff --git a/admin_web/app.py b/admin_web/app.py[m
+[1mindex 1bf38d1..69ddeeb 100644[m
+[1m--- a/admin_web/app.py[m
+[1m+++ b/admin_web/app.py[m
+[36m@@ -13,37 +13,36 @@[m [mdef create_app():[m
+     """Flask 앱 생성"""[m
+     app = Flask(__name__)[m
+ [m
+[31m-    # 환경 변수에서 SECRET_KEY 가져오기 (필수)[m
+[32m+[m[32m    # 1. 기본 설정[m
+[32m+[m[32m    app.config['DATABASE_PATH'] = os.getenv('DATABASE_PATH', 'economy.db')[m
+[32m+[m[41m    [m
+[32m+[m[32m    # 2. 보안 키 설정[m
+     secret_key = os.environ.get('SECRET_KEY')[m
+     if not secret_key:[m
+[31m-        # 개발 환경 편의를 위해 기본값 제공하되 경고 로그 출력 (선택 사항)[m
+[32m+[m[32m        if os.environ.get('FLASK_ENV') == 'production':[m
+[32m+[m[32m            raise RuntimeError("SECRET_KEY 환경 변수가 설정되지 않았습니다. 프로덕션을 위해 반드시 설정해주세요.")[m
+         logger.warning("SECRET_KEY가 설정되지 않았습니다. 임시 키를 사용합니다.")[m
+         secret_key = 'dev-secret-key-change-in-prod'[m
+     app.secret_key = secret_key[m
+ [m
+[31m-    # CSRF 보호 초기화[m
+[32m+[m[32m    # 3. CSRF 보호 초기화[m
+     csrf = CSRFProtect(app)[m
+[31m-    [m
+[31m-    # [중요] 웹훅은 외부(Mastodon)에서 오므로 CSRF 토큰 검증 예외 처리[m
+[31m-    csrf.exempt(webhook_bp) [m
+[32m+[m[32m    csrf.exempt(webhook_bp)  # 웹훅 예외 처리[m
+ [m
+[31m-    # 세션 보안 설정[m
+[31m-    # 주의: HTTPS가 아닌 로컬 개발 환경(http://localhost)에서는 SECURE=True 때문에 쿠키가 안 구워질 수 있습니다.[m
+[31m-    # 개발 환경 변수(FLASK_ENV)에 따라 조건부 적용하는 것이 좋습니다.[m
+[32m+[m[32m    # 4. 세션 보안 설정[m
+     is_production = os.environ.get('FLASK_ENV') == 'production'[m
+[31m-    [m
+[31m-    app.config['SESSION_COOKIE_SECURE'] = is_production  # 프로덕션(HTTPS)에서만 True[m
+[31m-    app.config['SESSION_COOKIE_HTTPONLY'] = True         # JavaScript 접근 방지[m
+[31m-    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'        # CSRF 방어[m
+[32m+[m[32m    app.config['SESSION_COOKIE_SECURE'] = is_production[m
+[32m+[m[32m    app.config['SESSION_COOKIE_HTTPONLY'] = True[m
+[32m+[m[32m    app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'[m
+ [m
+[31m-    # 마스토돈 및 기타 필수 환경 변수 로드[m
+[32m+[m[32m    # 5. 마스토돈 및 기타 필수 환경 변수 로드[m
+     app.config['MASTODON_INSTANCE_URL'] = os.getenv('MASTODON_INSTANCE_URL')[m
+     app.config['MASTODON_CLIENT_ID'] = os.getenv('MASTODON_CLIENT_ID')[m
+     app.config['MASTODON_CLIENT_SECRET'] = os.getenv('MASTODON_CLIENT_SECRET')[m
+     app.config['BOT_ACCESS_TOKEN'] = os.getenv('BOT_ACCESS_TOKEN')[m
+     app.config['ADMIN_PASSWORD'] = os.getenv('ADMIN_PASSWORD')[m
+ [m
+[31m-    # Blueprint 등록[m
+[32m+[m[32m    # 6. Blueprint 등록[m
+     app.register_blueprint(web_bp)[m
+     app.register_blueprint(api_bp)[m
+     app.register_blueprint(webhook_bp)[m
