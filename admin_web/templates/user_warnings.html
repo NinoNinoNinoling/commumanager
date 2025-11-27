@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}{{ user.username }} - 경고 내역{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('web.users') }}">유저 관리</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ user.username }} - 경고 내역</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="page-header">
+            <h2 class="page-title mb-1">{{ user.username }}님의 경고 내역</h2>
+            <p class="page-subtitle mb-0">Mastodon ID: {{ user.mastodon_id }}</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <small class="text-muted d-block">현재 경고 횟수</small>
+                <h2 class="mb-0 {% if user.warning_count >= 3 %}text-danger{% elif user.warning_count >= 2 %}text-warning{% else %}text-success{% endif %}">
+                    {{ user.warning_count|default(0) }} / 3
+                </h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 경고 추가 버튼 -->
+<div class="mb-3">
+    <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#addWarningModal">
+        <i class="bi bi-exclamation-triangle"></i> 경고 추가
+    </button>
+</div>
+
+<!-- 경고 내역 테이블 -->
+<div class="card">
+    <div class="card-body">
+        <h5 class="mb-3">경고 내역 목록</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>날짜</th>
+                        <th>경고 유형</th>
+                        <th>사유</th>
+                        <th>관리자</th>
+                        <th>DM 발송</th>
+                        <th>작업</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for warning in warnings %}
+                    <tr>
+                        <td>{{ warning.timestamp }}</td>
+                        <td>
+                            {% if warning.warning_type == 'activity' %}
+                            <span class="badge bg-warning">활동량 부족</span>
+                            {% elif warning.warning_type == 'isolation' %}
+                            <span class="badge bg-danger">고립</span>
+                            {% elif warning.warning_type == 'bias' %}
+                            <span class="badge bg-info">편향</span>
+                            {% elif warning.warning_type == 'avoidance' %}
+                            <span class="badge bg-secondary">회피</span>
+                            {% else %}
+                            <span class="badge bg-dark">{{ warning.warning_type }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small">{{ warning.message|default('사유 없음') }}</td>
+                        <td>{{ warning.admin_name|default('system') }}</td>
+                        <td>
+                            {% if warning.dm_sent %}
+                            <span class="text-success">✓ 발송됨</span>
+                            {% else %}
+                            <span class="text-muted">미발송</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteWarning({{ warning.id }}, '{{ warning.warning_type }}')">
+                                <i class="bi bi-trash"></i> 삭제
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="fs-1 mb-2">✅</div>
+                            <p class="text-muted">경고 내역이 없습니다.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 경고 추가 모달 -->
+<div class="modal fade" id="addWarningModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">경고 추가</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addWarningForm">
+                    <div class="mb-3">
+                        <label for="warningType" class="form-label">경고 유형</label>
+                        <select class="form-select" id="warningType" name="type" required>
+                            <option value="">선택하세요</option>
+                            <option value="activity">활동량 부족</option>
+                            <option value="isolation">고립</option>
+                            <option value="bias">편향</option>
+                            <option value="avoidance">회피</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="warningMessage" class="form-label">사유</label>
+                        <textarea class="form-control" id="warningMessage" name="message" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="adminName" class="form-label">관리자 이름</label>
+                        <input type="text" class="form-control" id="adminName" name="admin_name" value="{{ session.get('user_id', 'admin') }}" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-warning" onclick="submitAddWarning()">경고 추가</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function submitAddWarning() {
+    const form = document.getElementById('addWarningForm');
+    const formData = new FormData(form);
+
+    const data = {
+        user_id: '{{ user.mastodon_id }}',
+        type: formData.get('type'),
+        message: formData.get('message'),
+        admin_name: formData.get('admin_name')
+    };
+
+    fetch('/api/v1/warnings', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.warning) {
+            alert('경고가 추가되었습니다.');
+            location.reload();
+        } else {
+            alert('경고 추가 실패: ' + (data.error || '알 수 없는 오류'));
+        }
+    })
+    .catch(error => {
+        alert('오류가 발생했습니다: ' + error);
+    });
+}
+
+function deleteWarning(warningId, warningType) {
+    if (!confirm(`정말로 이 경고(${warningType})를 삭제하시겠습니까?\n삭제 시 경고 횟수가 감소합니다.`)) {
+        return;
+    }
+
+    fetch(`/api/v1/warnings/${warningId}`, {
+        method: 'DELETE',
+        headers: {'Content-Type': 'application/json'}
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('경고가 삭제되었습니다.');
+            location.reload();
+        } else {
+            alert('삭제 실패: ' + (data.error || '알 수 없는 오류'));
+        }
+    })
+    .catch(error => {
+        alert('오류가 발생했습니다: ' + error);
+    });
+}
+</script>
+{% endblock %}

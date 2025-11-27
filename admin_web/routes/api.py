@@ -14,7 +14,9 @@ from admin_web.dependencies import (
     get_dashboard_service,
     get_warning_service,
     get_item_service,
-    get_settings_service
+    get_settings_service,
+    get_transaction_service,
+    get_shop_service
 )
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
@@ -169,3 +171,59 @@ def get_warnings_for_user(user_id):
     warning_service = get_warning_service()
     warnings = warning_service.get_user_warnings(user_id)
     return jsonify({'warnings': warnings})
+
+
+@api_bp.route('/shop/purchase', methods=['POST'])
+@require_auth
+@validate_schema(required_fields=['item_id'])
+def purchase_item():
+    """아이템 구매"""
+    data = request.get_json()
+    item_id = data.get('item_id')
+    quantity = data.get('quantity', 1)
+    user_id = session.get('user_id')
+
+    # 수량 검증
+    if not isinstance(quantity, int) or quantity < 1:
+        return jsonify({'error': 'Quantity must be a positive integer'}), 400
+
+    shop_service = get_shop_service()
+    result = shop_service.purchase_item(user_id, item_id, quantity)
+
+    if result.get('success'):
+        return jsonify(result), 200
+    else:
+        return jsonify(result), 400
+
+
+@api_bp.route('/users/<user_id>/transactions', methods=['GET'])
+@require_auth
+def get_user_transactions(user_id):
+    """유저의 거래 내역 조회"""
+    transaction_service = get_transaction_service()
+    transactions = transaction_service.get_user_transactions(user_id)
+    return jsonify({'transactions': transactions})
+
+
+@api_bp.route('/warnings/<int:warning_id>', methods=['DELETE'])
+@require_auth
+def delete_warning(warning_id):
+    """경고 삭제"""
+    warning_service = get_warning_service()
+    try:
+        result = warning_service.delete_warning(warning_id)
+        return jsonify(result), 200
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 404
+
+
+@api_bp.route('/transactions/<int:transaction_id>', methods=['DELETE'])
+@require_auth
+def delete_transaction(transaction_id):
+    """거래 내역 삭제"""
+    transaction_service = get_transaction_service()
+    try:
+        result = transaction_service.delete_transaction(transaction_id)
+        return jsonify(result), 200
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 404

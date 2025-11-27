@@ -67,3 +67,53 @@ class TransactionService:
                 'total_spent': user.total_spent
             }
         return {'total_earned': 0, 'total_spent': 0}
+
+    def delete_transaction(self, transaction_id: int) -> Dict[str, Any]:
+        """
+        거래 내역을 삭제하고 유저의 잔액을 복원합니다. (원자적 트랜잭션)
+
+        Args:
+            transaction_id: 삭제할 거래 ID
+
+        Returns:
+            삭제 결과 딕셔너리
+
+        Raises:
+            ValueError: 거래 내역이 존재하지 않는 경우
+        """
+        # 거래 내역 조회 (트랜잭션 외부)
+        transaction = self.transaction_repo.find_by_id(transaction_id)
+        if not transaction:
+            raise ValueError('Transaction not found')
+
+        user_id = transaction.user_id
+        amount = transaction.amount  # 원래 거래 금액
+
+        # [중요] 원자적 트랜잭션: Transaction 삭제 + User 잔액 복원
+        conn = sqlite3.connect(self.db_path)
+        try:
+            # 1. Transaction 삭제
+            deleted = self.transaction_repo.delete(transaction_id, connection=conn)
+
+            # 2. User 잔액 복원 (거래를 취소하므로 반대로 조정)
+            # 예: 원래 -100 (지출)이었다면, +100으로 복원
+            self.user_repo.adjust_balance(user_id, -amount, connection=conn)
+
+            # 3. 모든 작업 성공 시 커밋
+            conn.commit()
+
+            # 4. 업데이트된 유저 정보 조회
+            updated_user = self.user_repo.find_by_id(user_id)
+
+            return {
+                'success': True,
+                'deleted_transaction_id': transaction_id,
+                'refunded_amount': -amount,
+                'user': updated_user.to_dict() if updated_user else None
+            }
+
+        except Exception as e:
+            conn.rollback()
+            raise e
+        finally:
+            conn.close()

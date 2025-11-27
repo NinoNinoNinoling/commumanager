@@ -198,3 +198,59 @@ class WarningService:
             warning_type = warning.warning_type
             counts[warning_type] = counts.get(warning_type, 0) + 1
         return counts
+
+    def delete_warning(self, warning_id: int) -> Dict[str, Any]:
+        """
+        경고를 삭제하고 유저의 warning_count를 감소시킵니다. (원자적 트랜잭션)
+
+        Args:
+            warning_id: 삭제할 경고 ID
+
+        Returns:
+            삭제 결과 딕셔너리
+
+        Raises:
+            ValueError: 경고가 존재하지 않는 경우
+        """
+        # 경고 조회 (트랜잭션 외부)
+        warning = self.warning_repo.find_by_id(warning_id)
+        if not warning:
+            raise ValueError('Warning not found')
+
+        user_id = warning.user_id
+
+        # [중요] 원자적 트랜잭션: Warning 삭제 + User warning_count 감소
+        conn = sqlite3.connect(self.db_path)
+        try:
+            # 1. Warning 삭제
+            deleted = self.warning_repo.delete(warning_id, connection=conn)
+
+            # 2. User warning_count 감소
+            user = self.user_repo.find_by_id(user_id)
+            if user and user.warning_count > 0:
+                # warning_count를 -1로 조정
+                cursor = conn.cursor()
+                cursor.execute("""
+                    UPDATE users
+                    SET warning_count = warning_count - 1
+                    WHERE mastodon_id = ? AND warning_count > 0
+                """, (user_id,))
+
+            # 3. 모든 작업 성공 시 커밋
+            conn.commit()
+
+            # 4. 업데이트된 유저 정보 조회
+            updated_user = self.user_repo.find_by_id(user_id)
+
+            return {
+                'success': True,
+                'deleted_warning_id': warning_id,
+                'user': updated_user.to_dict() if updated_user else None
+            }
+
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Failed to delete warning {warning_id}: {e}")
+            raise e
+        finally:
+            conn.close()
