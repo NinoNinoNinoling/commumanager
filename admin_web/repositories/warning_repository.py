@@ -61,17 +61,18 @@ class WarningRepository:
             timestamp=parse_datetime(row['timestamp'])
         )
 
-    def create(self, warning: Warning) -> Warning:
+    def create(self, warning: Warning, connection=None) -> Warning:
         """
         새 경고를 생성합니다.
 
         Args:
             warning: 생성할 Warning 인스턴스
+            connection: 트랜잭션용 연결 (선택사항)
 
         Returns:
             ID가 포함된 생성된 경고
         """
-        conn = self._get_connection()
+        conn = connection or self._get_connection()
         cursor = conn.cursor()
 
         cursor.execute("""
@@ -92,8 +93,10 @@ class WarningRepository:
         ))
 
         warning_id = cursor.lastrowid
-        conn.commit()
-        conn.close()
+
+        if connection is None:  # 독립 호출이면 자동 커밋
+            conn.commit()
+            conn.close()
 
         return self.find_by_id(warning_id)
 
