@@ -53,7 +53,7 @@ class InventoryRepository:
             acquired_at=parse_datetime(row['acquired_at'])
         )
 
-    def add_or_update(self, inventory: Inventory) -> Inventory:
+    def add_or_update(self, inventory: Inventory, connection=None) -> Inventory:
         """
         인벤토리에 아이템을 추가하거나 수량을 업데이트합니다.
 
@@ -61,17 +61,18 @@ class InventoryRepository:
 
         Args:
             inventory: 추가/업데이트할 Inventory 객체
+            connection: 트랜잭션용 연결 (선택사항)
 
         Returns:
             추가/업데이트된 Inventory 객체
         """
-        conn = self._get_connection()
+        conn = connection or self._get_connection()
         cursor = conn.cursor()
 
         # Check if exists
         cursor.execute("SELECT * FROM inventory WHERE user_id = ? AND item_id = ?", (inventory.user_id, inventory.item_id))
         existing = cursor.fetchone()
-        
+
         if existing:
             new_quantity = existing['quantity'] + inventory.quantity
             cursor.execute("UPDATE inventory SET quantity = ? WHERE user_id = ? AND item_id = ?",
@@ -83,13 +84,17 @@ class InventoryRepository:
                 VALUES (?, ?, ?)
             """, (inventory.user_id, inventory.item_id, inventory.quantity))
             result_id = cursor.lastrowid
-        
-        conn.commit()
-        
+
+        if connection is None:  # 독립 호출이면 자동 커밋
+            conn.commit()
+
         # Fetch the updated/created record
         cursor.execute("SELECT * FROM inventory WHERE id = ?", (result_id,))
         row = cursor.fetchone()
-        conn.close()
+
+        if connection is None:
+            conn.close()
+
         return self._row_to_inventory(row)
 
     def find_by_user(self, user_id: str) -> List[Inventory]:

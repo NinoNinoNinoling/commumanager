@@ -211,15 +211,16 @@ class ItemRepository:
         conn.close()
         return row['count']
 
-    def decrease_stock(self, item_id: int, quantity: int) -> None:
+    def decrease_stock(self, item_id: int, quantity: int, connection=None) -> None:
         """
         아이템 재고를 감소시키고 판매 수를 증가시킵니다.
 
         Args:
             item_id: 아이템 ID
             quantity: 감소시킬 수량
+            connection: 트랜잭션용 연결 (선택사항)
         """
-        conn = self._get_connection()
+        conn = connection or self._get_connection()
         cursor = conn.cursor()
 
         cursor.execute("""
@@ -230,5 +231,6 @@ class ItemRepository:
             WHERE id = ?
         """, (quantity, quantity, quantity, item_id))
 
-        conn.commit()
-        conn.close()
+        if connection is None:  # 독립 호출이면 자동 커밋
+            conn.commit()
+            conn.close()
