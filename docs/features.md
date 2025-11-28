@@ -106,10 +106,17 @@
 
 ### 총괄계정
 
-**유저 등록**
-- 총괄계정 팔로우 시 즉시 DB 등록 (follow 이벤트)
-- Redis 캐시 갱신 (1시간 TTL)
-- 백업: 답글 재화 지급 시 Lazy Creation
+**유저 등록 (웹훅 기반)**
+- 마스토돈 웹훅으로 새 계정 생성 감지 (account.created 이벤트)
+- 즉시 DB 등록 (초기 재화 0)
+- 역할 정보 자동 동기화 (role_name, role_color)
+- **봇 군단 자동 팔로우**: 신규 유저 가입 시 4개 봇이 자동으로 팔로우
+  - 👑 System Admin (총괄계정)
+  - 🤖 System Bot (시스템계정)
+  - 📖 Story Bot (스토리계정)
+  - 👁️ Supervisor Bot (감독봇)
+- 관리 로그 자동 기록
+- 환경 변수 기반 토큰 관리 (MASTODON_ACCESS_TOKEN, BOT_ACCESS_TOKEN, STORY_ACCESS_TOKEN, SUPERVISOR_ACCESS_TOKEN)
 
 **공지 발행**
 - scheduled_posts의 announcement 타입 발행
@@ -349,20 +356,34 @@
 
 ## 주요 유즈케이스
 
-### UC-01: 팔로우 이벤트 기반 유저 등록
+### UC-01: 웹훅 기반 유저 등록
 
-**액터**: Mastodon Streaming API, 재화봇
-**트리거**: 유저가 관리자 계정 팔로우
+**액터**: Mastodon Webhook, 관리자 웹
+**트리거**: 마스토돈에서 새 계정 생성 (account.created 이벤트)
 
 **흐름**:
-1. Streaming API에서 follow 이벤트 수신
-2. 총괄계정 팔로우인지 확인 (아니면 무시)
-3. 중복 체크
-4. 신규 유저 등록
-5. Redis 캐시 갱신 (1시간 TTL)
-6. 로그 기록
+1. 마스토돈 서버에서 account.created 웹훅 이벤트 발생
+2. 관리자 웹 서버의 `/webhooks/mastodon` 엔드포인트로 POST 요청
+3. HMAC-SHA256 서명 검증 (X-Hub-Signature 헤더)
+4. 기존 유저 확인
+   - 존재하면: 역할 정보(role_name, role_color)만 업데이트
+   - 없으면: 신규 유저 생성 (초기 재화 0, 역할 정보 저장)
+5. **봇 군단 자동 팔로우 실행**:
+   - System Admin (총괄계정) 팔로우
+   - System Bot (시스템계정) 팔로우
+   - Story Bot (스토리계정) 팔로우
+   - Supervisor Bot (감독봇) 팔로우
+6. 관리 로그 기록 (action_type: webhook_account_created)
+7. 200 OK 응답 반환
 
-**예외**: 중복 시 username/display_name 업데이트, DB 실패 시 에러 로그 + 관리자 알림, Lazy Creation 백업
+**보안**:
+- HMAC-SHA256 서명 검증으로 위조 방지
+- 환경 변수 `MASTODON_WEBHOOK_SECRET` 필수
+
+**예외**:
+- 서명 불일치 시 403 Forbidden
+- DB 실패 시 에러 로그 + 500 응답
+- 팔로우 실패 시 로그 기록 (유저 등록은 계속 진행)
 
 ---
 
