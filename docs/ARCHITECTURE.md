@@ -40,7 +40,8 @@ graph TB
 **역할**: 커뮤니티 대표, 어드민
 
 **기능**:
-- 유저 팔로우 → DB 등록 (follow 이벤트)
+- 유저 등록 (웹훅 기반 - account.created 이벤트)
+- 신규 유저 자동 팔로우 (봇 군단 총괄)
 - 관리자 웹 OAuth (총괄계정 + role='admin' 유저)
 - 공지 발행 (announcement)
 
@@ -348,10 +349,22 @@ flowchart TD
 ```
 
 **웹훅 설정 요구사항**:
-- 환경변수: `MASTODON_WEBHOOK_SECRET` (HMAC 서명용)
+- 환경변수:
+  - `MASTODON_WEBHOOK_SECRET`: HMAC 서명 검증용
+  - `MASTODON_ACCESS_TOKEN`: System Admin (총괄계정) 액세스 토큰
+  - `BOT_ACCESS_TOKEN`: System Bot (시스템계정) 액세스 토큰
+  - `STORY_ACCESS_TOKEN`: Story Bot (스토리계정) 액세스 토큰
+  - `SUPERVISOR_ACCESS_TOKEN`: Supervisor Bot (감독봇) 액세스 토큰
 - 마스토돈 관리자 페이지에서 웹훅 등록 필요
 - URL: `https://your-admin-server/webhooks/mastodon`
 - 지원 이벤트: `account.created`, `status.created`, `status.updated`
+
+**봇 군단 자동 팔로우**:
+신규 유저 가입 시 4개 봇이 자동으로 팔로우:
+- 👑 System Admin (MASTODON_ACCESS_TOKEN)
+- 🤖 System Bot (BOT_ACCESS_TOKEN)
+- 📖 Story Bot (STORY_ACCESS_TOKEN)
+- 👁️ Supervisor Bot (SUPERVISOR_ACCESS_TOKEN)
 
 **역할 정보 자동 동기화**:
 - OAuth 로그인 시: 사용자의 마스토돈 역할 정보 자동 저장
